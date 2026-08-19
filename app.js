@@ -1,23 +1,39 @@
 /**
- * RouteSetu / SafarShare - Dynamic Auto & Cab Pooling & Homebound Route Match Engine
- * Full SPA Controller: i18n, Leaflet Maps, Calculators, Matching Engine, Driver Cockpit, Admin Dashboard
+ * SahiRide - Dynamic Auto & Cab Pooling & Homebound Route Match Engine
+ * Sahi Ride, Sahi Price • 100% Free Doorstep Pickup & Drop
+ * Google Maps-Style Live Geocoding, Driver Incoming Ride Popups, Driver KYC & Flat 50% First-Ride Promo
  */
 
-// Global State
+// Global Application State
 const state = {
-  currentView: 'landing',
+  currentView: 'onboarding', // Starts with onboarding slides
   currentLang: 'en',
   currentTheme: 'dark',
+  currentSlide: 1,
+  authMode: 'login', // 'login' (existing) | 'signup' (new user)
+  userSession: {
+    isLoggedIn: false,
+    role: 'passenger', // 'passenger' | 'driver'
+    isNewUser: true,
+    phone: '9876543210',
+    name: 'Jayesh Sharma',
+    email: 'jayesh@example.com',
+    emergency: 'Pooja Sharma (+91-98765-00000)',
+    kycStatus: 'verified' // 'verified' | 'pending' | 'unsubmitted'
+  },
   passenger: {
-    pickup: { lat: 18.5913, lng: 73.7389, name: "Hinjewadi Phase 1, Pune" },
+    pickup: { lat: 18.5204, lng: 73.8567, name: "FC Road, Shivajinagar, Pune" },
     drop: { lat: 18.5074, lng: 73.8077, name: "Kothrud Stand, Pune" },
     vehicle: 'auto', // 'auto' | 'cab'
     mode: 'share',   // 'share' | 'private'
+    seatCount: 1,    // 1 to 3 (Auto) or 1 to 4 (Cab)
+    firstRideDiscountActive: true, // Flat 50% Off on First Ride
     womenOnly: false,
     rideActive: false,
     otp: '5839',
-    fare: 75,
-    distanceKm: 14.5
+    basePerSeatFare: 38,
+    totalFare: 38,
+    distanceKm: 8.4
   },
   driver: {
     online: true,
@@ -28,38 +44,53 @@ const state = {
     vehicleType: 'auto',
     capacity: 3,
     occupiedSeats: 2,
-    todayEarnings: { normal: 360, homebound: 420, pool: 680, fuelSaved: 240 }
+    todayEarnings: { normal: 360, homebound: 420, pool: 680, fuelSaved: 240, total: 1460 }
   },
   sandbox: {
     passengers: [
-      { id: 'A', name: 'Rahul M.', pick: [18.5913, 73.7389], drop: [18.5529, 73.8050], fare: 65, dist: 8.5, picked: true },
-      { id: 'B', name: 'Priya S.', pick: [18.5980, 73.7620], drop: [18.5204, 73.8567], fare: 110, dist: 14.2, picked: false }
+      { id: 'A', name: 'Rahul M.', pick: [18.5204, 73.8567], drop: [18.5529, 73.8050], fare: 65, dist: 8.5, picked: true },
+      { id: 'B', name: 'Priya S.', pick: [18.5150, 73.8350], drop: [18.5074, 73.8077], fare: 110, dist: 14.2, picked: false }
     ],
-    driver: { start: [18.6010, 73.7290], end: [18.5074, 73.8077] }
+    driver: { start: [18.5300, 73.8600], end: [18.5074, 73.8077] }
   }
 };
 
-// Preset Corridors
-const PRESETS = {
-  hinjewadi_kothrud: {
-    pickup: { lat: 18.5913, lng: 73.7389, name: "Hinjewadi Phase 1, Pune" },
-    drop: { lat: 18.5074, lng: 73.8077, name: "Kothrud Stand, Pune" }
-  },
-  airport_fcroad: {
-    pickup: { lat: 18.5822, lng: 73.9197, name: "Pune Airport (PNQ)" },
-    drop: { lat: 18.5204, lng: 73.8567, name: "FC Road, Shivajinagar" }
-  },
-  magarpatta_bibwewadi: {
-    pickup: { lat: 18.5529, lng: 73.9349, name: "Magarpatta Cybercity, Pune" },
-    drop: { lat: 18.4725, lng: 73.8860, name: "Bibwewadi, Pune" }
-  },
-  station_univ: {
-    pickup: { lat: 18.5284, lng: 73.8744, name: "Pune Central Railway Station" },
-    drop: { lat: 18.5529, lng: 73.8260, name: "Savitribai Phule Pune University" }
-  }
-};
+// Comprehensive Searchable Localities & College/Landmark Dataset (Pune, Mumbai, Delhi, Bengaluru)
+const PLACES_DATABASE = [
+  // Colleges & Institutions
+  { name: "PCCOE - Pimpri Chinchwad College of Engineering", lat: 18.6517, lng: 73.7628, desc: "Sector 26, Pradhikaran, Nigdi / Akurdi, Pune", type: "college", keywords: ["pccoe", "pimpri", "chinchwad", "engineering", "akurdi", "nigdi"] },
+  { name: "COEP Technological University", lat: 18.5292, lng: 73.8566, desc: "Wellesley Road, Shivajinagar, Pune", type: "college", keywords: ["coep", "shivajinagar", "engineering"] },
+  { name: "MIT World Peace University (MIT-WPU)", lat: 18.5180, lng: 73.8153, desc: "Paud Road, Kothrud, Pune", type: "college", keywords: ["mit", "wpu", "kothrud"] },
+  { name: "PICT - Pune Institute of Computer Technology", lat: 18.4575, lng: 73.8508, desc: "Dhankawadi, Katraj, Pune", type: "college", keywords: ["pict", "dhankawadi", "katraj"] },
+  { name: "DY Patil College of Engineering, Akurdi", lat: 18.6450, lng: 73.7580, desc: "Sector 29, Nigdi Pradhikaran, Akurdi", type: "college", keywords: ["dypatil", "dy patil", "akurdi"] },
+  { name: "Symbiosis International University (SIU)", lat: 18.5645, lng: 73.9110, desc: "Viman Nagar & Lavale Campus, Pune", type: "college", keywords: ["symbiosis", "viman nagar", "lavale"] },
+  { name: "Bharati Vidyapeeth Deemed University", lat: 18.4570, lng: 73.8510, desc: "Pune-Satara Road, Katraj, Pune", type: "college", keywords: ["bvp", "bharati vidyapeeth", "katraj"] },
+  { name: "VIT - Vishwakarma Institute of Technology", lat: 18.4636, lng: 73.8682, desc: "Upper Indira Nagar, Bibwewadi, Pune", type: "college", keywords: ["vit", "bibwewadi"] },
+  
+  // Popular Urban Hubs & Localities
+  { name: "FC Road, Shivajinagar, Pune", lat: 18.5204, lng: 73.8567, desc: "Fergusson College Road, Shivajinagar", type: "place", keywords: ["fc road", "shivajinagar", "deccan"] },
+  { name: "Kothrud Stand, Pune", lat: 18.5074, lng: 73.8077, desc: "Karve Road, Kothrud Depot", type: "place", keywords: ["kothrud", "karve road", "stand"] },
+  { name: "Hinjewadi Phase 1, Pune", lat: 18.5913, lng: 73.7389, desc: "Rajiv Gandhi Infotech Park", type: "itpark", keywords: ["hinjewadi", "hinjawadi", "phase 1"] },
+  { name: "Hinjewadi Phase 2, Pune", lat: 18.5832, lng: 73.7125, desc: "Wipro Circle, Phase 2", type: "itpark", keywords: ["hinjewadi phase 2", "wipro"] },
+  { name: "Hinjewadi Phase 3, Pune", lat: 18.5750, lng: 73.6890, desc: "Megapolis Circle, Phase 3", type: "itpark", keywords: ["hinjewadi phase 3", "megapolis"] },
+  { name: "Wakad Bridge / Datta Mandir, Pune", lat: 18.5980, lng: 73.7620, desc: "Datta Mandir Road, Wakad", type: "place", keywords: ["wakad", "datta mandir"] },
+  { name: "Baner Balewadi High Street, Pune", lat: 18.5679, lng: 73.7769, desc: "High Street, Baner", type: "place", keywords: ["baner", "balewadi", "high street"] },
+  { name: "Aundh D-Mart, Pune", lat: 18.5529, lng: 73.8050, desc: "ITI Road, Aundh", type: "place", keywords: ["aundh", "d-mart", "iti road"] },
+  { name: "Pune International Airport (PNQ)", lat: 18.5822, lng: 73.9197, desc: "Lohegaon Airport Terminal", type: "transit", keywords: ["airport", "pnq", "lohegaon", "flight"] },
+  { name: "Pune Central Railway Station", lat: 18.5284, lng: 73.8744, desc: "Station Road, Agarkar Nagar", type: "transit", keywords: ["railway station", "pune station", "train"] },
+  { name: "Swargate Bus Terminus, Pune", lat: 18.5018, lng: 73.8586, desc: "Swargate Chowk, Satara Road", type: "transit", keywords: ["swargate", "bus stand"] },
+  { name: "Magarpatta Cybercity, Pune", lat: 18.5529, lng: 73.9349, desc: "Hadapsar, East Pune", type: "itpark", keywords: ["magarpatta", "hadapsar", "cybercity"] },
+  { name: "Viman Nagar Phoenix Marketcity, Pune", lat: 18.5620, lng: 73.9167, desc: "Nagar Road, Viman Nagar", type: "place", keywords: ["viman nagar", "phoenix", "mall"] },
+  { name: "Deccan Gymkhana, Pune", lat: 18.5167, lng: 73.8417, desc: "JM Road, Deccan", type: "place", keywords: ["deccan", "jm road"] },
+  
+  // Other Metros
+  { name: "Bandra Kurla Complex (BKC), Mumbai", lat: 19.0664, lng: 72.8687, desc: "BKC Commercial Hub, Mumbai", type: "itpark", keywords: ["bkc", "bandra", "mumbai"] },
+  { name: "Andheri Metro Station, Mumbai", lat: 19.1197, lng: 72.8464, desc: "Western Suburbs, Mumbai", type: "transit", keywords: ["andheri", "metro", "mumbai"] },
+  { name: "Connaught Place, New Delhi", lat: 28.6315, lng: 77.2167, desc: "Central Business District, Delhi", type: "place", keywords: ["cp", "connaught place", "delhi"] },
+  { name: "Indiranagar 100ft Road, Bengaluru", lat: 12.9719, lng: 77.6412, desc: "Indiranagar, East Bengaluru", type: "place", keywords: ["indiranagar", "bengaluru", "bangalore"] }
+];
 
-// Map Instances
+// Leaflet Map Handles
 let passengerMap = null;
 let driverMap = null;
 let sandboxMap = null;
@@ -67,43 +98,45 @@ let sandboxMap = null;
 let passengerRouteLine = null;
 let passengerDriverMarker = null;
 let driverRouteLine = null;
-let driverCorridorCircle = null;
 let sandboxRouteLine = null;
 
-// Map click mode: null, 'pickup', 'drop'
+// Map click target mode: null, 'pickup', 'drop'
 let currentMapPinMode = null;
-
-// Chart Instance
 let adminChartInstance = null;
+let autocompleteDebounceTimer = null;
+
+// Driver Popup Timer handle
+let driverPopupCountdownInterval = null;
+let currentPendingRide = null;
 
 // -------------------------------------------------------------
-// 1. TRILINGUAL I18N DICTIONARY (English, Hindi, Marathi)
+// 1. TRILINGUAL I18N DICTIONARY
 // -------------------------------------------------------------
 const I18N = {
   en: {
-    tagline: "Dynamic Pooling & Homebound Route Match",
+    tagline: "Sahi Ride, Sahi Price • Dynamic Pooling & Route Match",
     nav_home: "Home",
     nav_passenger: "Passenger App",
     nav_driver: "Driver Cockpit",
     nav_algorithm: "Match Sandbox",
     nav_admin: "Admin Fleet",
-    hero_badge: "Maximizing Vehicle Capacity • Zero Fixed Stops",
-    hero_subtext: "Choose your exact pickup and drop point freely — just like a normal cab. Our dynamic engine clubs co-passengers heading your way for 35% cheaper fares, while drivers turn empty return journeys into paid trips.",
+    hero_badge: "Maximizing Vehicle Capacity • Flat 50% Off First Ride",
+    hero_subtext: "Choose your exact pickup and drop point freely — just like a normal cab. SahiRide's dynamic engine clubs co-passengers heading your way for 35% to 50% cheaper fares, while drivers turn empty return journeys into paid trips.",
     cta_book_ride: "Book a Ride / Share Auto",
     cta_driver_portal: "Driver Portal & Route Match",
     cta_see_algorithm: "See Algorithm in Action",
     diff1_tag: "Differentiator 1 • Driver Homebound Ride",
     diff1_title: "Eliminating Empty Deadhead Returns",
     before_driver_title: "Before: Empty Return Trip",
-    before_driver_desc: "Driver drops rider in Hinjewadi and drives 18 km back to Kothrud alone. Earns ₹0, wastes ₹95 on fuel/CNG.",
-    after_driver_title: "With RouteSetu: 'Set My Route'",
+    before_driver_desc: "Driver drops rider in distant suburb and drives 18 km back home alone. Earns ₹0, wastes ₹95 on fuel/CNG.",
+    after_driver_title: "With SahiRide: 'Set My Route'",
     after_driver_desc: "Driver enters home destination. System matches passengers along that corridor. Earns ₹190+ profit on the return trip!",
     diff2_tag: "Differentiator 2 • Dynamic Share Auto",
-    diff2_title: "100% Free Pickup/Drop + 35% Savings",
+    diff2_title: "100% Free Pickup/Drop + 35% to 50% Savings",
     before_pass_title: "Before: Paying for Empty Seats",
     before_pass_desc: "Solo passenger pays full vehicle fare ₹120 for 3 seats in an auto-rickshaw even when travelling alone.",
-    after_pass_title: "With RouteSetu: 'Share & Save'",
-    after_pass_desc: "Passenger picks exact pickup & drop. System clubs 2-3 riders seamlessly. Pays only ₹75, driver earns combined ₹220!",
+    after_pass_title: "With SahiRide: 'Share & Save'",
+    after_pass_desc: "Passenger picks exact pickup & drop. System clubs 2-3 riders seamlessly. Pays only ₹38 (First Ride 50% Off), driver earns ₹220!",
     calc_pill: "Real-Time Financial Impact",
     calc_title: "Calculate Your Extra Earnings & Monthly Savings",
     calc_desc: "See exactly how much drivers gain from return routes and how much passengers save by sharing.",
@@ -125,12 +158,12 @@ const I18N = {
     calc_est_monthly_savings: "Estimated Monthly Commute Savings",
     calc_pass_subtext: "Saved compared to booking full private autos/cabs for everyday travel.",
     calc_solo_fare: "Solo Private Fare:",
-    calc_shared_fare: "RouteSetu Share Fare:",
+    calc_shared_fare: "SahiRide Share Fare:",
     calc_discount_rate: "Discount Per Trip:",
     calc_annual_savings: "Annual Savings:",
     how_pill: "True Point-To-Point Flexibility",
-    how_title: "Why RouteSetu Outperforms Traditional Apps",
-    how_desc: "Unlike fixed-route shuttles or expensive solo cabs, RouteSetu dynamically merges individual journeys on the fly.",
+    how_title: "Why SahiRide Outperforms Traditional Apps",
+    how_desc: "Unlike fixed-route shuttles or expensive solo cabs, SahiRide dynamically merges individual journeys on the fly.",
     feat1_title: "100% Free Pickup & Drop",
     feat1_desc: "No fixed bus stops or meeting points. Set your own doorstep pickup and office drop just like a regular taxi booking.",
     feat2_title: "Vector & Corridor Matching",
@@ -142,29 +175,29 @@ const I18N = {
     p_book_ride_title: "Book Your Ride"
   },
   hi: {
-    tagline: "डायनामिक पूलिंग और घर वापसी रूट मैच",
+    tagline: "सही राइड, सही दाम • डायनामिक पूलिंग और घर वापसी रूट मैच",
     nav_home: "मुख्य पृष्ठ",
     nav_passenger: "यात्री ऐप",
     nav_driver: "चालक पोर्टल",
     nav_algorithm: "मैचिंग इंजन",
     nav_admin: "एडमिन फ्लीट",
-    hero_badge: "वाहन क्षमता का पूरा उपयोग • कोई फिक्स्ड स्टॉप नहीं",
-    hero_subtext: "अपनी पसंद का सटीक पिकअप और ड्रॉप चुनें। हमारा डायनामिक इंजन आपकी दिशा में जाने वाले यात्रियों को मिलाता है जिससे आपको 35% कम किराया मिलता है और ड्राइवर खाली वापसी को कमाई में बदलते हैं।",
+    hero_badge: "वाहन क्षमता का पूरा उपयोग • पहली राइड पर फ्लैट 50% छूट",
+    hero_subtext: "अपनी पसंद का सटीक पिकअप और ड्रॉप चुनें। SahiRide का डायनामिक इंजन आपकी दिशा में जाने वाले यात्रियों को मिलाता है जिससे आपको 35% से 50% कम किराया मिलता है और ड्राइवर खाली वापसी को कमाई में बदलते हैं।",
     cta_book_ride: "सवारी बुक करें / शेयर ऑटो",
     cta_driver_portal: "चालक पोर्टल और रूट मैच",
     cta_see_algorithm: "एल्गोरिदम देखें",
     diff1_tag: "विशेषता 1 • ड्राइवर घर वापसी राइड",
     diff1_title: "खाली वापसी यात्राओं का अंत",
     before_driver_title: "पहले: खाली वापसी यात्रा",
-    before_driver_desc: "ड्राइवर हिंजेवाड़ी में सवारी छोड़कर 18 किमी कोथरुड खाली लौटता है। ₹0 कमाई, ₹95 का ईंधन बर्बाद।",
-    after_driver_title: "RouteSetu के साथ: 'रूट सेट करें'",
+    before_driver_desc: "ड्राइवर सवारी छोड़कर 18 किमी खाली घर लौटता है। ₹0 कमाई, ₹95 का ईंधन बर्बाद।",
+    after_driver_title: "SahiRide के साथ: 'रूट सेट करें'",
     after_driver_desc: "ड्राइवर घर का गंतव्य डालता है। सिस्टम उसी रास्ते के यात्रियों को जोड़ता है। वापसी में ₹190+ का शुद्ध मुनाफा!",
     diff2_tag: "विशेषता 2 • डायनामिक शेयर ऑटो",
-    diff2_title: "100% मनचाहा पिकअप/ड्रॉप + 35% बचत",
+    diff2_title: "100% मनचाहा पिकअप/ड्रॉप + 35% से 50% बचत",
     before_pass_title: "पहले: खाली सीटों का पूरा किराया",
     before_pass_desc: "अकेला यात्री पूरे ऑटो की 3 सीटों का ₹120 किराया अकेले भरता है।",
-    after_pass_title: "RouteSetu के साथ: 'शेयर और बचत'",
-    after_pass_desc: "यात्री अपना सटीक पिकअप/ड्रॉप चुनता है। 2-3 सवारियां जुड़ती हैं। यात्री देता है सिर्फ ₹75, ड्राइवर कमाता है ₹220!",
+    after_pass_title: "SahiRide के साथ: 'शेयर और बचत'",
+    after_pass_desc: "यात्री अपना सटीक पिकअप/ड्रॉप चुनता है। 2-3 सवारियां जुड़ती हैं। पहली राइड पर सिर्फ ₹38, ड्राइवर कमाता है ₹220!",
     calc_pill: "वास्तविक आर्थिक लाभ",
     calc_title: "अपनी अतिरिक्त कमाई और मासिक बचत की गणना करें",
     calc_desc: "देखें कि ड्राइवर खाली वापसी से कितना कमाते हैं और यात्री शेयरिंग से कितना बचाते हैं।",
@@ -186,46 +219,46 @@ const I18N = {
     calc_est_monthly_savings: "अनुमानित मासिक बचत",
     calc_pass_subtext: "रोजाना प्राइवेट ऑटो/कैब बुक करने की तुलना में बचत।",
     calc_solo_fare: "प्राइवेट किराया:",
-    calc_shared_fare: "RouteSetu शेयर किराया:",
+    calc_shared_fare: "SahiRide शेयर किराया:",
     calc_discount_rate: "प्रति ट्रिप छूट:",
     calc_annual_savings: "सालाना बचत:",
     how_pill: "सच्ची पॉइंट-टू-पॉइंट सुविधा",
-    how_title: "RouteSetu पारंपरिक ऐप्स से बेहतर क्यों है",
-    how_desc: "फिक्स्ड शटल या महंगी प्राइवेट कैब के विपरीत, RouteSetu स्वतंत्र यात्राओं को तुरंत जोड़ता है।",
+    how_title: "SahiRide पारंपरिक ऐप्स से बेहतर क्यों है",
+    how_desc: "फिक्स्ड शटल या महंगी प्राइवेट कैब के विपरीत, SahiRide स्वतंत्र यात्राओं को तुरंत जोड़ता है।",
     feat1_title: "100% मनचाहा पिकअप व ड्रॉप",
     feat1_desc: "कोई फिक्स्ड बस स्टॉप नहीं। सामान्य टैक्सी की तरह अपने घर के दरवाजे से पिकअप और गंतव्य पर ड्रॉप सेट करें।",
     feat2_title: "वेक्टर और कॉरिडोर मैचिंग",
-    feat2_desc: "एल्गोरिदम सुनिश्चित करता है कि सह-यात्री एक ही दिशा में जा रहे हों (≤ 30° झुकाव) और न्यूनतम चक्कर (< 5 मिनट) लगे।",
+    feat2_desc: "एल्गोरिदम सुनिश्चित करता है कि सह-यात्री एक ही दिशा में जा रहे हों और न्यूनतम चक्कर लगे।",
     feat3_title: "सटीक दूरी के अनुसार किराया",
     feat3_desc: "आप केवल अपनी व्यक्तिगत दूरी का भुगतान करते हैं जिस पर 35% पूल छूट तुरंत लागू होती है।",
     feat4_title: "महिला-विशेष और सुरक्षा शील्ड",
-    feat4_desc: "महिला-विशेष पूल विकल्प, सत्यापित चालक, रीयल-टाइम ओटीपी, सुरक्षित राइडर प्रोफाइल और 24/7 एसओएस सुविधा।",
+    feat4_desc: "महिला-विशेष पूल विकल्प, सत्यापित चालक, रीयल-टाइम ओटीपी, सुरक्षित प्रोफाइल और 24/7 एसओएस।",
     p_book_ride_title: "सवारी बुक करें"
   },
   mr: {
-    tagline: "डायनॅमिक पूलिंग आणि घरवापसी रूट मॅच",
+    tagline: "सही राईड, सही भाव • डायनॅमिक पूलिंग आणि घरवापसी रूट मॅच",
     nav_home: "मुख्य पान",
     nav_passenger: "प्रवासी ॲप",
     nav_driver: "चालक पोर्टल",
     nav_algorithm: "मॅचिंग इंजिन",
     nav_admin: "ॲडमिन फ्लीट",
-    hero_badge: "वाहनांच्या क्षमतेचा पूर्ण वापर • कोणतेही ठरावीक स्टॉप नाही",
-    hero_subtext: "तुमचा स्वतःचा पिकअप आणि ड्रॉप पॉईंट निवडा. आमचे डायनॅमिक इंजिन एकाच दिशेने जाणाऱ्या प्रवाशांना एकत्र आणते, ज्यामुळे ३५% स्वस्त भाडे मिळते आणि चालकांना परतीच्या प्रवासात कमाई होते.",
+    hero_badge: "वाहनांच्या क्षमतेचा पूर्ण वापर • पहिल्या राईडवर ५०% सूट",
+    hero_subtext: "तुमचा स्वतःचा पिकअप आणि ड्रॉप पॉईंट निवडा. SahiRide चे डायनॅमिक इंजिन एकाच दिशेने जाणाऱ्या प्रवाशांना एकत्र आणते, ज्यामुळे ३५% ते ५०% स्वस्त भाडे मिळते आणि चालकांना परतीच्या प्रवासात कमाई होते.",
     cta_book_ride: "राईड बुक करा / शेअर ऑटो",
     cta_driver_portal: "चालक पोर्टल आणि रूट मॅच",
     cta_see_algorithm: "अल्गोरिदम पहा",
     diff1_tag: "वैशिष्ट्य १ • चालक घरवापसी राईड",
     diff1_title: "रिकाम्या परतीच्या प्रवासांचे निर्मूलन",
     before_driver_title: "आधी: रिकामा परतीचा प्रवास",
-    before_driver_desc: "चालक हिंजेवडीत प्रवासी सोडून १८ किमी कोथरूडला रिकामा येतो. ₹० कमाई, ₹९५ चे इंधन वाया जाते.",
-    after_driver_title: "RouteSetu सोबत: 'रूट सेट करा'",
+    before_driver_desc: "चालक लांब प्रवासी सोडून १८ किमी घरी रिकामा येतो. ₹० कमाई, ₹९५ चे इंधन वाया.",
+    after_driver_title: "SahiRide सोबत: 'रूट सेट करा'",
     after_driver_desc: "चालक घराचे ठिकाण टाकतो. सिस्टम त्याच मार्गावरील प्रवासी जोडते. परतीच्या प्रवासात ₹१९०+ चा निव्वळ नफा!",
     diff2_tag: "वैशिष्ट्य २ • डायनॅमिक शेअर ऑटो",
-    diff2_title: "१००% स्वतःचा पिकअप/ड्रॉप + ३५% बचत",
+    diff2_title: "१००% स्वतःचा पिकअप/ड्रॉप + ३५% ते ५०% बचत",
     before_pass_title: "आधी: रिकाम्या सीट्सचे पूर्ण भाडे",
     before_pass_desc: "एकटा प्रवासी ऑटोच्या ३ जागांचे पूर्ण ₹१२० भाडे एकटाच भरतो.",
-    after_pass_title: "RouteSetu सोबत: 'शेअर आणि सेव्ह'",
-    after_pass_desc: "प्रवासी स्वतःचा पिकअप/ड्रॉप निवडतो. २-३ प्रवासी एकत्र येतात. प्रवासी देतो फक्त ₹७५, चालक कमावतो ₹२२०!",
+    after_pass_title: "SahiRide सोबत: 'शेअर आणि सेव्ह'",
+    after_pass_desc: "प्रवासी स्वतःचा पिकअप/ड्रॉप निवडतो. पहिल्या राईडवर फक्त ₹३८, चालक कमावतो ₹२२०!",
     calc_pill: "थेट आर्थिक फायदा",
     calc_title: "तुमची अतिरिक्त कमाई आणि मासिक बचत मोजा",
     calc_desc: "चालक परतीच्या प्रवासातून किती जास्त कमवू शकतात आणि प्रवासी शेअरिंगने किती वाचवू शकतात ते पहा.",
@@ -247,16 +280,16 @@ const I18N = {
     calc_est_monthly_savings: "अंदाजे मासिक बचत",
     calc_pass_subtext: "दररोज खाजगी ऑटो/कॅब बुक करण्याच्या तुलनेत बचत.",
     calc_solo_fare: "खाजगी भाडे:",
-    calc_shared_fare: "RouteSetu शेअर भाडे:",
+    calc_shared_fare: "SahiRide शेअर भाडे:",
     calc_discount_rate: "प्रत्येक ट्रिपवर सूट:",
     calc_annual_savings: "वार्षिक बचत:",
     how_pill: "पॉईंट-टू-पॉईंट लवचिकता",
-    how_title: "RouteSetu पारंपारिक ॲप्सपेक्षा श्रेष्ठ का आहे",
-    how_desc: "ठरावीक शटल किंवा महागड्या खाजगी कॅब्सऐवजी, RouteSetu प्रवाशांचे मार्ग आपोआप एकत्र जोडते.",
+    how_title: "SahiRide पारंपारिक ॲप्सपेक्षा श्रेष्ठ का आहे",
+    how_desc: "ठरावीक शटल किंवा महागड्या खाजगी कॅब्सऐवजी, SahiRide प्रवाशांचे मार्ग आपोआप एकत्र जोडते.",
     feat1_title: "१००% स्वतःचा पिकअप आणि ड्रॉप",
     feat1_desc: "कोणतेही फिक्स बस स्टॉप नाहीत. सामान्य टॅक्सीप्रमाणे घराच्या दारातून पिकअप आणि इच्छित स्थळी ड्रॉप मिळवा.",
     feat2_title: "व्हेक्टर आणि कॉरिडॉर मॅचिंग",
-    feat2_desc: "अल्गोरिदम खात्री करतो की सहप्रवासी एकाच दिशेने जात आहेत (≤ ३०° कोन) आणि कमीतकमी वळण (< ५ मिनिटे) लागेल.",
+    feat2_desc: "अल्गोरिदम खात्री करतो की सहप्रवासी एकाच दिशेने जात आहेत आणि कमीतकमी वळण लागेल.",
     feat3_title: "योग्य अंतरावर आधारित भाडे",
     feat3_desc: "तुम्ही फक्त तुमच्या अंतराचे भाडे देता, ज्यावर ३५% पूल सूट आधीच लागू केली जाते.",
     feat4_title: "महिला-विशेष आणि सुरक्षा शील्ड",
@@ -266,7 +299,49 @@ const I18N = {
 };
 
 // -------------------------------------------------------------
-// 2. INITIALIZATION ON DOM LOAD
+// 2. AUDIO CHIME SYNTHESIZER (WEB AUDIO API)
+// -------------------------------------------------------------
+function playSoundAlert(type) {
+  try {
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    if (!AudioCtx) return;
+    const ctx = new AudioCtx();
+
+    if (type === 'incoming') {
+      const freqs = [440, 554.37, 659.25, 880];
+      freqs.forEach((f, idx) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.value = f;
+        gain.gain.setValueAtTime(0.15, ctx.currentTime + idx * 0.12);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + idx * 0.12 + 0.3);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(ctx.currentTime + idx * 0.12);
+        osc.stop(ctx.currentTime + idx * 0.12 + 0.3);
+      });
+    } else if (type === 'accept') {
+      [523.25, 659.25, 783.99, 1046.50].forEach((f) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.value = f;
+        gain.gain.setValueAtTime(0.18, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(ctx.currentTime);
+        osc.stop(ctx.currentTime + 0.5);
+      });
+    }
+  } catch (e) {
+    console.log('Audio chime error:', e);
+  }
+}
+
+// -------------------------------------------------------------
+// 3. DOM INITIALIZATION
 // -------------------------------------------------------------
 document.addEventListener('DOMContentLoaded', () => {
   initIcons();
@@ -274,8 +349,19 @@ document.addEventListener('DOMContentLoaded', () => {
   updateDriverCalc();
   updatePassengerCalc();
   initAdminChart();
-  
-  // Set up language
+  updateAuthUI();
+
+  // Close dropdowns on outside click
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.autocomplete-container')) {
+      closeAllAutocomplete();
+    }
+    if (!e.target.closest('.lang-selector')) {
+      const menu = document.getElementById('langMenu');
+      if (menu) menu.classList.remove('open');
+    }
+  });
+
   setLanguage('en');
 });
 
@@ -286,31 +372,306 @@ function initIcons() {
 }
 
 // -------------------------------------------------------------
-// 3. NAVIGATION & VIEW SWITCHING
+// 4. ONBOARDING CAROUSEL ENGINE (SLIDES FIRST BEFORE LOGIN)
+// -------------------------------------------------------------
+function goToSlide(slideNum) {
+  state.currentSlide = slideNum;
+  for (let i = 1; i <= 3; i++) {
+    const slide = document.getElementById(`slide-${i}`);
+    if (slide) slide.style.display = i === slideNum ? 'flex' : 'none';
+  }
+
+  const dots = document.querySelectorAll('.onboarding-dots .dot');
+  dots.forEach((d, idx) => {
+    d.classList.toggle('active', idx + 1 === slideNum);
+  });
+
+  const badge = document.getElementById('slideBadgeText');
+  if (badge) badge.textContent = `Feature ${slideNum} of 3`;
+
+  const nextBtn = document.getElementById('onboardingNextBtn');
+  if (nextBtn) {
+    nextBtn.innerHTML = slideNum === 3 ? '<span>Get Started &rarr; Login</span>' : '<span>Next &rarr;</span>';
+  }
+
+  initIcons();
+}
+
+function nextSlide() {
+  if (state.currentSlide < 3) {
+    goToSlide(state.currentSlide + 1);
+  } else {
+    skipOnboarding();
+  }
+}
+
+function skipOnboarding() {
+  switchView('login');
+}
+
+// -------------------------------------------------------------
+// 5. AUTHENTICATION & DRIVER KYC
+// -------------------------------------------------------------
+function setAuthMode(mode) {
+  state.authMode = mode;
+  state.userSession.isNewUser = (mode === 'signup');
+
+  document.getElementById('btnAuthModeLogin').classList.toggle('active', mode === 'login');
+  document.getElementById('btnAuthModeSignup').classList.toggle('active', mode === 'signup');
+
+  const title = document.getElementById('authHeaderTitle');
+  const sub = document.getElementById('authHeaderSubtitle');
+  const btnText = document.getElementById('btnGetOtpText');
+  const btnVerify = document.getElementById('btnVerifyAuthText');
+
+  if (mode === 'signup') {
+    if (title) title.textContent = 'Create New SahiRide Account';
+    if (sub) sub.textContent = 'Join India’s smartest pooling & route match platform';
+    if (btnText) btnText.textContent = 'Verify Mobile & Submit Registration';
+    if (btnVerify) btnVerify.textContent = 'Verify OTP & Activate New Account';
+  } else {
+    if (title) title.textContent = 'Welcome to SahiRide';
+    if (sub) sub.textContent = 'Sign in to book pooled rides or accept homebound passengers';
+    if (btnText) btnText.textContent = 'Get Verification Code (OTP)';
+    if (btnVerify) btnVerify.textContent = 'Verify OTP & Start SahiRide';
+  }
+
+  updateAuthFormVisibility();
+}
+
+function selectLoginRole(role) {
+  state.userSession.role = role;
+  document.getElementById('loginRolePassenger').classList.toggle('active', role === 'passenger');
+  document.getElementById('loginRoleDriver').classList.toggle('active', role === 'driver');
+  updateAuthFormVisibility();
+}
+
+function updateAuthFormVisibility() {
+  const isSignup = state.authMode === 'signup';
+  const isDriver = state.userSession.role === 'driver';
+
+  const passFields = document.getElementById('signupPassengerFields');
+  const driverFields = document.getElementById('signupDriverKYCFields');
+
+  if (passFields) passFields.style.display = (isSignup && !isDriver) ? 'block' : 'none';
+  if (driverFields) driverFields.style.display = (isSignup && isDriver) ? 'block' : 'none';
+
+  initIcons();
+}
+
+function requestLoginOtp() {
+  const phone = document.getElementById('loginPhoneInput').value.trim();
+  if (phone.length < 10) {
+    alert('Please enter a valid 10-digit mobile phone number.');
+    return;
+  }
+  state.userSession.phone = phone;
+
+  if (state.authMode === 'signup' && state.userSession.role === 'driver') {
+    const dl = document.getElementById('signupDriverDL').value.trim();
+    const aadhaar = document.getElementById('signupDriverAadhaar').value.trim();
+    if (!dl || !aadhaar) {
+      alert('Please fill Driving License (DL) and Aadhaar numbers for mandatory Driver KYC.');
+      return;
+    }
+  }
+
+  document.getElementById('loginStepPhone').style.display = 'none';
+  document.getElementById('loginStepOtp').style.display = 'block';
+  initIcons();
+}
+
+function autoFillDemoOtp() {
+  const digits = ['5', '8', '3', '9', '2', '1'];
+  for (let i = 1; i <= 6; i++) {
+    const box = document.getElementById(`otp-${i}`);
+    if (box) box.value = digits[i - 1];
+  }
+}
+
+function verifyLoginOtp() {
+  state.userSession.isLoggedIn = true;
+
+  if (state.authMode === 'signup') {
+    state.userSession.isNewUser = true;
+    state.passenger.firstRideDiscountActive = true;
+    if (state.userSession.role === 'driver') {
+      const name = document.getElementById('signupDriverName').value.trim();
+      state.userSession.name = name || 'Ramesh Shinde';
+      state.userSession.kycStatus = 'verified';
+    } else {
+      const name = document.getElementById('signupPassName').value.trim();
+      state.userSession.name = name || 'Jayesh Sharma';
+    }
+  } else {
+    state.userSession.name = state.userSession.role === 'driver' ? 'Ramesh Shinde' : 'Jayesh Sharma';
+  }
+  
+  updateAuthUI();
+
+  if (state.userSession.isNewUser && state.userSession.role === 'passenger') {
+    alert(`🎉 Welcome to SahiRide, ${state.userSession.name}!\nFlat 50% Discount coupon (FIRST50) has been applied to your first ride!`);
+  } else if (state.userSession.isNewUser && state.userSession.role === 'driver') {
+    alert(`🎉 Welcome Captain ${state.userSession.name}!\nDriver KYC Verification Approved ✓. You can now accept homebound & pooled rides!`);
+  } else {
+    alert(`Welcome back to SahiRide, ${state.userSession.name}!`);
+  }
+
+  if (state.userSession.role === 'driver') {
+    switchView('driver');
+    setTimeout(() => { triggerDriverRidePopup(); }, 3500);
+  } else {
+    switchView('passenger');
+  }
+}
+
+function backToPhoneStep() {
+  document.getElementById('loginStepPhone').style.display = 'block';
+  document.getElementById('loginStepOtp').style.display = 'none';
+}
+
+function openProfileModal() {
+  if (!state.userSession.isLoggedIn) {
+    switchView('login');
+    return;
+  }
+
+  const nameInput = document.getElementById('profInputName');
+  const phoneInput = document.getElementById('profInputPhone');
+  const emailInput = document.getElementById('profInputEmail');
+  const emergencyInput = document.getElementById('profInputEmergency');
+  const roleSelect = document.getElementById('profSelectRole');
+  const statusSelect = document.getElementById('profSelectUserStatus');
+
+  if (nameInput) nameInput.value = state.userSession.name;
+  if (phoneInput) phoneInput.value = state.userSession.phone;
+  if (emailInput) emailInput.value = state.userSession.email || 'jayesh@example.com';
+  if (emergencyInput) emergencyInput.value = state.userSession.emergency || 'Pooja Sharma (+91-98765-00000)';
+  if (roleSelect) roleSelect.value = state.userSession.role;
+  if (statusSelect) statusSelect.value = state.userSession.isNewUser ? 'new' : 'regular';
+
+  const modalName = document.getElementById('profileModalNameDisplay');
+  if (modalName) modalName.textContent = state.userSession.name;
+  
+  const modalRole = document.getElementById('profileModalRoleDisplay');
+  if (modalRole) modalRole.innerHTML = `Verified SahiRide ${state.userSession.role === 'driver' ? 'Captain / Driver' : 'Passenger'}`;
+
+  const avatar = document.getElementById('profileModalAvatar');
+  if (avatar) {
+    const initials = state.userSession.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() || 'JS';
+    avatar.textContent = initials;
+  }
+
+  toggleUserNewStatus(state.userSession.isNewUser ? 'new' : 'regular');
+  openModal('profileModal');
+}
+
+function toggleUserNewStatus(status) {
+  state.userSession.isNewUser = (status === 'new');
+  state.passenger.firstRideDiscountActive = (status === 'new');
+  
+  const badge = document.getElementById('profileNewUserBadge');
+  const headerBadge = document.getElementById('headerNewUserBadge');
+  const tripsStat = document.getElementById('profStatsTrips');
+  const savedStat = document.getElementById('profStatsSaved');
+
+  if (badge) badge.style.display = state.userSession.isNewUser ? 'inline-flex' : 'none';
+  if (headerBadge) headerBadge.style.display = state.userSession.isNewUser ? 'inline-flex' : 'none';
+
+  if (state.userSession.isNewUser) {
+    if (tripsStat) tripsStat.textContent = '1st Ride';
+    if (savedStat) savedStat.textContent = 'Flat 50% Off';
+  } else {
+    if (tripsStat) tripsStat.textContent = '28 Rides';
+    if (savedStat) savedStat.textContent = '₹3,420 Saved';
+  }
+
+  recalcPassengerFares();
+}
+
+function saveUserProfile() {
+  const name = document.getElementById('profInputName').value.trim();
+  const phone = document.getElementById('profInputPhone').value.trim();
+  const email = document.getElementById('profInputEmail').value.trim();
+  const emergency = document.getElementById('profInputEmergency').value.trim();
+  const role = document.getElementById('profSelectRole').value;
+  const status = document.getElementById('profSelectUserStatus').value;
+
+  if (!name || !phone) {
+    alert('Name and Phone Number cannot be blank.');
+    return;
+  }
+
+  state.userSession.name = name;
+  state.userSession.phone = phone;
+  state.userSession.email = email;
+  state.userSession.emergency = emergency;
+  state.userSession.role = role;
+  state.userSession.isNewUser = (status === 'new');
+  state.passenger.firstRideDiscountActive = (status === 'new');
+
+  updateAuthUI();
+  recalcPassengerFares();
+  closeModal('profileModal');
+  alert('Your profile details and welcome promo have been updated!');
+
+  if (role === 'driver' && state.currentView === 'passenger') {
+    switchView('driver');
+  } else if (role === 'passenger' && state.currentView === 'driver') {
+    switchView('passenger');
+  }
+}
+
+function confirmLogout() {
+  if (confirm('Are you sure you want to log out of SahiRide?')) {
+    closeModal('profileModal');
+    logout();
+  }
+}
+
+function logout() {
+  state.userSession.isLoggedIn = false;
+  updateAuthUI();
+  switchView('login');
+}
+
+function updateAuthUI() {
+  const label = document.getElementById('userProfileLabel');
+  const dot = document.getElementById('userStatusDot');
+  const headerBadge = document.getElementById('headerNewUserBadge');
+
+  if (state.userSession.isLoggedIn) {
+    const shortName = state.userSession.name.split(' ')[0];
+    if (label) label.textContent = `${shortName} (${state.userSession.role === 'driver' ? 'Driver' : 'Passenger'})`;
+    if (dot) dot.style.background = 'var(--brand-secondary)';
+    if (headerBadge) headerBadge.style.display = state.passenger.firstRideDiscountActive ? 'inline-flex' : 'none';
+  } else {
+    if (label) label.textContent = 'Login / Sign Up';
+    if (dot) dot.style.background = 'var(--brand-primary)';
+    if (headerBadge) headerBadge.style.display = 'none';
+  }
+}
+
+// -------------------------------------------------------------
+// 6. VIEW NAVIGATION & MANAGEMENT
 // -------------------------------------------------------------
 function switchView(viewName) {
   state.currentView = viewName;
 
-  // Update Section active states
   document.querySelectorAll('.app-view').forEach(view => {
     view.classList.remove('active');
   });
   const targetView = document.getElementById(`view-${viewName}`);
-  if (targetView) {
-    targetView.classList.add('active');
-  }
+  if (targetView) targetView.classList.add('active');
 
-  // Update Desktop Tabs
   document.querySelectorAll('.view-tab-btn').forEach(btn => btn.classList.remove('active'));
   const targetBtn = document.getElementById(`tabBtn-${viewName}`);
   if (targetBtn) targetBtn.classList.add('active');
 
-  // Update Mobile Tabs
   document.querySelectorAll('.mobile-nav-item').forEach(m => m.classList.remove('active'));
   const targetMobileBtn = document.getElementById(`mTab-${viewName}`);
   if (targetMobileBtn) targetMobileBtn.classList.add('active');
 
-  // Lazy Initialize Maps when views become visible
   setTimeout(() => {
     if (viewName === 'passenger') {
       initPassengerMap();
@@ -321,88 +682,860 @@ function switchView(viewName) {
     } else if (viewName === 'admin') {
       if (adminChartInstance) adminChartInstance.resize();
     }
-  }, 100);
+  }, 120);
 
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 // -------------------------------------------------------------
-// 4. LANGUAGE SWITCHER
+// 7. DRIVER INCOMING RIDE REQUEST POPUP ENGINE
 // -------------------------------------------------------------
-function toggleLanguageMenu() {
-  const menu = document.getElementById('langMenu');
-  menu.classList.toggle('open');
-}
-
-function setLanguage(lang) {
-  state.currentLang = lang;
-  const dict = I18N[lang] || I18N.en;
-
-  // Update labels
-  const langLabel = document.getElementById('currentLangLabel');
-  if (langLabel) {
-    langLabel.textContent = lang === 'hi' ? 'हिन्दी' : lang === 'mr' ? 'मराठी' : 'English';
+function triggerDriverRidePopup(rideData) {
+  if (!state.driver.online) {
+    state.driver.online = true;
+    toggleDriverOnline();
   }
 
-  // Update text elements with data-i18n
-  document.querySelectorAll('[data-i18n]').forEach(el => {
-    const key = el.getAttribute('data-i18n');
-    if (dict[key]) {
-      el.innerHTML = dict[key];
+  currentPendingRide = rideData || {
+    name: "Priya Sharma",
+    rating: "4.9",
+    trips: "142",
+    isNew: false,
+    seats: 1,
+    pickup: { name: "PCCOE Akurdi / Nigdi", lat: 18.6517, lng: 73.7628 },
+    drop: { name: "FC Road, Shivajinagar", lat: 18.5204, lng: 73.8567 },
+    detourMins: "+3.2 mins",
+    addedPayout: 75,
+    totalTrip: 195
+  };
+
+  playSoundAlert('incoming');
+
+  const pName = document.getElementById('popupPassengerName');
+  if (pName) pName.textContent = `New Passenger: ${currentPendingRide.name}`;
+
+  const pMeta = document.getElementById('popupPassengerMeta');
+  if (pMeta) {
+    pMeta.textContent = currentPendingRide.isNew 
+      ? `🌱 New Passenger (First Ride) • ${currentPendingRide.seats} Seat (Share Auto)`
+      : `★ ${currentPendingRide.rating} (${currentPendingRide.trips} rides) • ${currentPendingRide.seats} Seat (Share Auto)`;
+  }
+
+  const pPick = document.getElementById('popupPickupName');
+  if (pPick) pPick.textContent = currentPendingRide.pickup.name;
+
+  const pDrop = document.getElementById('popupDropName');
+  if (pDrop) pDrop.textContent = currentPendingRide.drop.name;
+
+  const pDetour = document.getElementById('popupDetourTime');
+  if (pDetour) pDetour.textContent = currentPendingRide.detourMins;
+
+  const pAdded = document.getElementById('popupAddedPayout');
+  if (pAdded) pAdded.textContent = `+₹${currentPendingRide.addedPayout}.00`;
+
+  const pTotal = document.getElementById('popupTotalEarnings');
+  if (pTotal) pTotal.textContent = `₹${currentPendingRide.totalTrip}.00`;
+
+  const pBtnAccept = document.getElementById('popupAcceptBtnText');
+  if (pBtnAccept) pBtnAccept.textContent = `ACCEPT (+₹${currentPendingRide.addedPayout})`;
+
+  let seconds = 15;
+  const countEl = document.getElementById('popupCountdownText');
+  if (countEl) countEl.textContent = seconds;
+
+  clearInterval(driverPopupCountdownInterval);
+  driverPopupCountdownInterval = setInterval(() => {
+    seconds--;
+    if (countEl) countEl.textContent = seconds;
+
+    if (seconds <= 0) {
+      clearInterval(driverPopupCountdownInterval);
+      closeModal('driverRideRequestModal');
     }
-  });
+  }, 1000);
 
-  // Close dropdown
-  const menu = document.getElementById('langMenu');
-  if (menu) menu.classList.remove('open');
-
-  // Refresh icons
+  openModal('driverRideRequestModal');
   initIcons();
 }
 
-// -------------------------------------------------------------
-// 5. THEME TOGGLE (Dark vs Clean Light)
-// -------------------------------------------------------------
-function initTheme() {
-  const saved = localStorage.getItem('routesetu_theme') || 'dark';
-  applyTheme(saved);
-}
+function acceptIncomingRidePopup() {
+  clearInterval(driverPopupCountdownInterval);
+  closeModal('driverRideRequestModal');
+  playSoundAlert('accept');
 
-function toggleTheme() {
-  const nextTheme = state.currentTheme === 'dark' ? 'light' : 'dark';
-  applyTheme(nextTheme);
-}
-
-function applyTheme(theme) {
-  state.currentTheme = theme;
-  document.documentElement.setAttribute('data-theme', theme);
-  localStorage.setItem('routesetu_theme', theme);
-
-  const icon = document.getElementById('themeIcon');
-  if (icon) {
-    icon.setAttribute('data-lucide', theme === 'dark' ? 'sun' : 'moon');
-    initIcons();
+  const list = document.getElementById('driverManifestList');
+  if (list && currentPendingRide) {
+    list.innerHTML = `
+      <div class="manifest-step">
+        <div class="step-num pickup">1</div>
+        <div class="step-details">
+          <strong>Pick Up: Rahul M. (OTP: 5839)</strong>
+          <p>Origin Pickup Point • <span style="color:var(--brand-secondary);">Boarded ✓</span></p>
+        </div>
+      </div>
+      <div class="manifest-step" style="background:rgba(16,185,129,0.1); border-radius:var(--radius-sm); padding:0.6rem;">
+        <div class="step-num pickup" style="background:var(--brand-secondary); color:#fff;">2</div>
+        <div class="step-details">
+          <strong>Pick Up: ${currentPendingRide.name} (OTP: 7421)</strong>
+          <p>${currentPendingRide.pickup.name} • <span style="color:var(--brand-secondary); font-weight:700;">NEW MATCH ACCEPTED (+₹${currentPendingRide.addedPayout})</span></p>
+        </div>
+      </div>
+      <div class="manifest-step">
+        <div class="step-num drop">3</div>
+        <div class="step-details">
+          <strong>Drop Off: Rahul M.</strong>
+          <p>Intermediate Dropoff • Fare: ₹75</p>
+        </div>
+      </div>
+      <div class="manifest-step">
+        <div class="step-num drop">4</div>
+        <div class="step-details">
+          <strong>Drop Off: ${currentPendingRide.name}</strong>
+          <p>${currentPendingRide.drop.name} • Fare: ₹${currentPendingRide.addedPayout}</p>
+        </div>
+      </div>
+    `;
   }
 
-  // Update map tile filters
-  updateMapStyles();
+  document.getElementById('driverSeatCount').textContent = 'Seats: 3/3 (Full Capacity)';
+  state.driver.todayEarnings.total += (currentPendingRide ? currentPendingRide.addedPayout : 75);
+  state.driver.todayEarnings.pool += (currentPendingRide ? currentPendingRide.addedPayout : 75);
+
+  const earningsTotal = document.getElementById('driverEarningsTotal');
+  if (earningsTotal) earningsTotal.textContent = `₹${state.driver.todayEarnings.total}`;
+  
+  const poolEarnings = document.getElementById('driverPoolEarnings');
+  if (poolEarnings) poolEarnings.textContent = `₹${state.driver.todayEarnings.pool}`;
+
+  renderDriverCockpitRoute();
+  alert(`✓ Ride Accepted!\nAdded ${currentPendingRide.name} to route. Next stop: ${currentPendingRide.pickup.name}.`);
+  initIcons();
 }
 
-function updateMapStyles() {
-  const isDark = state.currentTheme === 'dark';
-  const tileUrl = isDark
-    ? 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png'
-    : 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+function declineIncomingRidePopup() {
+  clearInterval(driverPopupCountdownInterval);
+  closeModal('driverRideRequestModal');
+}
 
-  [passengerMap, driverMap, sandboxMap].forEach(m => {
-    if (m) {
-      m.invalidateSize();
+// -------------------------------------------------------------
+// 8. FIRST RIDE 50% FLAT DISCOUNT TOGGLE
+// -------------------------------------------------------------
+function toggleFirstRideDiscount() {
+  state.passenger.firstRideDiscountActive = !state.passenger.firstRideDiscountActive;
+  const btn = document.getElementById('btnToggleFirstRideDiscount');
+  const banner = document.getElementById('firstRidePromoBanner');
+
+  if (state.passenger.firstRideDiscountActive) {
+    if (btn) {
+      btn.textContent = '50% OFF APPLIED ✓';
+      btn.style.background = 'var(--brand-secondary)';
     }
+    if (banner) banner.style.opacity = '1';
+    alert('🎉 Flat 50% First Ride Discount (Code: FIRST50) is ACTIVE!');
+  } else {
+    if (btn) {
+      btn.textContent = 'APPLY 50% OFF';
+      btn.style.background = 'var(--brand-primary)';
+    }
+    if (banner) banner.style.opacity = '0.7';
+    alert('First Ride 50% Discount removed. Standard fare applied.');
+  }
+
+  recalcPassengerFares();
+}
+
+// -------------------------------------------------------------
+// 9. PASSENGER COUNT / SEATS CONTROLLER
+// -------------------------------------------------------------
+function adjustPassengerCount(delta) {
+  const maxSeats = state.passenger.vehicle === 'auto' ? 3 : 4;
+  let newCount = state.passenger.seatCount + delta;
+
+  if (newCount < 1) newCount = 1;
+  if (newCount > maxSeats) {
+    alert(`Maximum passenger capacity for ${state.passenger.vehicle === 'auto' ? 'Auto-Rickshaw is 3 seats' : 'Mini Cab is 4 seats'}.`);
+    return;
+  }
+
+  state.passenger.seatCount = newCount;
+  document.getElementById('passengerCountVal').textContent = newCount;
+  
+  const lblPassenger = document.getElementById('lblPassengerCount');
+  if (lblPassenger) {
+    lblPassenger.textContent = `${newCount} Passenger${newCount > 1 ? 's' : ''} (${newCount} Seat${newCount > 1 ? 's' : ''})`;
+  }
+
+  recalcPassengerFares();
+}
+
+// -------------------------------------------------------------
+// 10. GOOGLE MAPS-STYLE REAL-TIME LIVE GEOCODING & AUTOCOMPLETE
+// -------------------------------------------------------------
+function handleLocationInput(type, query) {
+  clearTimeout(autocompleteDebounceTimer);
+  const dropdown = document.getElementById(type === 'pickup' ? 'pickupAutocompleteDropdown' : 'dropAutocompleteDropdown');
+  if (!dropdown) return;
+
+  if (!query || query.trim().length < 2) {
+    dropdown.classList.remove('open');
+    dropdown.innerHTML = '';
+    return;
+  }
+
+  renderFastLocalSuggestions(type, query.trim(), dropdown);
+
+  autocompleteDebounceTimer = setTimeout(() => {
+    fetchLiveGeocodedPlaces(type, query.trim(), dropdown);
+  }, 350);
+}
+
+function handleDriverDestInput(query) {
+  clearTimeout(autocompleteDebounceTimer);
+  const dropdown = document.getElementById('driverDestAutocompleteDropdown');
+  if (!dropdown) return;
+
+  if (!query || query.trim().length < 2) {
+    dropdown.classList.remove('open');
+    dropdown.innerHTML = '';
+    return;
+  }
+
+  renderFastLocalSuggestions('driverDest', query.trim(), dropdown);
+
+  autocompleteDebounceTimer = setTimeout(() => {
+    fetchLiveGeocodedPlaces('driverDest', query.trim(), dropdown);
+  }, 350);
+}
+
+function renderFastLocalSuggestions(targetField, query, dropdownEl) {
+  const lowerQuery = query.toLowerCase().replace(/[^a-z0-9]/g, '');
+  
+  const localMatches = PLACES_DATABASE.filter(p => {
+    const nameMatch = p.name.toLowerCase().includes(query.toLowerCase());
+    const descMatch = p.desc.toLowerCase().includes(query.toLowerCase());
+    const kwMatch = p.keywords && p.keywords.some(k => k.toLowerCase().replace(/[^a-z0-9]/g, '').includes(lowerQuery) || lowerQuery.includes(k));
+    return nameMatch || descMatch || kwMatch;
+  });
+
+  dropdownEl.innerHTML = '';
+
+  if (localMatches.length > 0) {
+    localMatches.slice(0, 4).forEach(place => {
+      const item = document.createElement('div');
+      item.className = 'autocomplete-item';
+      
+      let iconName = 'map-pin';
+      let badgeHtml = '';
+      if (place.type === 'college') {
+        iconName = 'graduation-cap';
+        badgeHtml = '<span class="autocomplete-badge">COLLEGE / CAMPUS</span>';
+      } else if (place.type === 'transit') {
+        iconName = 'train';
+        badgeHtml = '<span class="autocomplete-badge" style="color:var(--brand-accent); background:var(--brand-accent-light);">TRANSIT</span>';
+      } else if (place.type === 'itpark') {
+        iconName = 'building';
+        badgeHtml = '<span class="autocomplete-badge" style="color:var(--brand-secondary); background:var(--brand-secondary-light);">TECH PARK</span>';
+      }
+
+      item.innerHTML = `
+        <i data-lucide="${iconName}" class="autocomplete-icon"></i>
+        <div class="autocomplete-text">
+          <strong>${place.name} ${badgeHtml}</strong>
+          <span>${place.desc}</span>
+        </div>
+      `;
+      item.onclick = () => selectAutocompletePlace(targetField, place);
+      dropdownEl.appendChild(item);
+    });
+
+    dropdownEl.classList.add('open');
+    initIcons();
+  }
+}
+
+async function fetchLiveGeocodedPlaces(targetField, query, dropdownEl) {
+  try {
+    if (dropdownEl.children.length === 0) {
+      dropdownEl.innerHTML = `
+        <div style="padding:0.75rem 1rem; display:flex; align-items:center; gap:0.5rem; color:var(--text-muted); font-size:0.85rem;">
+          <span class="search-spinner"></span> Searching locations via Google Maps / OpenStreetMap...
+        </div>
+      `;
+      dropdownEl.classList.add('open');
+    }
+
+    const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5&countrycodes=in&addressdetails=1`, {
+      headers: { 'Accept-Language': 'en' }
+    });
+    
+    if (!res.ok) throw new Error('Geocoding network error');
+    const results = await res.json();
+
+    if (results && results.length > 0) {
+      dropdownEl.innerHTML = '';
+      results.forEach(r => {
+        const item = document.createElement('div');
+        item.className = 'autocomplete-item';
+        
+        const mainTitle = r.display_name.split(',')[0];
+        const secondarySubtitle = r.display_name.split(',').slice(1).join(',').trim();
+
+        item.innerHTML = `
+          <i data-lucide="map-pin" class="autocomplete-icon"></i>
+          <div class="autocomplete-text">
+            <strong>${mainTitle} <span class="autocomplete-badge" style="color:var(--brand-info); background:rgba(14,165,233,0.15);">LIVE MAP</span></strong>
+            <span>${secondarySubtitle || r.display_name}</span>
+          </div>
+        `;
+
+        const placeObj = {
+          name: `${mainTitle}, ${secondarySubtitle ? secondarySubtitle.split(',')[0] : ''}`,
+          lat: parseFloat(r.lat),
+          lng: parseFloat(r.lon),
+          desc: r.display_name
+        };
+
+        item.onclick = () => selectAutocompletePlace(targetField, placeObj);
+        dropdownEl.appendChild(item);
+      });
+      dropdownEl.classList.add('open');
+      initIcons();
+    }
+  } catch (err) {
+    console.log('Live geocode fallback triggered:', err);
+  }
+}
+
+function selectAutocompletePlace(targetField, place) {
+  if (targetField === 'pickup') {
+    state.passenger.pickup = { lat: place.lat, lng: place.lng, name: place.name };
+    document.getElementById('passPickupInput').value = place.name;
+    renderPassengerRoute();
+    recalcPassengerFares();
+  } else if (targetField === 'drop') {
+    state.passenger.drop = { lat: place.lat, lng: place.lng, name: place.name };
+    document.getElementById('passDropInput').value = place.name;
+    renderPassengerRoute();
+    recalcPassengerFares();
+  } else if (targetField === 'driverDest') {
+    state.driver.homeDest = { lat: place.lat, lng: place.lng, name: place.name };
+    document.getElementById('driverHomeDestInput').value = place.name;
+    renderDriverCockpitRoute();
+  }
+
+  closeAllAutocomplete();
+}
+
+function closeAllAutocomplete() {
+  document.querySelectorAll('.autocomplete-dropdown').forEach(d => {
+    d.classList.remove('open');
   });
 }
 
 // -------------------------------------------------------------
-// 6. FINANCIAL CALCULATORS ENGINE
+// 11. GPS CURRENT LOCATION INTEGRATION
+// -------------------------------------------------------------
+async function useCurrentGpsLocation() {
+  const pickupInput = document.getElementById('passPickupInput');
+  pickupInput.value = 'Locating GPS position with high accuracy...';
+
+  if ("geolocation" in navigator) {
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        const lat = pos.coords.latitude;
+        const lng = pos.coords.longitude;
+        
+        let placeName = `Current Location (${lat.toFixed(4)}, ${lng.toFixed(4)})`;
+
+        try {
+          const rev = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`);
+          if (rev.ok) {
+            const data = await rev.json();
+            if (data && data.display_name) {
+              const parts = data.display_name.split(',');
+              placeName = `${parts[0]}, ${parts[1] || ''} (GPS)`;
+            }
+          }
+        } catch (e) {
+          console.log('Reverse geocoding error:', e);
+        }
+
+        state.passenger.pickup = { lat, lng, name: placeName };
+        pickupInput.value = placeName;
+        renderPassengerRoute();
+        recalcPassengerFares();
+      },
+      (err) => {
+        state.passenger.pickup = { lat: 18.5204, lng: 73.8567, name: "FC Road, Shivajinagar, Pune (GPS Detected)" };
+        pickupInput.value = state.passenger.pickup.name;
+        renderPassengerRoute();
+        recalcPassengerFares();
+      },
+      { enableHighAccuracy: true, timeout: 5000 }
+    );
+  } else {
+    state.passenger.pickup = { lat: 18.5204, lng: 73.8567, name: "Shivajinagar, Pune (GPS)" };
+    pickupInput.value = state.passenger.pickup.name;
+    renderPassengerRoute();
+    recalcPassengerFares();
+  }
+}
+
+// -------------------------------------------------------------
+// 12. PASSENGER MAP & FARE CALCULATION (WITH FLAT 50% FIRST RIDE)
+// -------------------------------------------------------------
+function initPassengerMap() {
+  if (passengerMap) {
+    passengerMap.invalidateSize();
+    return;
+  }
+
+  const el = document.getElementById('passengerMap');
+  if (!el) return;
+
+  passengerMap = L.map('passengerMap', { zoomControl: false }).setView([18.5200, 73.8300], 13);
+  L.control.zoom({ position: 'topright' }).addTo(passengerMap);
+
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+    attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
+    maxZoom: 19
+  }).addTo(passengerMap);
+
+  passengerMap.on('click', (e) => {
+    if (currentMapPinMode === 'pickup') {
+      state.passenger.pickup = { lat: e.latlng.lat, lng: e.latlng.lng, name: `Custom Pickup (${e.latlng.lat.toFixed(3)}, ${e.latlng.lng.toFixed(3)})` };
+      document.getElementById('passPickupInput').value = state.passenger.pickup.name;
+      currentMapPinMode = null;
+      document.getElementById('btnPinPickup').classList.remove('active');
+      renderPassengerRoute();
+      recalcPassengerFares();
+    } else if (currentMapPinMode === 'drop') {
+      state.passenger.drop = { lat: e.latlng.lat, lng: e.latlng.lng, name: `Custom Dropoff (${e.latlng.lat.toFixed(3)}, ${e.latlng.lng.toFixed(3)})` };
+      document.getElementById('passDropInput').value = state.passenger.drop.name;
+      currentMapPinMode = null;
+      document.getElementById('btnPinDrop').classList.remove('active');
+      renderPassengerRoute();
+      recalcPassengerFares();
+    }
+  });
+
+  renderPassengerRoute();
+  recalcPassengerFares();
+}
+
+function enableMapPinMode(mode) {
+  currentMapPinMode = mode;
+  document.getElementById('btnPinPickup').classList.toggle('active', mode === 'pickup');
+  document.getElementById('btnPinDrop').classList.toggle('active', mode === 'drop');
+}
+
+function selectPassengerVehicle(type) {
+  state.passenger.vehicle = type;
+  document.getElementById('pvehSelectAuto').classList.toggle('active', type === 'auto');
+  document.getElementById('pvehSelectCab').classList.toggle('active', type === 'cab');
+
+  const sub = document.getElementById('lblSeatCapacitySub');
+  if (sub) {
+    sub.textContent = type === 'auto' ? 'Auto Capacity: 3 Seats Max' : 'Cab Capacity: 4 Seats Max';
+  }
+
+  if (type === 'auto' && state.passenger.seatCount > 3) {
+    state.passenger.seatCount = 3;
+    document.getElementById('passengerCountVal').textContent = 3;
+  }
+
+  recalcPassengerFares();
+}
+
+function selectRideMode(mode) {
+  state.passenger.mode = mode;
+  document.getElementById('optShareRide').classList.toggle('selected', mode === 'share');
+  document.getElementById('optPrivateRide').classList.toggle('selected', mode === 'private');
+  recalcPassengerFares();
+}
+
+function recalcPassengerFares() {
+  const dist = calculateHaversineKm(
+    state.passenger.pickup.lat, state.passenger.pickup.lng,
+    state.passenger.drop.lat, state.passenger.drop.lng
+  );
+  state.passenger.distanceKm = Math.max(2, Math.round(dist * 10) / 10);
+
+  const base = state.passenger.vehicle === 'auto' ? 30 : 50;
+  const rate = state.passenger.vehicle === 'auto' ? 10 : 15;
+  
+  const standardSoloFare = Math.round(base + state.passenger.distanceKm * rate);
+  const standardSharePerSeat = Math.round(standardSoloFare * 0.62); // 38% pool discount
+
+  const is50Off = state.passenger.firstRideDiscountActive;
+  
+  let finalSoloFare = is50Off ? Math.round(standardSoloFare * 0.5) : standardSoloFare;
+  let finalSharePerSeat = is50Off ? Math.round(standardSharePerSeat * 0.5) : standardSharePerSeat;
+
+  const seats = state.passenger.seatCount;
+  const totalShareFare = finalSharePerSeat * seats;
+  const totalPrivateFare = finalSoloFare;
+
+  state.passenger.basePerSeatFare = finalSharePerSeat;
+  state.passenger.totalFare = state.passenger.mode === 'share' ? totalShareFare : totalPrivateFare;
+
+  // Update UI pricing elements
+  const passPrivateFare = document.getElementById('passPrivateFare');
+  const passPrivateStrike = document.getElementById('passPrivateStrike');
+  const passShareFare = document.getElementById('passShareFare');
+  const passShareStrike = document.getElementById('passShareStrike');
+  const badgeShareDiscount = document.getElementById('badgeShareDiscount');
+  const badgePrivateDiscount = document.getElementById('badgePrivateDiscount');
+
+  if (passPrivateFare) passPrivateFare.textContent = `₹${totalPrivateFare}`;
+  if (passPrivateStrike) {
+    passPrivateStrike.textContent = `₹${standardSoloFare}`;
+    passPrivateStrike.style.display = is50Off ? 'block' : 'none';
+  }
+  if (badgePrivateDiscount) badgePrivateDiscount.style.display = is50Off ? 'inline-block' : 'none';
+
+  if (passShareFare) passShareFare.textContent = `₹${totalShareFare}`;
+  if (passShareStrike) {
+    passShareStrike.textContent = `₹${standardSharePerSeat * seats}`;
+    passShareStrike.style.display = 'block';
+  }
+  if (badgeShareDiscount) {
+    badgeShareDiscount.textContent = is50Off ? 'Flat 50% Off' : 'Save 38%';
+  }
+
+  const btnText = document.getElementById('btnConfirmRideText');
+  if (btnText) {
+    btnText.textContent = `Confirm & ${state.passenger.mode === 'share' ? `Match Share Ride (${seats} Seat${seats > 1 ? 's' : ''})` : 'Book Private'} (₹${state.passenger.totalFare}${is50Off ? ' • Flat 50% Off' : ''})`;
+  }
+
+  // Payment Modal updates
+  const modalSeats = document.getElementById('modalSeatsCount');
+  if (modalSeats) modalSeats.textContent = `${seats} Seat${seats > 1 ? 's' : ''}`;
+  const modalDist = document.getElementById('modalSegmentDist');
+  if (modalDist) modalDist.textContent = `${state.passenger.distanceKm} km`;
+  const modalSoloRate = document.getElementById('modalSoloRate');
+  if (modalSoloRate) modalSoloRate.textContent = `₹${standardSoloFare}.00`;
+  const modalDiscountRate = document.getElementById('modalDiscountRate');
+  if (modalDiscountRate) modalDiscountRate.textContent = `-₹${standardSoloFare - standardSharePerSeat}.00`;
+
+  const promoRow = document.getElementById('modalFirstRidePromoRow');
+  const promoVal = document.getElementById('modalFirstRideDiscountVal');
+  if (promoRow) promoRow.style.display = is50Off ? 'flex' : 'none';
+  if (promoVal) {
+    const promoAmt = (state.passenger.mode === 'share' ? standardSharePerSeat * seats : standardSoloFare) - state.passenger.totalFare;
+    promoVal.textContent = `-₹${promoAmt}.00`;
+  }
+
+  const modalPayable = document.getElementById('modalPayableAmount');
+  if (modalPayable) modalPayable.textContent = `₹${state.passenger.totalFare}.00`;
+  
+  const btnPayModal = document.getElementById('btnPayModalActionText');
+  if (btnPayModal) btnPayModal.textContent = `Pay ₹${state.passenger.totalFare}.00 (Instant UPI Handshake)`;
+
+  const btnPayModalText = document.getElementById('btnPayModalText');
+  if (btnPayModalText) btnPayModalText.textContent = `View Fare Split / Pay ₹${state.passenger.totalFare}${is50Off ? ' (50% Off)' : ''}`;
+}
+
+function renderPassengerRoute() {
+  if (!passengerMap) return;
+
+  passengerMap.eachLayer(layer => {
+    if (layer instanceof L.Marker || layer instanceof L.Polyline || layer instanceof L.Circle) {
+      passengerMap.removeLayer(layer);
+    }
+  });
+
+  const pPick = state.passenger.pickup;
+  const pDrop = state.passenger.drop;
+
+  L.circleMarker([pPick.lat, pPick.lng], {
+    radius: 9,
+    fillColor: '#10B981',
+    color: '#ffffff',
+    weight: 2,
+    fillOpacity: 1
+  }).addTo(passengerMap).bindPopup(`<strong>Pickup:</strong><br>${pPick.name}`).openPopup();
+
+  L.circleMarker([pDrop.lat, pDrop.lng], {
+    radius: 9,
+    fillColor: '#EF4444',
+    color: '#ffffff',
+    weight: 2,
+    fillOpacity: 1
+  }).addTo(passengerMap).bindPopup(`<strong>Dropoff:</strong><br>${pDrop.name}`);
+
+  const midLat = (pPick.lat + pDrop.lat) / 2 + 0.004;
+  const midLng = (pPick.lng + pDrop.lng) / 2 - 0.003;
+  const routePoints = [[pPick.lat, pPick.lng], [midLat, midLng], [pDrop.lat, pDrop.lng]];
+
+  passengerRouteLine = L.polyline(routePoints, {
+    color: '#F59E0B',
+    weight: 5,
+    opacity: 0.85,
+    dashArray: '8, 8'
+  }).addTo(passengerMap);
+
+  const driverIcon = L.divIcon({
+    className: 'custom-map-pin pin-driver-auto',
+    html: '<i data-lucide="navigation" style="width:14px; height:14px; transform:rotate(45deg);"></i>',
+    iconSize: [28, 28]
+  });
+
+  passengerDriverMarker = L.marker([midLat, midLng], { icon: driverIcon }).addTo(passengerMap)
+    .bindPopup("<strong>Ramesh Shinde (Bajaj RE Auto)</strong><br><span style='color:#10B981;'>KYC Verified ✓</span> • Picking up along corridor");
+
+  passengerMap.fitBounds(passengerRouteLine.getBounds(), { padding: [40, 40] });
+  initIcons();
+}
+
+function requestPassengerRide() {
+  document.getElementById('passBookingPanel').style.display = 'none';
+  document.getElementById('passTrackingPanel').style.display = 'block';
+
+  const otp = Math.floor(1000 + Math.random() * 9000);
+  document.getElementById('tripOtpCode').textContent = otp;
+  state.passenger.otp = otp;
+  state.passenger.rideActive = true;
+
+  const coLabel = document.getElementById('coPassengersCountLabel');
+  if (coLabel) {
+    coLabel.textContent = `Matched Co-Passengers (${state.passenger.seatCount}/3 Seats)`;
+  }
+
+  let progress = 25;
+  const bar = document.getElementById('liveTripProgressBar');
+  const timer = setInterval(() => {
+    if (!state.passenger.rideActive) {
+      clearInterval(timer);
+      return;
+    }
+    progress = (progress + 10) % 100;
+    if (bar) bar.style.width = `${progress}%`;
+  }, 2000);
+
+  initIcons();
+}
+
+function cancelOrResetRide() {
+  state.passenger.rideActive = false;
+  document.getElementById('passBookingPanel').style.display = 'block';
+  document.getElementById('passTrackingPanel').style.display = 'none';
+  renderPassengerRoute();
+}
+
+// -------------------------------------------------------------
+// 13. DRIVER COCKPIT & HOMEBOUND ROUTE MATCH
+// -------------------------------------------------------------
+function initDriverMap() {
+  if (driverMap) {
+    driverMap.invalidateSize();
+    return;
+  }
+
+  const el = document.getElementById('driverMap');
+  if (!el) return;
+
+  driverMap = L.map('driverMap', { zoomControl: false }).setView([18.5200, 73.8300], 13);
+  L.control.zoom({ position: 'topright' }).addTo(driverMap);
+
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+    attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
+    maxZoom: 19
+  }).addTo(driverMap);
+
+  renderDriverCockpitRoute();
+}
+
+function toggleDriverOnline() {
+  state.driver.online = !state.driver.online;
+  const btn = document.getElementById('driverOnlineToggleBtn');
+  const text = document.getElementById('driverOnlineStatusText');
+
+  if (state.driver.online) {
+    btn.className = 'online-pill online';
+    text.textContent = 'Online (Ready)';
+    setTimeout(() => { triggerDriverRidePopup(); }, 3500);
+  } else {
+    btn.className = 'online-pill offline';
+    text.textContent = 'Offline (Paused)';
+  }
+}
+
+function setDriverMode(mode) {
+  state.driver.mode = mode;
+  document.getElementById('dmode-normal').classList.toggle('active', mode === 'normal');
+  document.getElementById('dmode-route').classList.toggle('active', mode === 'route');
+  document.getElementById('dmode-pool').classList.toggle('active', mode === 'pool');
+
+  const routeConfig = document.getElementById('driverRouteMatchConfig');
+  if (routeConfig) {
+    routeConfig.style.display = (mode === 'route' || mode === 'pool') ? 'block' : 'none';
+  }
+
+  renderDriverCockpitRoute();
+}
+
+function updateDriverDetourRadius() {
+  const val = parseFloat(document.getElementById('slider-driver-detour').value);
+  state.driver.detourRadiusKm = val;
+  document.getElementById('lbl-driver-detour').textContent = `${val.toFixed(1)} km`;
+  renderDriverCockpitRoute();
+}
+
+function renderDriverCockpitRoute() {
+  if (!driverMap) return;
+
+  driverMap.eachLayer(layer => {
+    if (layer instanceof L.Marker || layer instanceof L.Polyline || layer instanceof L.Circle) {
+      driverMap.removeLayer(layer);
+    }
+  });
+
+  const stops = [
+    { pos: [18.5204, 73.8567], label: "1. Rahul M. (Pickup FC Road)", type: 'pick' },
+    { pos: [18.5150, 73.8350], label: "2. Priya S. (Pickup Deccan)", type: 'pick' },
+    { pos: [18.5529, 73.8050], label: "3. Rahul M. (Dropoff Aundh)", type: 'drop' },
+    { pos: [state.driver.homeDest.lat, state.driver.homeDest.lng], label: `4. Final Destination (${state.driver.homeDest.name})`, type: 'home' }
+  ];
+
+  const latlngs = stops.map(s => s.pos);
+
+  if (state.driver.mode === 'route' || state.driver.mode === 'pool') {
+    stops.forEach(s => {
+      L.circle(s.pos, {
+        radius: state.driver.detourRadiusKm * 800,
+        color: '#6366F1',
+        weight: 1,
+        fillColor: '#6366F1',
+        fillOpacity: 0.08
+      }).addTo(driverMap);
+    });
+  }
+
+  driverRouteLine = L.polyline(latlngs, {
+    color: '#10B981',
+    weight: 5,
+    opacity: 0.9
+  }).addTo(driverMap);
+
+  stops.forEach((s, idx) => {
+    const isPick = s.type === 'pick';
+    const marker = L.circleMarker(s.pos, {
+      radius: 10,
+      fillColor: isPick ? '#F59E0B' : '#EF4444',
+      color: '#fff',
+      weight: 2,
+      fillOpacity: 1
+    }).addTo(driverMap).bindPopup(`<strong>${s.label}</strong>`);
+    if (idx === 0) marker.openPopup();
+  });
+
+  driverMap.fitBounds(driverRouteLine.getBounds(), { padding: [30, 30] });
+  initIcons();
+}
+
+function triggerSimulatedDriverStep() {
+  state.driver.currentStep = (state.driver.currentStep % 4) + 1;
+  alert(`Driver navigation advanced to Step ${state.driver.currentStep}.`);
+}
+
+// -------------------------------------------------------------
+// 14. MATCHING ENGINE SANDBOX
+// -------------------------------------------------------------
+function initSandboxMap() {
+  if (sandboxMap) {
+    sandboxMap.invalidateSize();
+    return;
+  }
+
+  const el = document.getElementById('sandboxMap');
+  if (!el) return;
+
+  sandboxMap = L.map('sandboxMap', { zoomControl: false }).setView([18.5300, 73.8300], 13);
+  L.control.zoom({ position: 'topright' }).addTo(sandboxMap);
+
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+    attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
+    maxZoom: 19
+  }).addTo(sandboxMap);
+
+  runSandboxMatchSimulation();
+}
+
+function runSandboxMatchSimulation() {
+  if (!sandboxMap) return;
+
+  sandboxMap.eachLayer(layer => {
+    if (layer instanceof L.Marker || layer instanceof L.Polyline || layer instanceof L.Circle) {
+      sandboxMap.removeLayer(layer);
+    }
+  });
+
+  const passengers = state.sandbox.passengers;
+  const routePoints = [];
+
+  passengers.forEach((p, idx) => {
+    routePoints.push(p.pick);
+    L.circleMarker(p.pick, {
+      radius: 9,
+      fillColor: '#10B981',
+      color: '#fff',
+      weight: 2,
+      fillOpacity: 1
+    }).addTo(sandboxMap).bindPopup(`<strong>Step ${idx + 1}: Pickup ${p.name}</strong><br>Origin Point`);
+  });
+
+  passengers.forEach((p, idx) => {
+    routePoints.push(p.drop);
+    L.circleMarker(p.drop, {
+      radius: 9,
+      fillColor: '#EF4444',
+      color: '#fff',
+      weight: 2,
+      fillOpacity: 1
+    }).addTo(sandboxMap).bindPopup(`<strong>Step ${passengers.length + idx + 1}: Drop ${p.name}</strong><br>Fare: ₹${p.fare}`);
+  });
+
+  sandboxRouteLine = L.polyline(routePoints, {
+    color: '#6366F1',
+    weight: 5,
+    opacity: 0.9,
+    dashArray: '6, 6'
+  }).addTo(sandboxMap);
+
+  sandboxMap.fitBounds(sandboxRouteLine.getBounds(), { padding: [30, 30] });
+  initIcons();
+}
+
+function addSandboxRandomPassenger() {
+  if (state.sandbox.passengers.length >= 4) {
+    alert('Maximum capacity reached (3 in Auto, 4 in Cab).');
+    return;
+  }
+  const id = String.fromCharCode(65 + state.sandbox.passengers.length);
+  const newPass = {
+    id: id,
+    name: `Passenger ${id}`,
+    pick: [18.5200 + (Math.random() - 0.5) * 0.03, 73.8300 + (Math.random() - 0.5) * 0.03],
+    drop: [18.5500 + (Math.random() - 0.5) * 0.03, 73.8000 + (Math.random() - 0.5) * 0.03],
+    fare: 85,
+    dist: 10.2,
+    picked: false
+  };
+  state.sandbox.passengers.push(newPass);
+  runSandboxMatchSimulation();
+}
+
+function resetSandboxSimulation() {
+  state.sandbox.passengers = [
+    { id: 'A', name: 'Rahul M.', pick: [18.5204, 73.8567], drop: [18.5529, 73.8050], fare: 65, dist: 8.5, picked: true },
+    { id: 'B', name: 'Priya S.', pick: [18.5150, 73.8350], drop: [18.5074, 73.8077], fare: 110, dist: 14.2, picked: false }
+  ];
+  runSandboxMatchSimulation();
+}
+
+// -------------------------------------------------------------
+// 15. CALCULATORS & ADMIN ENGINE
 // -------------------------------------------------------------
 let driverCalcVehType = 'auto';
 let passCalcVehType = 'auto';
@@ -446,7 +1579,6 @@ function updateDriverCalc() {
   const poolUpliftPerTrip = driverCalcVehType === 'auto' ? 65 : 110;
   const fuelCostPerKm = driverCalcVehType === 'auto' ? 3.2 : 5.5;
 
-  // Monthly 26 working days
   const homeboundEarnings = returnTrips * returnDist * perKmRate * 0.85 * 26;
   const poolEarnings = poolTrips * poolUpliftPerTrip * 26;
   const fuelSaved = returnTrips * returnDist * fuelCostPerKm * 26;
@@ -475,9 +1607,9 @@ function updatePassengerCalc() {
   const baseFare = passCalcVehType === 'auto' ? 30 : 50;
   const perKm = passCalcVehType === 'auto' ? 10 : 16;
   const soloTripFare = Math.round(baseFare + dist * perKm);
-  const shareTripFare = Math.round(soloTripFare * 0.62); // 38% discount
+  const shareTripFare = Math.round(soloTripFare * 0.62);
 
-  const monthlyTrips = daysPerWeek * 2 * 4.3; // 2 trips/day (to & fro)
+  const monthlyTrips = daysPerWeek * 2 * 4.3;
   const monthlySavings = Math.round((soloTripFare - shareTripFare) * monthlyTrips);
   const annualSavings = Math.round(monthlySavings * 12);
 
@@ -487,442 +1619,6 @@ function updatePassengerCalc() {
   document.getElementById('passBreakdownAnnual').textContent = `₹${annualSavings.toLocaleString('en-IN')} / yr`;
 }
 
-// -------------------------------------------------------------
-// 7. PASSENGER MAP & BOOKING FLOW
-// -------------------------------------------------------------
-function initPassengerMap() {
-  if (passengerMap) {
-    passengerMap.invalidateSize();
-    return;
-  }
-
-  const el = document.getElementById('passengerMap');
-  if (!el) return;
-
-  passengerMap = L.map('passengerMap', { zoomControl: false }).setView([18.5500, 73.7800], 12);
-  L.control.zoom({ position: 'topright' }).addTo(passengerMap);
-
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-    attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
-    maxZoom: 19
-  }).addTo(passengerMap);
-
-  // Add click listener for pinning pickup/drop
-  passengerMap.on('click', (e) => {
-    if (currentMapPinMode === 'pickup') {
-      state.passenger.pickup = { lat: e.latlng.lat, lng: e.latlng.lng, name: `Custom Location (${e.latlng.lat.toFixed(3)}, ${e.latlng.lng.toFixed(3)})` };
-      document.getElementById('passPickupInput').value = state.passenger.pickup.name;
-      currentMapPinMode = null;
-      document.getElementById('btnPinPickup').classList.remove('active');
-      renderPassengerRoute();
-    } else if (currentMapPinMode === 'drop') {
-      state.passenger.drop = { lat: e.latlng.lat, lng: e.latlng.lng, name: `Custom Dropoff (${e.latlng.lat.toFixed(3)}, ${e.latlng.lng.toFixed(3)})` };
-      document.getElementById('passDropInput').value = state.passenger.drop.name;
-      currentMapPinMode = null;
-      document.getElementById('btnPinDrop').classList.remove('active');
-      renderPassengerRoute();
-    }
-  });
-
-  renderPassengerRoute();
-}
-
-function enableMapPinMode(mode) {
-  currentMapPinMode = mode;
-  document.getElementById('btnPinPickup').classList.toggle('active', mode === 'pickup');
-  document.getElementById('btnPinDrop').classList.toggle('active', mode === 'drop');
-}
-
-function applyPreset(presetKey) {
-  const preset = PRESETS[presetKey];
-  if (!preset) return;
-  state.passenger.pickup = { ...preset.pickup };
-  state.passenger.drop = { ...preset.drop };
-
-  document.getElementById('passPickupInput').value = preset.pickup.name;
-  document.getElementById('passDropInput').value = preset.drop.name;
-
-  renderPassengerRoute();
-  recalcPassengerFares();
-}
-
-function selectPassengerVehicle(type) {
-  state.passenger.vehicle = type;
-  document.getElementById('pvehSelectAuto').classList.toggle('active', type === 'auto');
-  document.getElementById('pvehSelectCab').classList.toggle('active', type === 'cab');
-  recalcPassengerFares();
-}
-
-function selectRideMode(mode) {
-  state.passenger.mode = mode;
-  document.getElementById('optShareRide').classList.toggle('selected', mode === 'share');
-  document.getElementById('optPrivateRide').classList.toggle('selected', mode === 'private');
-
-  const btnText = document.getElementById('btnConfirmRideText');
-  const fare = mode === 'share' ? state.passenger.fare : Math.round(state.passenger.fare / 0.62);
-  btnText.textContent = `Confirm & ${mode === 'share' ? 'Match Share Ride' : 'Book Private'} (₹${fare})`;
-}
-
-function recalcPassengerFares() {
-  const dist = calculateHaversineKm(
-    state.passenger.pickup.lat, state.passenger.pickup.lng,
-    state.passenger.drop.lat, state.passenger.drop.lng
-  );
-  state.passenger.distanceKm = Math.max(3, Math.round(dist * 10) / 10);
-
-  const base = state.passenger.vehicle === 'auto' ? 30 : 50;
-  const rate = state.passenger.vehicle === 'auto' ? 10 : 15;
-  const privateFare = Math.round(base + state.passenger.distanceKm * rate);
-  const shareFare = Math.round(privateFare * 0.62);
-
-  state.passenger.fare = shareFare;
-
-  document.getElementById('passPrivateFare').textContent = `₹${privateFare}`;
-  document.getElementById('passShareStrike').textContent = `₹${privateFare}`;
-  document.getElementById('passShareFare').textContent = `₹${shareFare}`;
-
-  const btnText = document.getElementById('btnConfirmRideText');
-  if (btnText) {
-    btnText.textContent = `Confirm & ${state.passenger.mode === 'share' ? 'Match Share Ride' : 'Book Private'} (₹${state.passenger.mode === 'share' ? shareFare : privateFare})`;
-  }
-}
-
-function renderPassengerRoute() {
-  if (!passengerMap) return;
-
-  // Clear existing markers & polyline
-  passengerMap.eachLayer(layer => {
-    if (layer instanceof L.Marker || layer instanceof L.Polyline || layer instanceof L.Circle) {
-      passengerMap.removeLayer(layer);
-    }
-  });
-
-  const pPick = state.passenger.pickup;
-  const pDrop = state.passenger.drop;
-
-  // Pickup marker (Green)
-  const pickMarker = L.circleMarker([pPick.lat, pPick.lng], {
-    radius: 9,
-    fillColor: '#10B981',
-    color: '#ffffff',
-    weight: 2,
-    fillOpacity: 1
-  }).addTo(passengerMap).bindPopup(`<strong>Your Pickup:</strong><br>${pPick.name}`).openPopup();
-
-  // Drop marker (Red)
-  const dropMarker = L.circleMarker([pDrop.lat, pDrop.lng], {
-    radius: 9,
-    fillColor: '#EF4444',
-    color: '#ffffff',
-    weight: 2,
-    fillOpacity: 1
-  }).addTo(passengerMap).bindPopup(`<strong>Your Dropoff:</strong><br>${pDrop.name}`);
-
-  // Route polyline with midpoint waypoint for realistic road curves
-  const midLat = (pPick.lat + pDrop.lat) / 2 + 0.008;
-  const midLng = (pPick.lng + pDrop.lng) / 2 - 0.006;
-  const routePoints = [[pPick.lat, pPick.lng], [midLat, midLng], [pDrop.lat, pDrop.lng]];
-
-  passengerRouteLine = L.polyline(routePoints, {
-    color: '#F59E0B',
-    weight: 5,
-    opacity: 0.85,
-    dashArray: '8, 8'
-  }).addTo(passengerMap);
-
-  // Auto Driver Marker
-  const driverIcon = L.divIcon({
-    className: 'custom-map-pin pin-driver-auto',
-    html: '<i data-lucide="navigation" style="width:14px; height:14px; transform:rotate(45deg);"></i>',
-    iconSize: [28, 28]
-  });
-
-  passengerDriverMarker = L.marker([midLat, midLng], { icon: driverIcon }).addTo(passengerMap)
-    .bindPopup("<strong>Ramesh Shinde (Bajaj RE Auto)</strong><br>Picking up along corridor");
-
-  passengerMap.fitBounds(passengerRouteLine.getBounds(), { padding: [40, 40] });
-  initIcons();
-}
-
-function requestPassengerRide() {
-  document.getElementById('passBookingPanel').style.display = 'none';
-  document.getElementById('passTrackingPanel').style.display = 'block';
-
-  // Generate random 4-digit OTP
-  const otp = Math.floor(1000 + Math.random() * 9000);
-  document.getElementById('tripOtpCode').textContent = otp;
-  state.passenger.otp = otp;
-  state.passenger.rideActive = true;
-
-  // Animate progress bar
-  let progress = 25;
-  const bar = document.getElementById('liveTripProgressBar');
-  const timer = setInterval(() => {
-    if (!state.passenger.rideActive) {
-      clearInterval(timer);
-      return;
-    }
-    progress = (progress + 10) % 100;
-    if (bar) bar.style.width = `${progress}%`;
-  }, 2000);
-
-  initIcons();
-}
-
-function cancelOrResetRide() {
-  state.passenger.rideActive = false;
-  document.getElementById('passBookingPanel').style.display = 'block';
-  document.getElementById('passTrackingPanel').style.display = 'none';
-  renderPassengerRoute();
-}
-
-// -------------------------------------------------------------
-// 8. DRIVER COCKPIT ENGINE & MANIFEST
-// -------------------------------------------------------------
-function initDriverMap() {
-  if (driverMap) {
-    driverMap.invalidateSize();
-    return;
-  }
-
-  const el = document.getElementById('driverMap');
-  if (!el) return;
-
-  driverMap = L.map('driverMap', { zoomControl: false }).setView([18.5500, 73.7800], 12);
-  L.control.zoom({ position: 'topright' }).addTo(driverMap);
-
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-    attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
-    maxZoom: 19
-  }).addTo(driverMap);
-
-  renderDriverCockpitRoute();
-}
-
-function toggleDriverOnline() {
-  state.driver.online = !state.driver.online;
-  const btn = document.getElementById('driverOnlineToggleBtn');
-  const text = document.getElementById('driverOnlineStatusText');
-
-  if (state.driver.online) {
-    btn.className = 'online-pill online';
-    text.textContent = 'Online (Ready)';
-  } else {
-    btn.className = 'online-pill offline';
-    text.textContent = 'Offline (Paused)';
-  }
-}
-
-function setDriverMode(mode) {
-  state.driver.mode = mode;
-  document.getElementById('dmode-normal').classList.toggle('active', mode === 'normal');
-  document.getElementById('dmode-route').classList.toggle('active', mode === 'route');
-  document.getElementById('dmode-pool').classList.toggle('active', mode === 'pool');
-
-  const routeConfig = document.getElementById('driverRouteMatchConfig');
-  if (routeConfig) {
-    routeConfig.style.display = (mode === 'route' || mode === 'pool') ? 'block' : 'none';
-  }
-
-  renderDriverCockpitRoute();
-}
-
-function updateDriverDetourRadius() {
-  const val = parseFloat(document.getElementById('slider-driver-detour').value);
-  state.driver.detourRadiusKm = val;
-  document.getElementById('lbl-driver-detour').textContent = `${val.toFixed(1)} km`;
-  renderDriverCockpitRoute();
-}
-
-function renderDriverCockpitRoute() {
-  if (!driverMap) return;
-
-  driverMap.eachLayer(layer => {
-    if (layer instanceof L.Marker || layer instanceof L.Polyline || layer instanceof L.Circle) {
-      driverMap.removeLayer(layer);
-    }
-  });
-
-  const dStart = [18.5913, 73.7389]; // Hinjewadi
-  const dEnd = [18.5074, 73.8077];   // Kothrud
-
-  // Multi-stop route sequence: Hinjewadi -> Wakad (Pick Priya) -> Aundh (Drop Rahul) -> Kothrud (Drop Priya / Home)
-  const stops = [
-    { pos: [18.5913, 73.7389], label: "1. Rahul M. (Pickup Hinjewadi)", type: 'pick' },
-    { pos: [18.5980, 73.7620], label: "2. Priya S. (Pickup Wakad)", type: 'pick' },
-    { pos: [18.5529, 73.8050], label: "3. Rahul M. (Dropoff Aundh)", type: 'drop' },
-    { pos: [18.5074, 73.8077], label: "4. Homebound Final Drop (Kothrud)", type: 'home' }
-  ];
-
-  const latlngs = stops.map(s => s.pos);
-
-  // Corridor Buffer Circle
-  if (state.driver.mode === 'route' || state.driver.mode === 'pool') {
-    stops.forEach(s => {
-      L.circle(s.pos, {
-        radius: state.driver.detourRadiusKm * 800,
-        color: '#6366F1',
-        weight: 1,
-        fillColor: '#6366F1',
-        fillOpacity: 0.08
-      }).addTo(driverMap);
-    });
-  }
-
-  driverRouteLine = L.polyline(latlngs, {
-    color: '#10B981',
-    weight: 5,
-    opacity: 0.9
-  }).addTo(driverMap);
-
-  stops.forEach((s, idx) => {
-    const isPick = s.type === 'pick';
-    const marker = L.circleMarker(s.pos, {
-      radius: 10,
-      fillColor: isPick ? '#F59E0B' : '#EF4444',
-      color: '#fff',
-      weight: 2,
-      fillOpacity: 1
-    }).addTo(driverMap).bindPopup(`<strong>${s.label}</strong>`);
-    if (idx === 0) marker.openPopup();
-  });
-
-  driverMap.fitBounds(driverRouteLine.getBounds(), { padding: [30, 30] });
-  initIcons();
-}
-
-function simulateIncomingRequest() {
-  const card = document.getElementById('incomingOfferCard');
-  if (!card) return;
-  card.style.display = 'block';
-
-  let countdown = 15;
-  const timerLbl = document.getElementById('offerTimer');
-  const timer = setInterval(() => {
-    countdown--;
-    if (timerLbl) timerLbl.textContent = `00:${countdown < 10 ? '0' + countdown : countdown}`;
-    if (countdown <= 0) {
-      clearInterval(timer);
-      card.style.display = 'none';
-    }
-  }, 1000);
-}
-
-function acceptDriverOffer() {
-  document.getElementById('incomingOfferCard').style.display = 'none';
-  document.getElementById('driverSeatCount').textContent = 'Seats: 3/3 (Full)';
-  alert('Ride offer accepted! Priya S. added to manifest with +₹75.00 extra earnings.');
-}
-
-function declineDriverOffer() {
-  document.getElementById('incomingOfferCard').style.display = 'none';
-}
-
-function triggerSimulatedDriverStep() {
-  state.driver.currentStep = (state.driver.currentStep % 4) + 1;
-  alert(`Driver navigation updated to Step ${state.driver.currentStep}.`);
-}
-
-// -------------------------------------------------------------
-// 9. DYNAMIC MATCHING ALGORITHM SANDBOX
-// -------------------------------------------------------------
-function initSandboxMap() {
-  if (sandboxMap) {
-    sandboxMap.invalidateSize();
-    return;
-  }
-
-  const el = document.getElementById('sandboxMap');
-  if (!el) return;
-
-  sandboxMap = L.map('sandboxMap', { zoomControl: false }).setView([18.5500, 73.7900], 12);
-  L.control.zoom({ position: 'topright' }).addTo(sandboxMap);
-
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-    attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
-    maxZoom: 19
-  }).addTo(sandboxMap);
-
-  runSandboxMatchSimulation();
-}
-
-function runSandboxMatchSimulation() {
-  if (!sandboxMap) return;
-
-  sandboxMap.eachLayer(layer => {
-    if (layer instanceof L.Marker || layer instanceof L.Polyline || layer instanceof L.Circle) {
-      sandboxMap.removeLayer(layer);
-    }
-  });
-
-  const passengers = state.sandbox.passengers;
-  const routePoints = [];
-
-  // Add pickups
-  passengers.forEach((p, idx) => {
-    routePoints.push(p.pick);
-    L.circleMarker(p.pick, {
-      radius: 9,
-      fillColor: '#10B981',
-      color: '#fff',
-      weight: 2,
-      fillOpacity: 1
-    }).addTo(sandboxMap).bindPopup(`<strong>Step ${idx + 1}: Pickup ${p.name}</strong><br>Origin Point`);
-  });
-
-  // Add drops
-  passengers.forEach((p, idx) => {
-    routePoints.push(p.drop);
-    L.circleMarker(p.drop, {
-      radius: 9,
-      fillColor: '#EF4444',
-      color: '#fff',
-      weight: 2,
-      fillOpacity: 1
-    }).addTo(sandboxMap).bindPopup(`<strong>Step ${passengers.length + idx + 1}: Drop ${p.name}</strong><br>Fare: ₹${p.fare}`);
-  });
-
-  sandboxRouteLine = L.polyline(routePoints, {
-    color: '#6366F1',
-    weight: 5,
-    opacity: 0.9,
-    dashArray: '6, 6'
-  }).addTo(sandboxMap);
-
-  sandboxMap.fitBounds(sandboxRouteLine.getBounds(), { padding: [30, 30] });
-  initIcons();
-}
-
-function addSandboxRandomPassenger() {
-  if (state.sandbox.passengers.length >= 4) {
-    alert('Maximum legal capacity reached (3 in Auto, 4 in Cab).');
-    return;
-  }
-  const id = String.fromCharCode(65 + state.sandbox.passengers.length);
-  const newPass = {
-    id: id,
-    name: `Passenger ${id}`,
-    pick: [18.5600 + (Math.random() - 0.5) * 0.04, 73.7800 + (Math.random() - 0.5) * 0.04],
-    drop: [18.5200 + (Math.random() - 0.5) * 0.04, 73.8400 + (Math.random() - 0.5) * 0.04],
-    fare: 85,
-    dist: 10.2,
-    picked: false
-  };
-  state.sandbox.passengers.push(newPass);
-  runSandboxMatchSimulation();
-}
-
-function resetSandboxSimulation() {
-  state.sandbox.passengers = [
-    { id: 'A', name: 'Rahul M.', pick: [18.5913, 73.7389], drop: [18.5529, 73.8050], fare: 65, dist: 8.5, picked: true },
-    { id: 'B', name: 'Priya S.', pick: [18.5980, 73.7620], drop: [18.5204, 73.8567], fare: 110, dist: 14.2, picked: false }
-  ];
-  runSandboxMatchSimulation();
-}
-
-// -------------------------------------------------------------
-// 10. ADMIN DASHBOARD & CHART.JS
-// -------------------------------------------------------------
 function initAdminChart() {
   const ctx = document.getElementById('adminRevenueChart');
   if (!ctx) return;
@@ -971,11 +1667,11 @@ function approveKYC(btn) {
   const statusCell = row.cells[3];
   statusCell.innerHTML = '<span class="input-val-badge" style="background:rgba(16,185,129,0.2); color:var(--brand-secondary);">Approved ✓</span>';
   btn.remove();
-  alert('Driver KYC approved! Driver activated for live pooling.');
+  alert('Driver KYC approved! Driver activated for live pooling on SahiRide.');
 }
 
 // -------------------------------------------------------------
-// 11. MODALS & UTILITY FUNCTIONS
+// 16. MODALS & UTILITIES
 // -------------------------------------------------------------
 function openModal(modalId) {
   const m = document.getElementById(modalId);
@@ -992,18 +1688,19 @@ function openKYCModal() { openModal('kycModal'); }
 function openSOSModal() { openModal('sosModal'); }
 
 function openShareTripModal() {
-  navigator.clipboard?.writeText(window.location.href);
-  alert('Live trip tracking link copied to clipboard! Share with family or friends.');
+  const shareUrl = `${window.location.origin}/#live-track?otp=${state.passenger.otp}&lat=${state.passenger.pickup.lat}&lng=${state.passenger.pickup.lng}`;
+  navigator.clipboard?.writeText(shareUrl);
+  alert(`SahiRide Live Location Link copied to clipboard!\nShare with family: ${shareUrl}`);
 }
 
 function completePaymentSimulation() {
   closeModal('paymentModal');
-  alert('Payment of ₹75.00 successful via UPI! Digital receipt & carbon offset certificate generated.');
+  alert(`Payment of ₹${state.passenger.totalFare}.00 successful via UPI on SahiRide! Flat 50% First Ride Discount applied.`);
 }
 
 function submitKYC() {
   closeModal('kycModal');
-  alert('Driver documents uploaded successfully. Background verification completed.');
+  alert('Driver documents re-verified successfully via Traffic Police records.');
 }
 
 function triggerSOSCall() {
@@ -1011,9 +1708,8 @@ function triggerSOSCall() {
   closeModal('sosModal');
 }
 
-// Math Utility: Haversine distance in km
 function calculateHaversineKm(lat1, lon1, lat2, lon2) {
-  const R = 6371; // Earth radius km
+  const R = 6371;
   const dLat = (lat2 - lat1) * Math.PI / 180;
   const dLon = (lon2 - lon1) * Math.PI / 180;
   const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
