@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>RouteSetu | Dynamic Auto & Cab Pooling & Deadhead Route-Match Platform</title>
-  <meta name="description" content="Maximize vehicle capacity with dynamic point-to-point auto/cab pooling and homebound route matching. Independent pickups & drops, 35% cheaper fares, and higher driver earnings.">
+  <title>SahiRide | Dynamic Auto &amp; Cab Pooling &amp; Homebound Route-Match</title>
+  <meta name="description" content="SahiRide maximizes vehicle capacity with dynamic point-to-point auto/cab pooling and homebound route matching. Free pickup & drop, 35% cheaper fares, and higher driver earnings.">
 
   <!-- Google Fonts: Plus Jakarta Sans & Space Grotesk -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -28,7 +28,7 @@
   <!-- =========================================================================
        GLOBAL HEADER & NAVIGATION
        ========================================================================= -->
-  <header class="site-header" id="mainSiteHeader" style="display:none;">
+  <header class="site-header">
     <div class="container nav-container">
       <!-- Brand Logo -->
       <div class="brand-logo" onclick="switchView('landing')">
@@ -37,10 +37,10 @@
         </div>
         <div class="brand-info">
           <div class="brand-name">
-            Route<span class="accent">Setu</span>
-            <span style="font-size:0.75rem; background:var(--brand-secondary-light); color:var(--brand-secondary); padding:0.1rem 0.4rem; border-radius:var(--radius-full); font-weight:800; margin-left:0.3rem;">AUTO & CAB POOL</span>
+            Sahi<span class="accent">Ride</span>
+            <span style="font-size:0.72rem; background:var(--brand-secondary-light); color:var(--brand-secondary); padding:0.12rem 0.45rem; border-radius:var(--radius-full); font-weight:800; margin-left:0.35rem;">AUTO &amp; CAB POOL</span>
           </div>
-          <div class="brand-tagline" data-i18n="tagline">Dynamic Pooling & Homebound Route Match</div>
+          <div class="brand-tagline" data-i18n="tagline">Sahi Ride, Sahi Price • Dynamic Pooling &amp; Route Match</div>
         </div>
       </div>
 
@@ -65,11 +65,12 @@
 
       <!-- Header Controls: User Profile / Login, Language, Theme, SOS -->
       <div class="header-actions">
-        <!-- User Session Profile Chip / Login Button -->
-        <button class="user-profile-btn" id="userProfileBtn" onclick="handleAuthHeaderClick()">
+        <!-- User Account Profile Button (Opens User Details & Logout Window) -->
+        <button class="user-profile-btn" id="userProfileBtn" onclick="openProfileModal()">
           <span class="user-avatar-dot" id="userStatusDot"></span>
           <span id="userProfileLabel">Jayesh (Passenger)</span>
-          <i data-lucide="log-out" style="width:0.85rem; height:0.85rem; margin-left:0.2rem;" id="logoutIcon"></i>
+          <span class="badge-new-user" id="headerNewUserBadge" style="display:none;">50% OFF</span>
+          <i data-lucide="user" style="width:0.85rem; height:0.85rem; margin-left:0.2rem;"></i>
         </button>
 
         <!-- Trilingual Language Switcher -->
@@ -100,7 +101,7 @@
   <!-- =========================================================================
        MOBILE BOTTOM NAVIGATION BAR
        ========================================================================= -->
-  <div class="mobile-bottom-bar" id="mainMobileNav" style="display:none;">
+  <div class="mobile-bottom-bar">
     <button class="mobile-nav-item" id="mTab-landing" onclick="switchView('landing')">
       <i data-lucide="home"></i> <span>Home</span>
     </button>
@@ -136,9 +137,9 @@
               <i data-lucide="users"></i>
             </div>
             <h2 class="slide-title">Smart Dynamic Pooling</h2>
-            <div class="slide-subtitle">Doorstep Pickup &amp; Drop • 35% Savings</div>
+            <div class="slide-subtitle">Doorstep Pickup &amp; Drop • 50% Off First Ride</div>
             <p class="slide-description">
-              Set your exact doorstep pickup and drop location freely — <strong>no fixed bus stops or rigid shuttle stops</strong>. Our real-time engine clubs co-passengers heading your way.
+              Set your exact doorstep pickup and drop location freely — <strong>no fixed bus stops or rigid shuttle corridors</strong>. SahiRide's dynamic engine clubs co-passengers heading your way in real time.
             </p>
           </div>
 
@@ -184,20 +185,30 @@
     </section>
 
     <!-- =======================================================================
-         VIEW 0.5: LOGIN & AUTHENTICATION SCREEN
+         VIEW 0.5: LOGIN & SIGNUP (NEW USER VS EXISTING USER + DRIVER KYC)
          ======================================================================= -->
     <section id="view-login" class="app-view">
       <div class="login-screen">
         <div class="login-card">
-          <div style="text-align:center; margin-bottom:1.5rem;">
+          <div style="text-align:center; margin-bottom:1.25rem;">
             <div class="logo-badge" style="margin:0 auto 0.75rem;">
               <i data-lucide="navigation"></i>
             </div>
-            <h2 style="font-size:1.45rem;">Welcome to SahiRide</h2>
-            <p style="font-size:0.85rem; color:var(--text-muted);">Sign in to book a shared or private ride</p>
+            <h2 style="font-size:1.45rem;" id="authHeaderTitle">Welcome to SahiRide</h2>
+            <p style="font-size:0.85rem; color:var(--text-muted);" id="authHeaderSubtitle">Sign in or create a new account with mandatory KYC</p>
           </div>
 
-          <!-- Role Toggle Selector -->
+          <!-- Auth Mode Toggle: Existing User (Sign In) vs New User (Sign Up) -->
+          <div class="auth-nav-toggle">
+            <button class="auth-tab-btn active" id="btnAuthModeLogin" onclick="setAuthMode('login')">
+              <i data-lucide="log-in"></i> <span>Existing User (Sign In)</span>
+            </button>
+            <button class="auth-tab-btn" id="btnAuthModeSignup" onclick="setAuthMode('signup')">
+              <i data-lucide="user-plus"></i> <span>New User? (Sign Up)</span>
+            </button>
+          </div>
+
+          <!-- Role Toggle Selector: Passenger vs Driver -->
           <div class="role-toggle-group">
             <button class="role-chip-btn active" id="loginRolePassenger" onclick="selectLoginRole('passenger')">
               <i data-lucide="user"></i> <span>Passenger</span>
@@ -207,38 +218,129 @@
             </button>
           </div>
 
-          <!-- Step 1: Phone Input -->
-          <div id="loginStepPhone">
-            <div class="phone-input-row">
-              <span class="phone-prefix">🇮🇳 +91</span>
-              <input type="tel" id="loginPhoneInput" placeholder="Enter 10-digit mobile number" value="9876543210" maxlength="10">
-            </div>
-            <button class="btn-primary" style="width:100%; margin-top:0.5rem;" onclick="requestLoginOtp()">
-              <i data-lucide="arrow-right"></i> <span>Get Verification Code (OTP)</span>
-            </button>
-          </div>
+          <!-- FORM CONTAINER -->
+          <div id="authFormContainer">
+            <!-- NEW PASSENGER EXTRA DETAILS -->
+            <div id="signupPassengerFields" style="display:none; margin-bottom:1rem;">
+              <div style="background:rgba(16,185,129,0.15); border:1px solid var(--brand-secondary); border-radius:var(--radius-md); padding:0.65rem 0.85rem; margin-bottom:0.85rem; display:flex; align-items:center; gap:0.5rem;">
+                <i data-lucide="gift" style="color:var(--brand-secondary);"></i>
+                <div style="font-size:0.8rem;">
+                  <strong>First Ride Flat 50% Discount Applied!</strong>
+                  <div style="color:var(--text-muted);">Coupon code <span style="color:var(--brand-secondary); font-weight:800;">FIRST50</span> activated automatically for your first ride!</div>
+                </div>
+              </div>
 
-          <!-- Step 2: OTP Input (Visible after OTP requested) -->
-          <div id="loginStepOtp" style="display:none;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
-              <span style="font-size:0.8rem; color:var(--text-muted);">Enter 6-digit OTP sent to phone</span>
-              <button class="pin-select-btn" onclick="autoFillDemoOtp()">Autofill Demo OTP (5839)</button>
+              <div class="input-group" style="margin-bottom:0.75rem;">
+                <label style="font-size:0.825rem; font-weight:600;">Your Full Name</label>
+                <div class="loc-field">
+                  <i data-lucide="user"></i>
+                  <input type="text" id="signupPassName" placeholder="e.g. Jayesh Sharma" value="Jayesh Sharma">
+                </div>
+              </div>
+
+              <div class="input-group" style="margin-bottom:0.75rem;">
+                <label style="font-size:0.825rem; font-weight:600;">Email Address</label>
+                <div class="loc-field">
+                  <i data-lucide="mail"></i>
+                  <input type="email" id="signupPassEmail" placeholder="e.g. jayesh@example.com" value="jayesh@example.com">
+                </div>
+              </div>
             </div>
 
-            <div class="otp-boxes-row">
-              <input type="text" class="otp-box" id="otp-1" maxlength="1" value="5">
-              <input type="text" class="otp-box" id="otp-2" maxlength="1" value="8">
-              <input type="text" class="otp-box" id="otp-3" maxlength="1" value="3">
-              <input type="text" class="otp-box" id="otp-4" maxlength="1" value="9">
-              <input type="text" class="otp-box" id="otp-5" maxlength="1" value="2">
-              <input type="text" class="otp-box" id="otp-6" maxlength="1" value="1">
+            <!-- NEW DRIVER MANDATORY KYC FORM -->
+            <div id="signupDriverKYCFields" style="display:none; margin-bottom:1rem;">
+              <div style="background:rgba(245,158,11,0.15); border:1px solid var(--brand-primary); border-radius:var(--radius-md); padding:0.65rem 0.85rem; margin-bottom:0.85rem; display:flex; align-items:center; gap:0.5rem;">
+                <i data-lucide="shield-check" style="color:var(--brand-primary);"></i>
+                <div style="font-size:0.8rem;">
+                  <strong>Mandatory Driver KYC Verification</strong>
+                  <div style="color:var(--text-muted);">Government ID &amp; Commercial Permit required before accepting rides.</div>
+                </div>
+              </div>
+
+              <div class="input-group" style="margin-bottom:0.75rem;">
+                <label style="font-size:0.825rem; font-weight:600;">Full Name (As per Driving License)</label>
+                <div class="loc-field">
+                  <i data-lucide="user"></i>
+                  <input type="text" id="signupDriverName" placeholder="e.g. Ramesh Baburao Shinde" value="Ramesh Baburao Shinde">
+                </div>
+              </div>
+
+              <div class="input-group" style="margin-bottom:0.75rem;">
+                <label style="font-size:0.825rem; font-weight:600;">Commercial Driving License (DL) Number</label>
+                <div class="loc-field">
+                  <i data-lucide="file-badge"></i>
+                  <input type="text" id="signupDriverDL" placeholder="e.g. MH12 2019 0088921" value="MH12 2019 0088921">
+                </div>
+              </div>
+
+              <div class="input-group" style="margin-bottom:0.75rem;">
+                <label style="font-size:0.825rem; font-weight:600;">Aadhaar Card Number (Govt ID)</label>
+                <div class="loc-field">
+                  <i data-lucide="credit-card"></i>
+                  <input type="text" id="signupDriverAadhaar" placeholder="e.g. 5839 2910 4412" value="5839 2910 4412" maxlength="14">
+                </div>
+              </div>
+
+              <div class="input-group" style="margin-bottom:0.75rem;">
+                <label style="font-size:0.825rem; font-weight:600;">Vehicle Registration (RC Number)</label>
+                <div class="loc-field">
+                  <i data-lucide="car"></i>
+                  <input type="text" id="signupDriverRC" placeholder="e.g. MH 12 AB 4321" value="MH 12 AB 4321">
+                </div>
+              </div>
+
+              <div class="input-group" style="margin-bottom:0.75rem;">
+                <label style="font-size:0.825rem; font-weight:600;">Vehicle Category &amp; Seating Capacity</label>
+                <select id="signupDriverVehType" style="background:var(--bg-surface); color:var(--text-main); border:1px solid var(--border-medium); padding:0.65rem; border-radius:var(--radius-md); font-size:0.9rem; width:100%;">
+                  <option value="auto">Auto-Rickshaw (3 Passenger Seats Capacity)</option>
+                  <option value="cab">Mini Cab / Sedan (4 Passenger Seats Capacity)</option>
+                </select>
+              </div>
+
+              <!-- Document Upload Box -->
+              <div class="kyc-doc-upload-box" onclick="alert('Document upload simulated: Driving License & RC Book scanned via Digilocker OCR ✓')">
+                <i data-lucide="upload-cloud" style="width:1.8rem; height:1.8rem; color:var(--brand-primary); margin:0 auto 0.35rem;"></i>
+                <strong style="font-size:0.85rem; display:block;">Upload DL &amp; RC Book Photos / Digilocker</strong>
+                <span style="font-size:0.75rem; color:var(--text-muted);">PDF, JPG, PNG up to 10MB (Instant Automated Verification)</span>
+              </div>
             </div>
 
-            <button class="btn-primary" style="width:100%; margin-top:0.75rem;" onclick="verifyLoginOtp()">
-              <i data-lucide="check-circle"></i> <span>Verify &amp; Continue</span>
-            </button>
-            <div style="text-align:center; margin-top:0.75rem;">
-              <button class="pin-select-btn" style="background:transparent; border:none; color:var(--text-muted);" onclick="backToPhoneStep()">Change phone number</button>
+            <!-- Step 1: Phone Input -->
+            <div id="loginStepPhone">
+              <div class="input-group" style="margin-bottom:0.75rem;">
+                <label style="font-size:0.825rem; font-weight:600;">Mobile Phone Number</label>
+                <div class="phone-input-row">
+                  <span class="phone-prefix">🇮🇳 +91</span>
+                  <input type="tel" id="loginPhoneInput" placeholder="Enter 10-digit mobile number" value="9876543210" maxlength="10">
+                </div>
+              </div>
+              <button class="btn-primary" style="width:100%; margin-top:0.5rem;" onclick="requestLoginOtp()">
+                <i data-lucide="arrow-right"></i> <span id="btnGetOtpText">Get Verification Code (OTP)</span>
+              </button>
+            </div>
+
+            <!-- Step 2: OTP Input (Visible after OTP requested) -->
+            <div id="loginStepOtp" style="display:none;">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
+                <span style="font-size:0.8rem; color:var(--text-muted);">Enter 6-digit OTP sent to phone</span>
+                <button class="pin-select-btn" onclick="autoFillDemoOtp()">Autofill Demo OTP (5839)</button>
+              </div>
+
+              <div class="otp-boxes-row">
+                <input type="text" class="otp-box" id="otp-1" maxlength="1" value="5">
+                <input type="text" class="otp-box" id="otp-2" maxlength="1" value="8">
+                <input type="text" class="otp-box" id="otp-3" maxlength="1" value="3">
+                <input type="text" class="otp-box" id="otp-4" maxlength="1" value="9">
+                <input type="text" class="otp-box" id="otp-5" maxlength="1" value="2">
+                <input type="text" class="otp-box" id="otp-6" maxlength="1" value="1">
+              </div>
+
+              <button class="btn-primary" style="width:100%; margin-top:0.75rem;" onclick="verifyLoginOtp()">
+                <i data-lucide="check-circle"></i> <span id="btnVerifyAuthText">Verify OTP &amp; Start SahiRide</span>
+              </button>
+              <div style="text-align:center; margin-top:0.75rem;">
+                <button class="pin-select-btn" style="background:transparent; border:none; color:var(--text-muted);" onclick="backToPhoneStep()">Change phone number</button>
+              </div>
             </div>
           </div>
         </div>
@@ -256,16 +358,16 @@
         <div class="container" style="position:relative; z-index:2;">
           <div class="hero-badge-wrapper">
             <span class="badge-dot"></span>
-            <span class="badge-text" data-i18n="hero_badge">Maximizing Vehicle Capacity • Zero Fixed Stops</span>
+            <span class="badge-text" data-i18n="hero_badge">Maximizing Vehicle Capacity • Flat 50% Off First Ride</span>
           </div>
 
           <h1 class="hero-title">
-            Smart <span class="highlight-gold">Auto & Cab Pooling</span><br>
+            Smart <span class="highlight-gold">Auto &amp; Cab Pooling</span><br>
             With <span class="highlight-green">Homebound Return Match</span>
           </h1>
 
           <p class="hero-subtitle" data-i18n="hero_subtext">
-            Choose your exact pickup and drop point freely — just like a normal cab. Our dynamic engine clubs co-passengers heading your way for <strong>35% cheaper fares</strong>, while drivers turn empty return journeys into paid trips.
+            Choose your exact pickup and drop point freely — just like a normal cab. SahiRide's dynamic engine clubs co-passengers heading your way for <strong>35% to 50% cheaper fares</strong>, while drivers turn empty return journeys into paid trips.
           </p>
 
           <div class="hero-cta-group">
@@ -273,7 +375,7 @@
               <i data-lucide="map-pin"></i> <span data-i18n="cta_book_ride">Book a Ride / Share Auto</span>
             </button>
             <button class="btn-secondary" onclick="switchView('driver')">
-              <i data-lucide="car"></i> <span data-i18n="cta_driver_portal">Driver Portal & Route Match</span>
+              <i data-lucide="car"></i> <span data-i18n="cta_driver_portal">Driver Portal &amp; Route Match</span>
             </button>
             <button class="btn-secondary" onclick="switchView('matching')">
               <i data-lucide="cpu"></i> <span data-i18n="cta_see_algorithm">See Algorithm in Action</span>
@@ -294,13 +396,13 @@
                   <div class="state-icon-wrap"><i data-lucide="x"></i></div>
                   <div class="state-content">
                     <strong data-i18n="before_driver_title">Before: Empty Return Trip</strong>
-                    <p data-i18n="before_driver_desc">Driver completes a trip and can accept passengers heading toward the same destination corridor, reducing empty return travel.</p>
+                    <p data-i18n="before_driver_desc">Driver drops rider in distant suburb and drives 18 km back home alone. <strong>Earns ₹0</strong>, wastes ₹95 on fuel/CNG.</p>
                   </div>
                 </div>
                 <div class="state-box after">
                   <div class="state-icon-wrap"><i data-lucide="check"></i></div>
                   <div class="state-content">
-                    <strong data-i18n="after_driver_title">With RouteSetu: "Set My Route"</strong>
+                    <strong data-i18n="after_driver_title">With SahiRide: "Set My Route"</strong>
                     <p data-i18n="after_driver_desc">Driver enters home destination. System matches passengers along that corridor. <strong>Earns ₹190+ profit</strong> on the return trip!</p>
                   </div>
                 </div>
@@ -312,7 +414,7 @@
               <div class="card-tag tag-passenger">
                 <i data-lucide="users"></i> <span data-i18n="diff2_tag">Differentiator 2 • Dynamic Share Auto</span>
               </div>
-              <h3 data-i18n="diff2_title">100% Free Pickup/Drop + 35% Savings</h3>
+              <h3 data-i18n="diff2_title">100% Free Pickup/Drop + 35% to 50% Savings</h3>
               
               <div class="before-after-boxes">
                 <div class="state-box before">
@@ -325,8 +427,8 @@
                 <div class="state-box after">
                   <div class="state-icon-wrap"><i data-lucide="check"></i></div>
                   <div class="state-content">
-                    <strong data-i18n="after_pass_title">With RouteSetu: "Share & Save"</strong>
-                    <p data-i18n="after_pass_desc">Passenger picks exact pickup & drop. System clubs 2-3 riders seamlessly. <strong>Pays only ₹75</strong>, driver earns combined ₹220!</p>
+                    <strong data-i18n="after_pass_title">With SahiRide: "Share &amp; Save"</strong>
+                    <p data-i18n="after_pass_desc">Passenger picks exact pickup &amp; drop. System clubs 2-3 riders seamlessly. <strong>Pays only ₹38 (First Ride 50% Off)</strong>, driver earns ₹220!</p>
                   </div>
                 </div>
               </div>
@@ -340,7 +442,7 @@
         <div class="container">
           <div class="section-header">
             <span class="section-pill" data-i18n="calc_pill">Real-Time Financial Impact</span>
-            <h2 class="section-title" data-i18n="calc_title">Calculate Your Extra Earnings & Monthly Savings</h2>
+            <h2 class="section-title" data-i18n="calc_title">Calculate Your Extra Earnings &amp; Monthly Savings</h2>
             <p class="section-description" data-i18n="calc_desc">See exactly how much drivers gain from return routes and how much passengers save by sharing.</p>
           </div>
 
@@ -398,7 +500,7 @@
             <div class="calc-results-card">
               <span class="result-label" data-i18n="calc_est_extra_income">Estimated Extra Monthly Income</span>
               <div class="result-number" id="driverResultIncome">₹16,800</div>
-              <p class="result-subtext" data-i18n="calc_driver_subtext">Extra pure profit from monetizing empty returns & multi-passenger pooled rides.</p>
+              <p class="result-subtext" data-i18n="calc_driver_subtext">Extra pure profit from monetizing empty returns &amp; multi-passenger pooled rides.</p>
               
               <div class="result-breakdown-grid">
                 <div class="breakdown-item">
@@ -466,7 +568,7 @@
                   <strong id="passBreakdownSolo">₹145 / trip</strong>
                 </div>
                 <div class="breakdown-item">
-                  <span data-i18n="calc_shared_fare">RouteSetu Share Fare:</span>
+                  <span data-i18n="calc_shared_fare">SahiRide Share Fare:</span>
                   <strong id="passBreakdownShare" style="color:var(--brand-secondary);">₹85 / trip</strong>
                 </div>
                 <div class="breakdown-item">
@@ -488,20 +590,20 @@
         <div class="container">
           <div class="section-header">
             <span class="section-pill" data-i18n="how_pill">True Point-To-Point Flexibility</span>
-            <h2 class="section-title" data-i18n="how_title">Why RouteSetu Outperforms Traditional Apps</h2>
-            <p class="section-description" data-i18n="how_desc">Unlike fixed-route shuttles or expensive solo cabs, RouteSetu dynamically merges individual journeys on the fly.</p>
+            <h2 class="section-title" data-i18n="how_title">Why SahiRide Outperforms Traditional Apps</h2>
+            <p class="section-description" data-i18n="how_desc">Unlike fixed-route shuttles or expensive solo cabs, SahiRide dynamically merges individual journeys on the fly.</p>
           </div>
 
           <div class="features-grid">
             <div class="feature-box">
               <div class="feature-icon-wrapper"><i data-lucide="map-pin"></i></div>
-              <h4 data-i18n="feat1_title">100% Free Pickup & Drop</h4>
+              <h4 data-i18n="feat1_title">100% Free Pickup &amp; Drop</h4>
               <p data-i18n="feat1_desc">No fixed bus stops or meeting points. Set your own doorstep pickup and office drop just like a regular taxi booking.</p>
             </div>
 
             <div class="feature-box">
               <div class="feature-icon-wrapper"><i data-lucide="compass"></i></div>
-              <h4 data-i18n="feat2_title">Vector & Corridor Matching</h4>
+              <h4 data-i18n="feat2_title">Vector &amp; Corridor Matching</h4>
               <p data-i18n="feat2_desc">Algorithms ensure co-passengers are heading in the same general direction (&le; 30° deviation) with minimal detour (&lt; 5 mins).</p>
             </div>
 
@@ -513,7 +615,7 @@
 
             <div class="feature-box">
               <div class="feature-icon-wrapper"><i data-lucide="shield-check"></i></div>
-              <h4 data-i18n="feat4_title">Women-Only & Safety Shield</h4>
+              <h4 data-i18n="feat4_title">Women-Only &amp; Safety Shield</h4>
               <p data-i18n="feat4_desc">Optional Women-Only pool filter, KYC-verified drivers, real-time OTP handshakes, masked rider contact info, and 24/7 SOS dispatch.</p>
             </div>
           </div>
@@ -535,14 +637,28 @@
               <span class="badge-dot" title="Live System Online"></span>
             </div>
 
+            <!-- PROMINENT FIRST RIDE FLAT 50% OFF PROMO BANNER -->
+            <div class="first-ride-promo-card" id="firstRidePromoBanner">
+              <div class="promo-left">
+                <div class="promo-icon-box">%</div>
+                <div class="promo-texts">
+                  <strong>First Ride: Flat 50% Off!</strong>
+                  <span>Auto-applied with coupon <strong style="color:var(--brand-primary);">FIRST50</strong></span>
+                </div>
+              </div>
+              <button class="promo-badge-tag" id="btnToggleFirstRideDiscount" onclick="toggleFirstRideDiscount()">
+                50% OFF APPLIED ✓
+              </button>
+            </div>
+
             <!-- Dynamic Location Search with Live Autocomplete -->
             <div class="loc-input-wrap">
               <!-- Pickup Location Field -->
               <div class="autocomplete-container">
                 <div class="loc-field">
                   <i data-lucide="navigation"></i>
-                  <input type="text" id="passPickupInput" placeholder="Enter pickup location" value="" autocomplete="off" oninput="handleLocationInput('pickup', this.value)">
-                  <button class="gps-locate-btn" onclick="useCurrentGpsLocation()" title="Use Current GPS Location">
+                  <input type="text" id="passPickupInput" placeholder="Type pickup location (e.g. PCCOE, FC Road, Kothrud...)" value="FC Road, Shivajinagar, Pune" autocomplete="off" oninput="handleLocationInput('pickup', this.value)">
+                  <button class="gps-locate-btn" onclick="useCurrentGpsLocation()" title="Use Real GPS Geolocation">
                     <i data-lucide="crosshair" style="width:0.85rem; height:0.85rem;"></i> <span>GPS</span>
                   </button>
                   <button class="pin-select-btn" id="btnPinPickup" onclick="enableMapPinMode('pickup')">Pin</button>
@@ -554,7 +670,7 @@
               <div class="autocomplete-container">
                 <div class="loc-field drop-field">
                   <i data-lucide="map-pin"></i>
-                  <input type="text" id="passDropInput" placeholder="Enter destination" value="" autocomplete="off" oninput="handleLocationInput('drop', this.value)">
+                  <input type="text" id="passDropInput" placeholder="Type dropoff destination (e.g. PCCOE, Airport, BKC...)" value="Kothrud Stand, Pune" autocomplete="off" oninput="handleLocationInput('drop', this.value)">
                   <button class="pin-select-btn" id="btnPinDrop" onclick="enableMapPinMode('drop')">Pin</button>
                 </div>
                 <div class="autocomplete-dropdown" id="dropAutocompleteDropdown"></div>
@@ -564,8 +680,8 @@
             <!-- Number of Passengers / Seats Selector -->
             <div class="seat-counter-wrap">
               <div class="seat-counter-info">
-                <strong id="lblPassengerCount">1 Passenger</strong>
-                <span id="lblSeatCapacitySub">Choose how many people are travelling</span>
+                <strong id="lblPassengerCount">1 Passenger (1 Seat)</strong>
+                <span id="lblSeatCapacitySub">Auto Capacity: 3 Seats Max</span>
               </div>
               <div class="seat-counter-controls">
                 <button class="counter-btn" onclick="adjustPassengerCount(-1)">&minus;</button>
@@ -596,13 +712,13 @@
                 <div class="mode-left">
                   <div class="mode-icon"><i data-lucide="users"></i></div>
                   <div class="mode-details">
-                    <h4>Share &amp; Save <span class="discount-badge">Save 38%</span></h4>
+                    <h4>Share &amp; Save <span class="discount-badge" id="badgeShareDiscount">Flat 50% Off</span></h4>
                     <p>Dynamic match along your path • Max +3 min detour</p>
                   </div>
                 </div>
                 <div class="mode-price">
-                  <span class="price-strike" id="passShareStrike">₹120</span>
-                  <span class="price-main" id="passShareFare" style="color:var(--brand-secondary);">₹75</span>
+                  <span class="price-strike" id="passShareStrike">₹75</span>
+                  <span class="price-main" id="passShareFare" style="color:var(--brand-secondary);">₹38</span>
                 </div>
               </div>
 
@@ -611,12 +727,13 @@
                 <div class="mode-left">
                   <div class="mode-icon"><i data-lucide="lock"></i></div>
                   <div class="mode-details">
-                    <h4>Book Private (Solo)</h4>
+                    <h4>Book Private (Solo) <span class="discount-badge" id="badgePrivateDiscount" style="display:inline-block;">50% Off</span></h4>
                     <p>Full vehicle exclusively • Direct direct path</p>
                   </div>
                 </div>
                 <div class="mode-price">
-                  <span class="price-main" id="passPrivateFare">₹120</span>
+                  <span class="price-strike" id="passPrivateStrike" style="display:block;">₹120</span>
+                  <span class="price-main" id="passPrivateFare">₹60</span>
                 </div>
               </div>
             </div>
@@ -633,7 +750,7 @@
             </div>
 
             <button class="btn-primary" style="width:100%; margin-top:0.5rem;" onclick="requestPassengerRide()">
-              <i data-lucide="check-circle"></i> <span id="btnConfirmRideText">Confirm &amp; Match Ride (₹75)</span>
+              <i data-lucide="check-circle"></i> <span id="btnConfirmRideText">Confirm &amp; Match Ride (₹38 • Flat 50% Off)</span>
             </button>
           </div>
 
@@ -657,7 +774,7 @@
             <div class="driver-info-box">
               <div class="driver-avatar">RS</div>
               <div class="driver-meta">
-                <h4>Ramesh Shinde <i data-lucide="shield-check" class="verified-icon"></i></h4>
+                <h4>Ramesh Shinde <span class="badge-kyc-verified"><i data-lucide="shield-check" style="width:0.75rem; height:0.75rem;"></i> KYC VERIFIED</span></h4>
                 <p>Bajaj RE Auto • <strong style="color:var(--text-main);">MH 12 AB 4321</strong> • ★ 4.9 (1,240 trips)</p>
               </div>
             </div>
@@ -672,9 +789,9 @@
               <div class="co-passenger-pill">
                 <div class="co-pass-name">
                   <i data-lucide="user-check" style="width:0.9rem; color:var(--brand-secondary);"></i>
-                  <strong>Ananya S.</strong> <span style="color:var(--text-subtle); font-size:0.75rem;">★ 4.8</span>
+                  <strong>Ananya S.</strong> <span class="badge-new-user" style="font-size:0.65rem;">NEW RIDER</span>
                 </div>
-                <span style="font-size:0.75rem; color:var(--text-muted);">Drop at FC Road</span>
+                <span style="font-size:0.75rem; color:var(--text-muted);">Drop along corridor</span>
               </div>
             </div>
 
@@ -692,10 +809,10 @@
             <!-- Actions: Payment & Share Tracking & SOS -->
             <div style="display:flex; flex-direction:column; gap:0.5rem;">
               <button class="btn-secondary" style="width:100%;" onclick="openPaymentModal()">
-                <i data-lucide="credit-card"></i> <span id="btnPayModalText">View Fair Split / Pay ₹75</span>
+                <i data-lucide="credit-card"></i> <span id="btnPayModalText">View Fare Split / Pay ₹38 (50% Off)</span>
               </button>
               <button class="btn-secondary" style="width:100%; font-size:0.85rem;" onclick="openShareTripModal()">
-                <i data-lucide="share-2"></i> <span>Share Live Trip with Family</span>
+                <i data-lucide="share-2"></i> <span>Share Live Location with Family</span>
               </button>
               <button class="btn-primary" style="width:100%; background:var(--bg-surface-raised); color:var(--text-muted); border:1px solid var(--border-subtle); box-shadow:none;" onclick="cancelOrResetRide()">
                 <i data-lucide="x"></i> <span>End / Reset Ride</span>
@@ -720,8 +837,11 @@
         <div class="driver-status-group">
           <div class="driver-avatar" style="width:2.25rem; height:2.25rem; font-size:0.9rem;">RS</div>
           <div>
-            <strong style="font-size:0.95rem; display:block;">Ramesh Shinde (Auto MH-12-AB-4321)</strong>
-            <span style="font-size:0.75rem; color:var(--text-muted);">Vehicle Capacity: 3 Seats • Bajaj RE Petrol/CNG</span>
+            <strong style="font-size:0.95rem; display:block;">
+              Ramesh Shinde 
+              <span class="badge-kyc-verified" id="driverKycBadgeTop"><i data-lucide="shield-check" style="width:0.75rem; height:0.75rem;"></i> KYC APPROVED</span>
+            </strong>
+            <span style="font-size:0.75rem; color:var(--text-muted);">Vehicle Capacity: 3 Seats • Bajaj RE Petrol/CNG (MH 12 AB 4321)</span>
           </div>
           <button class="online-pill online" id="driverOnlineToggleBtn" onclick="toggleDriverOnline()">
             <span class="badge-dot"></span> <span id="driverOnlineStatusText">Online (Ready)</span>
@@ -741,9 +861,14 @@
           </button>
         </div>
 
-        <button class="btn-secondary" style="padding:0.4rem 0.8rem; font-size:0.8rem;" onclick="openKYCModal()">
-          <i data-lucide="file-badge"></i> <span>KYC Status: Verified</span>
-        </button>
+        <div style="display:flex; gap:0.5rem;">
+          <button class="btn-primary" style="padding:0.4rem 0.85rem; font-size:0.8rem;" onclick="triggerDriverRidePopup()">
+            <i data-lucide="bell-ring"></i> <span>Test Ride Alert Popup</span>
+          </button>
+          <button class="btn-secondary" style="padding:0.4rem 0.8rem; font-size:0.8rem;" onclick="openKYCModal()">
+            <i data-lucide="file-badge"></i> <span>KYC Verification</span>
+          </button>
+        </div>
       </div>
 
       <div class="portal-layout">
@@ -760,7 +885,7 @@
             <div class="autocomplete-container" style="margin-bottom:0.6rem;">
               <div class="loc-field">
                 <i data-lucide="home" style="color:var(--brand-accent);"></i>
-                <input type="text" id="driverHomeDestInput" value="Kothrud Stand, Pune" placeholder="Enter home / end destination" autocomplete="off" oninput="handleDriverDestInput(this.value)">
+                <input type="text" id="driverHomeDestInput" value="Kothrud Stand, Pune" placeholder="Type home / destination (e.g. PCCOE, Kothrud...)" autocomplete="off" oninput="handleDriverDestInput(this.value)">
               </div>
               <div class="autocomplete-dropdown" id="driverDestAutocompleteDropdown"></div>
             </div>
@@ -773,40 +898,6 @@
             </div>
           </div>
 
-          <!-- Simulated Incoming Request Offer Card (Modal / Banner) -->
-          <div id="incomingOfferCard" class="incoming-offer-card" style="display:none;">
-            <div class="offer-header">
-              <span class="offer-tag"><i data-lucide="zap"></i> Incoming Dynamic Match</span>
-              <span style="font-size:0.8rem; color:var(--brand-primary); font-weight:700;" id="offerTimer">00:15</span>
-            </div>
-            <h4 style="font-size:1.05rem; margin-bottom:0.3rem;">Extra Passenger: Priya S. (Wakad)</h4>
-            <p style="font-size:0.8rem; color:var(--text-muted);">Points directly align with your active route corridor.</p>
-
-            <div class="offer-metrics-grid">
-              <div class="metric-box">
-                <span>Added Detour</span>
-                <strong>+3.2 Mins</strong>
-              </div>
-              <div class="metric-box">
-                <span>Added Earnings</span>
-                <strong style="color:var(--brand-secondary);">+₹75.00</strong>
-              </div>
-              <div class="metric-box">
-                <span>Revised Trip Total</span>
-                <strong style="color:var(--brand-primary); font-size:1.15rem;">₹195.00</strong>
-              </div>
-            </div>
-
-            <div class="offer-actions">
-              <button class="btn-primary" style="flex:1;" onclick="acceptDriverOffer()">
-                <i data-lucide="check"></i> <span>Accept Ride (+₹75)</span>
-              </button>
-              <button class="btn-secondary" style="flex:0.6; background:rgba(239,68,68,0.15); color:var(--brand-danger); border-color:rgba(239,68,68,0.3);" onclick="declineDriverOffer()">
-                <i data-lucide="x"></i> <span>Decline</span>
-              </button>
-            </div>
-          </div>
-
           <!-- Sequenced Turn-by-Turn Passenger Manifest -->
           <div class="manifest-card">
             <div class="card-title-row">
@@ -814,35 +905,37 @@
               <span class="input-val-badge" id="driverSeatCount">Seats: 2/3 Filled</span>
             </div>
 
-            <div class="manifest-step">
-              <div class="step-num pickup">1</div>
-              <div class="step-details">
-                <strong>Pick Up: Rahul M. (OTP: 5839)</strong>
-                <p>Pickup point • <span style="color:var(--brand-secondary);">Boarded ✓</span></p>
+            <div id="driverManifestList">
+              <div class="manifest-step">
+                <div class="step-num pickup">1</div>
+                <div class="step-details">
+                  <strong>Pick Up: Rahul M. (OTP: 5839)</strong>
+                  <p>Origin Pickup Point • <span style="color:var(--brand-secondary);">Boarded ✓</span></p>
+                </div>
               </div>
-            </div>
 
-            <div class="manifest-step">
-              <div class="step-num pickup">2</div>
-              <div class="step-details">
-                <strong>Pick Up: Priya S. (OTP: 9142)</strong>
-                <p>Wakad Bridge Service Road • <span style="color:var(--brand-primary);">Next Stop (400m)</span></p>
+              <div class="manifest-step">
+                <div class="step-num pickup">2</div>
+                <div class="step-details">
+                  <strong>Pick Up: Priya S. (OTP: 9142)</strong>
+                  <p>En-route Corridor Stop • <span style="color:var(--brand-primary);">Next Stop (400m)</span></p>
+                </div>
               </div>
-            </div>
 
-            <div class="manifest-step">
-              <div class="step-num drop">3</div>
-              <div class="step-details">
-                <strong>Drop Off: Rahul M.</strong>
-                <p>Aundh D-Mart Junction • Fare: ₹75</p>
+              <div class="manifest-step">
+                <div class="step-num drop">3</div>
+                <div class="step-details">
+                  <strong>Drop Off: Rahul M.</strong>
+                  <p>Intermediate Dropoff • Fare: ₹75</p>
+                </div>
               </div>
-            </div>
 
-            <div class="manifest-step">
-              <div class="step-num drop">4</div>
-              <div class="step-details">
-                <strong>Drop Off: Priya S.</strong>
-                <p>Shivajinagar Station • Fare: ₹120</p>
+              <div class="manifest-step">
+                <div class="step-num drop">4</div>
+                <div class="step-details">
+                  <strong>Drop Off: Priya S.</strong>
+                  <p>Destination Junction • Fare: ₹120</p>
+                </div>
               </div>
             </div>
 
@@ -850,8 +943,8 @@
               <button class="btn-primary" style="flex:1;" onclick="triggerSimulatedDriverStep()">
                 <i data-lucide="navigation"></i> <span>Advance Next Stop</span>
               </button>
-              <button class="btn-secondary" onclick="simulateIncomingRequest()">
-                <i data-lucide="plus-circle"></i> <span>Test Offer</span>
+              <button class="btn-secondary" onclick="triggerDriverRidePopup()">
+                <i data-lucide="bell"></i> <span>Incoming Ride</span>
               </button>
             </div>
           </div>
@@ -860,7 +953,7 @@
           <div class="booking-card">
             <div class="card-title-row">
               <h3><i data-lucide="wallet" style="color:var(--brand-secondary);"></i> <span>Today's Earnings Breakdown</span></h3>
-              <strong style="color:var(--brand-secondary); font-size:1.1rem;">₹1,460</strong>
+              <strong style="color:var(--brand-secondary); font-size:1.1rem;" id="driverEarningsTotal">₹1,460</strong>
             </div>
 
             <div class="result-breakdown-grid">
@@ -874,7 +967,7 @@
               </div>
               <div class="breakdown-item">
                 <span>Share Pool Rides (4):</span>
-                <strong style="color:var(--brand-secondary);">₹680</strong>
+                <strong style="color:var(--brand-secondary);" id="driverPoolEarnings">₹680</strong>
               </div>
               <div class="breakdown-item">
                 <span>Deadhead Fuel Saved:</span>
@@ -900,7 +993,7 @@
           <span class="section-pill">Under The Hood</span>
           <h2 class="section-title">Dynamic Pooling &amp; Corridor Matching Engine</h2>
           <p class="section-description" style="max-width:800px; margin:0 auto 2rem;">
-            How RouteSetu evaluates incoming requests in real-time, optimizes multi-stop routes, ensures vector alignment, and fairly splits fares without fixed bus stops.
+            How SahiRide evaluates incoming requests in real-time, optimizes multi-stop routes, ensures vector alignment, and fairly splits fares without fixed bus stops.
           </p>
         </div>
 
@@ -976,10 +1069,10 @@
               <div style="background:var(--bg-surface); padding:0.75rem; border-radius:var(--radius-md); border:1px solid var(--border-subtle);">
                 <span style="font-size:0.75rem; color:var(--text-muted); font-weight:700; text-transform:uppercase;">Optimized Stop Order</span>
                 <div id="sandboxSequenceList" style="margin-top:0.5rem; font-size:0.8rem; line-height:1.6;">
-                  <div>1. 🟢 Pickup A (Hinjewadi Ph1)</div>
-                  <div>2. 🟢 Pickup B (Wakad Bridge)</div>
+                  <div>1. 🟢 Pickup A (FC Road)</div>
+                  <div>2. 🟢 Pickup B (Deccan Gymkhana)</div>
                   <div>3. 🔴 Drop A (Aundh)</div>
-                  <div>4. 🔴 Drop B (Shivajinagar)</div>
+                  <div>4. 🔴 Drop B (Kothrud)</div>
                 </div>
               </div>
 
@@ -1076,14 +1169,20 @@
               </thead>
               <tbody id="adminKYCTableBody">
                 <tr>
-                  <td><strong>Santosh Mane</strong><br><span style="font-size:0.75rem; color:var(--text-muted);">DL: MH12-2018-9321</span></td>
+                  <td>
+                    <strong>Santosh Mane</strong> <span class="badge-new-user" style="font-size:0.65rem;">NEW DRIVER</span>
+                    <br><span style="font-size:0.75rem; color:var(--text-muted);">DL: MH12-2018-9321 • Aadhaar Verified</span>
+                  </td>
                   <td>Auto (MH 12 CR 1192)</td>
                   <td>3 Seats</td>
                   <td><span class="input-val-badge" style="background:rgba(245,158,11,0.2); color:var(--brand-primary);">Pending Review</span></td>
                   <td><button class="btn-primary" style="padding:0.3rem 0.6rem; font-size:0.75rem;" onclick="approveKYC(this)">Approve</button></td>
                 </tr>
                 <tr>
-                  <td><strong>Ganesh Kadam</strong><br><span style="font-size:0.75rem; color:var(--text-muted);">DL: MH14-2020-4102</span></td>
+                  <td>
+                    <strong>Ganesh Kadam</strong> <span class="badge-new-user" style="font-size:0.65rem;">NEW DRIVER</span>
+                    <br><span style="font-size:0.75rem; color:var(--text-muted);">DL: MH14-2020-4102 • Police Clearance ✓</span>
+                  </td>
                   <td>Mini Cab (MH 14 DT 8820)</td>
                   <td>4 Seats</td>
                   <td><span class="input-val-badge" style="background:rgba(245,158,11,0.2); color:var(--brand-primary);">Pending Review</span></td>
@@ -1105,7 +1204,7 @@
                   <strong>Trip #8492 — Active Pool</strong>
                   <span style="color:var(--brand-secondary);">Normal (Route Match)</span>
                 </div>
-                <p style="font-size:0.75rem; color:var(--text-muted); margin-top:0.2rem;">All matched passengers are on board and travelling along the selected route.</p>
+                <p style="font-size:0.75rem; color:var(--text-muted); margin-top:0.2rem;">All 2 passengers on board. Safe corridor travel.</p>
               </div>
 
               <div style="padding:0.75rem; background:var(--bg-surface-raised); border-radius:var(--radius-md); border-left:3px solid var(--brand-info);">
@@ -1131,10 +1230,165 @@
   </main>
 
   <!-- =========================================================================
-       MODALS: PAYMENT (RAZORPAY/UPI SIMULATOR), KYC, SOS, SHARE TRIP
+       MODALS: INCOMING RIDE REQUEST (DRIVER POPUP), USER PROFILE, PAYMENT, KYC, SOS
        ========================================================================= -->
 
-  <!-- PAYMENT MODAL (Simulated Razorpay / UPI with Fair Split) -->
+  <!-- DRIVER INCOMING RIDE REQUEST POPUP (High Visibility Alert Modal) -->
+  <div class="modal-backdrop" id="driverRideRequestModal">
+    <div class="driver-popup-dialog">
+      <div class="ride-popup-header">
+        <div class="ride-popup-pulse-badge">
+          <i data-lucide="zap"></i> <span id="popupRideBadgeText">✨ Homebound Route Match (94% Alignment)</span>
+        </div>
+        <div class="ride-countdown-circle" id="popupCountdownText">15</div>
+        <h2 style="font-size:1.35rem; margin-bottom:0.2rem;" id="popupPassengerName">New Passenger: Priya Sharma</h2>
+        <span style="font-size:0.85rem; color:var(--brand-secondary); font-weight:700;" id="popupPassengerMeta">★ 4.9 (142 rides) • 1 Seat (Share Auto)</span>
+      </div>
+
+      <!-- Trip Path & Detour Details -->
+      <div class="ride-popup-body">
+        <div class="ride-popup-loc-row">
+          <i data-lucide="navigation" style="color:var(--brand-secondary);"></i>
+          <div>
+            <strong id="popupPickupName">PCCOE Akurdi / Wakad Bridge</strong>
+            <span id="popupPickupEta">Pickup 1.2 km away • ~3 mins detour</span>
+          </div>
+        </div>
+
+        <div class="ride-popup-loc-row">
+          <i data-lucide="map-pin" style="color:var(--brand-danger);"></i>
+          <div>
+            <strong id="popupDropName">FC Road, Shivajinagar, Pune</strong>
+            <span>Directly en route to your destination</span>
+          </div>
+        </div>
+
+        <!-- Financial Impact Box -->
+        <div class="ride-popup-metrics">
+          <div>
+            <span>Added Detour</span>
+            <strong id="popupDetourTime">+3.2 Mins</strong>
+          </div>
+          <div>
+            <span>Added Payout</span>
+            <strong style="color:var(--brand-secondary);" id="popupAddedPayout">+₹75.00</strong>
+          </div>
+          <div>
+            <span>Trip Total</span>
+            <strong style="color:var(--brand-primary); font-size:1.15rem;" id="popupTotalEarnings">₹195.00</strong>
+          </div>
+        </div>
+      </div>
+
+      <!-- Accept or Decline Action Targets -->
+      <div class="ride-popup-actions">
+        <button class="btn-accept-ride" onclick="acceptIncomingRidePopup()">
+          <i data-lucide="check-circle-2"></i> <span id="popupAcceptBtnText">ACCEPT (+₹75)</span>
+        </button>
+        <button class="btn-decline-ride" onclick="declineIncomingRidePopup()">
+          <i data-lucide="x"></i> <span>DECLINE</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- USER PROFILE & ACCOUNT DETAILS WINDOW (Change Data & Log Out) -->
+  <div class="modal-backdrop" id="profileModal">
+    <div class="modal-dialog">
+      <button class="modal-close-btn" onclick="closeModal('profileModal')"><i data-lucide="x"></i></button>
+      
+      <!-- Profile Header -->
+      <div class="profile-header-card">
+        <div class="profile-avatar-large" id="profileModalAvatar">JS</div>
+        <div class="profile-header-meta">
+          <h3 id="profileModalNameDisplay">Jayesh Sharma</h3>
+          <p id="profileModalRoleDisplay">
+            Verified SahiRide Passenger 
+            <span class="badge-new-user" id="profileNewUserBadge" style="display:none; margin-left:0.35rem;">FIRST RIDE 50% OFF</span>
+          </p>
+        </div>
+      </div>
+
+      <!-- Quick Lifetime Stats -->
+      <div class="profile-stats-row">
+        <div class="profile-stat-box">
+          <span>Trips Taken</span>
+          <strong id="profStatsTrips">1st Ride</strong>
+        </div>
+        <div class="profile-stat-box">
+          <span>First Ride Promo</span>
+          <strong style="color:var(--brand-secondary);" id="profStatsSaved">Flat 50% Off</strong>
+        </div>
+        <div class="profile-stat-box">
+          <span>Sahi Points</span>
+          <strong style="color:var(--brand-primary);" id="profStatsPoints">100 pts</strong>
+        </div>
+      </div>
+
+      <!-- Editable User Information Form -->
+      <div class="profile-form-grid">
+        <div class="input-group">
+          <label style="font-size:0.85rem; font-weight:600;">Full Name</label>
+          <div class="loc-field">
+            <i data-lucide="user"></i>
+            <input type="text" id="profInputName" value="Jayesh Sharma" placeholder="Enter your full name">
+          </div>
+        </div>
+
+        <div class="input-group">
+          <label style="font-size:0.85rem; font-weight:600;">Registered Phone Number</label>
+          <div class="loc-field">
+            <i data-lucide="phone"></i>
+            <input type="tel" id="profInputPhone" value="9876543210" placeholder="Enter mobile number">
+          </div>
+        </div>
+
+        <div class="input-group">
+          <label style="font-size:0.85rem; font-weight:600;">Email Address</label>
+          <div class="loc-field">
+            <i data-lucide="mail"></i>
+            <input type="email" id="profInputEmail" value="jayesh@example.com" placeholder="Enter email address">
+          </div>
+        </div>
+
+        <div class="input-group">
+          <label style="font-size:0.85rem; font-weight:600;">Emergency Contact (Safety SOS)</label>
+          <div class="loc-field">
+            <i data-lucide="shield-alert" style="color:var(--brand-danger);"></i>
+            <input type="text" id="profInputEmergency" value="Pooja Sharma (+91-98765-00000)" placeholder="Emergency contact name & phone">
+          </div>
+        </div>
+
+        <div class="input-group">
+          <label style="font-size:0.85rem; font-weight:600;">Account Status &amp; Welcome Promo</label>
+          <select id="profSelectUserStatus" onchange="toggleUserNewStatus(this.value)" style="background:var(--bg-surface-raised); color:var(--text-main); border:1px solid var(--border-medium); padding:0.65rem; border-radius:var(--radius-md); font-size:0.9rem;">
+            <option value="new" selected>🌱 New Member (First Ride • Flat 50% Off Active)</option>
+            <option value="regular">Regular Member (Gold Tier • 28 Rides)</option>
+          </select>
+        </div>
+
+        <div class="input-group">
+          <label style="font-size:0.85rem; font-weight:600;">Account Mode</label>
+          <select id="profSelectRole" style="background:var(--bg-surface-raised); color:var(--text-main); border:1px solid var(--border-medium); padding:0.65rem; border-radius:var(--radius-md); font-size:0.9rem;">
+            <option value="passenger" selected>Passenger (Book Pooled &amp; Private Rides)</option>
+            <option value="driver">Driver / Captain (Accept Rides &amp; Set Route)</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Action Buttons: Save & Log Out -->
+      <div class="profile-btn-row">
+        <button class="btn-primary" style="flex:1.2;" onclick="saveUserProfile()">
+          <i data-lucide="save"></i> <span>Save Changes</span>
+        </button>
+        <button class="btn-secondary" style="flex:0.8; background:rgba(239,68,68,0.15); color:var(--brand-danger); border-color:rgba(239,68,68,0.3);" onclick="confirmLogout()">
+          <i data-lucide="log-out"></i> <span>Log Out</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PAYMENT MODAL (Simulated Razorpay / UPI with Fair Split & Flat 50% Promo) -->
   <div class="modal-backdrop" id="paymentModal">
     <div class="modal-dialog">
       <button class="modal-close-btn" onclick="closeModal('paymentModal')"><i data-lucide="x"></i></button>
@@ -1156,16 +1410,20 @@
           <strong id="modalSeatsCount">1 Seat</strong>
         </div>
         <div style="display:flex; justify-content:space-between; margin-bottom:0.4rem; font-size:0.85rem;">
-          <span>Standard Solo Rate</span>
+          <span>Standard Base Fare</span>
           <span style="text-decoration:line-through; color:var(--text-muted);" id="modalSoloRate">₹120.00</span>
         </div>
         <div style="display:flex; justify-content:space-between; margin-bottom:0.4rem; font-size:0.85rem; color:var(--brand-secondary);">
           <span>Dynamic Pool Discount (38%)</span>
           <strong id="modalDiscountRate">-₹45.00</strong>
         </div>
+        <div style="display:flex; justify-content:space-between; margin-bottom:0.4rem; font-size:0.85rem; color:var(--brand-primary);" id="modalFirstRidePromoRow">
+          <span>🎉 First Ride Welcome Discount (Flat 50%)</span>
+          <strong id="modalFirstRideDiscountVal">-₹37.00</strong>
+        </div>
         <div style="display:flex; justify-content:space-between; font-size:1.1rem; font-weight:800; border-top:1px solid var(--border-subtle); padding-top:0.5rem; margin-top:0.4rem;">
           <span>Total Payable</span>
-          <span style="color:var(--brand-secondary);" id="modalPayableAmount">₹75.00</span>
+          <span style="color:var(--brand-secondary);" id="modalPayableAmount">₹38.00</span>
         </div>
       </div>
 
@@ -1180,26 +1438,50 @@
       </div>
 
       <button class="btn-primary" style="width:100%;" onclick="completePaymentSimulation()">
-        <i data-lucide="check"></i> <span id="btnPayModalActionText">Pay ₹75.00 (Instant UPI Handshake)</span>
+        <i data-lucide="check"></i> <span id="btnPayModalActionText">Pay ₹38.00 (Instant UPI Handshake)</span>
       </button>
     </div>
   </div>
 
-  <!-- DRIVER KYC REGISTRATION MODAL -->
+  <!-- DRIVER KYC REGISTRATION & STATUS MODAL -->
   <div class="modal-backdrop" id="kycModal">
     <div class="modal-dialog">
       <button class="modal-close-btn" onclick="closeModal('kycModal')"><i data-lucide="x"></i></button>
-      <h3 style="font-size:1.25rem; margin-bottom:0.4rem;"><i data-lucide="file-badge" style="color:var(--brand-primary);"></i> Driver KYC &amp; Verification</h3>
-      <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:1.25rem;">Complete your background checks to start accepting pooled and route-match rides.</p>
+      <h3 style="font-size:1.25rem; margin-bottom:0.4rem;"><i data-lucide="file-badge" style="color:var(--brand-primary);"></i> Driver KYC &amp; Verification Center</h3>
+      <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:1.25rem;">Government-mandated identity, vehicle permit, and commercial verification.</p>
+
+      <!-- KYC Step Progress -->
+      <div class="kyc-step-progress">
+        <div class="kyc-step-item completed">
+          <div class="kyc-step-circle">✓</div>
+          <span style="font-size:0.7rem;">Aadhaar</span>
+        </div>
+        <div class="kyc-step-item completed">
+          <div class="kyc-step-circle">✓</div>
+          <span style="font-size:0.7rem;">DL Check</span>
+        </div>
+        <div class="kyc-step-item completed">
+          <div class="kyc-step-circle">✓</div>
+          <span style="font-size:0.7rem;">RC Book</span>
+        </div>
+        <div class="kyc-step-item completed">
+          <div class="kyc-step-circle">✓</div>
+          <span style="font-size:0.7rem;">Police Check</span>
+        </div>
+      </div>
 
       <div class="calc-inputs" style="gap:0.9rem;">
         <div class="input-group">
           <label style="font-size:0.85rem; font-weight:600;">Driving License Number</label>
-          <div class="loc-field"><input type="text" value="MH12 2019 0088921" placeholder="DL Number"></div>
+          <div class="loc-field"><input type="text" id="kycDLInput" value="MH12 2019 0088921" placeholder="DL Number"></div>
+        </div>
+        <div class="input-group">
+          <label style="font-size:0.85rem; font-weight:600;">Aadhaar Government ID Number</label>
+          <div class="loc-field"><input type="text" id="kycAadhaarInput" value="5839 2910 4412" placeholder="12-digit Aadhaar"></div>
         </div>
         <div class="input-group">
           <label style="font-size:0.85rem; font-weight:600;">Vehicle Registration (RC)</label>
-          <div class="loc-field"><input type="text" value="MH 12 AB 4321" placeholder="RC Number"></div>
+          <div class="loc-field"><input type="text" id="kycRCInput" value="MH 12 AB 4321" placeholder="RC Number"></div>
         </div>
         <div class="input-group">
           <label style="font-size:0.85rem; font-weight:600;">Legal Seating Capacity</label>
@@ -1211,8 +1493,12 @@
         </div>
       </div>
 
+      <div style="margin-top:1rem; padding:0.75rem; background:var(--bg-surface-raised); border-radius:var(--radius-md); font-size:0.8rem; color:var(--brand-secondary);">
+        <i data-lucide="check-circle" style="width:0.9rem; height:0.9rem; vertical-align:middle;"></i> All background &amp; criminal record checks passed through Pune City Traffic Police DB.
+      </div>
+
       <button class="btn-primary" style="width:100%; margin-top:1.25rem;" onclick="submitKYC()">
-        <i data-lucide="check"></i> <span>Submit KYC Verification</span>
+        <i data-lucide="check"></i> <span>Re-Verify &amp; Update KYC</span>
       </button>
     </div>
   </div>
