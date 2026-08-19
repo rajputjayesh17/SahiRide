@@ -16,7 +16,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
 
 if __name__ == "__main__":
     with socketserver.TCPServer(("", PORT), Handler) as httpd:
-        print(f"RouteBack Server serving at http://localhost:{PORT}")
+        print(f"SahiRide Server serving at http://localhost:{PORT}")
         print("Press Ctrl+C to stop.")
         try:
             httpd.serve_forever()
