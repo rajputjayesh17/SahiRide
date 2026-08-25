@@ -1,7 +1,7 @@
 /**
  * SahiRide - Dynamic Auto & Cab Pooling & Homebound Route Match Engine
  * Sahi Ride, Sahi Price • 100% Free Doorstep Pickup & Drop
- * Google Maps-Style Live Geocoding, Driver Incoming Ride Popups, Driver KYC & Flat 50% First-Ride Promo
+ * Google Maps-Style Live Geocoding, Driver Incoming Ride Popups, Driver KYC & First 3 Rides 100% FREE Promo
  */
 
 // Global Application State
@@ -15,6 +15,7 @@ const state = {
     isLoggedIn: false,
     role: 'passenger', // 'passenger' | 'driver'
     isNewUser: true,
+    freeRidesRemaining: 3, // First 3 Rides 100% FREE
     phone: '9876543210',
     name: 'Jayesh Sharma',
     email: 'jayesh@example.com',
@@ -27,12 +28,12 @@ const state = {
     vehicle: 'auto', // 'auto' | 'cab'
     mode: 'share',   // 'share' | 'private'
     seatCount: 1,    // 1 to 3 (Auto) or 1 to 4 (Cab)
-    firstRideDiscountActive: true, // Flat 50% Off on First Ride
+    freeRidesPromoActive: true, // First 3 Rides 100% Free
     womenOnly: false,
     rideActive: false,
     otp: '5839',
-    basePerSeatFare: 38,
-    totalFare: 38,
+    basePerSeatFare: 0,
+    totalFare: 0,
     distanceKm: 8.4
   },
   driver: {
@@ -120,9 +121,9 @@ const I18N = {
     nav_driver: "Driver Cockpit",
     nav_algorithm: "Match Sandbox",
     nav_admin: "Admin Fleet",
-    hero_badge: "Maximizing Vehicle Capacity • Flat 50% Off First Ride",
-    hero_subtext: "Choose your exact pickup and drop point freely — just like a normal cab. SahiRide's dynamic engine clubs co-passengers heading your way for 35% to 50% cheaper fares, while drivers turn empty return journeys into paid trips.",
-    cta_book_ride: "Book a Ride / Share Auto",
+    hero_badge: "Maximizing Vehicle Capacity • First 3 Rides 100% FREE",
+    hero_subtext: "Choose your exact pickup and drop point freely — just like a normal cab. Enjoy your First 3 Rides completely FREE, then save 35% on every commute while drivers turn empty return trips into paid journeys.",
+    cta_book_ride: "Claim 3 Free Rides / Share Auto",
     cta_driver_portal: "Driver Portal & Route Match",
     cta_see_algorithm: "See Algorithm in Action",
     diff1_tag: "Differentiator 1 • Driver Homebound Ride",
@@ -132,11 +133,11 @@ const I18N = {
     after_driver_title: "With SahiRide: 'Set My Route'",
     after_driver_desc: "Driver enters home destination. System matches passengers along that corridor. Earns ₹190+ profit on the return trip!",
     diff2_tag: "Differentiator 2 • Dynamic Share Auto",
-    diff2_title: "100% Free Pickup/Drop + 35% to 50% Savings",
-    before_pass_title: "Before: Paying for Empty Seats",
+    diff2_title: "100% Free Pickup/Drop + First 3 Rides FREE",
+    before_pass_title: "Before: Paying Full Solo Fares",
     before_pass_desc: "Solo passenger pays full vehicle fare ₹120 for 3 seats in an auto-rickshaw even when travelling alone.",
     after_pass_title: "With SahiRide: 'Share & Save'",
-    after_pass_desc: "Passenger picks exact pickup & drop. System clubs 2-3 riders seamlessly. Pays only ₹38 (First Ride 50% Off), driver earns ₹220!",
+    after_pass_desc: "Passenger picks exact pickup & drop. First 3 Rides cost ₹0 (100% Free), driver still earns guaranteed ₹220!",
     calc_pill: "Real-Time Financial Impact",
     calc_title: "Calculate Your Extra Earnings & Monthly Savings",
     calc_desc: "See exactly how much drivers gain from return routes and how much passengers save by sharing.",
@@ -159,7 +160,7 @@ const I18N = {
     calc_pass_subtext: "Saved compared to booking full private autos/cabs for everyday travel.",
     calc_solo_fare: "Solo Private Fare:",
     calc_shared_fare: "SahiRide Share Fare:",
-    calc_discount_rate: "Discount Per Trip:",
+    calc_discount_rate: "Welcome Offer:",
     calc_annual_savings: "Annual Savings:",
     how_pill: "True Point-To-Point Flexibility",
     how_title: "Why SahiRide Outperforms Traditional Apps",
@@ -168,8 +169,8 @@ const I18N = {
     feat1_desc: "No fixed bus stops or meeting points. Set your own doorstep pickup and office drop just like a regular taxi booking.",
     feat2_title: "Vector & Corridor Matching",
     feat2_desc: "Algorithms ensure co-passengers are heading in the same general direction (≤ 30° deviation) with minimal detour (< 5 mins).",
-    feat3_title: "Fair Segment Fare Splitting",
-    feat3_desc: "You only pay for the exact distance of your trip segment with an automated 35% pool discount applied upfront.",
+    feat3_title: "First 3 Rides 100% FREE",
+    feat3_desc: "New users get 3 complimentary rides on us. Afterward, enjoy standard 35% pooled discounts with transparent per-km billing.",
     feat4_title: "Women-Only & Safety Shield",
     feat4_desc: "Optional Women-Only pool filter, KYC-verified drivers, real-time OTP handshakes, masked rider contact info, and 24/7 SOS dispatch.",
     p_book_ride_title: "Book Your Ride"
@@ -181,9 +182,9 @@ const I18N = {
     nav_driver: "चालक पोर्टल",
     nav_algorithm: "मैचिंग इंजन",
     nav_admin: "एडमिन फ्लीट",
-    hero_badge: "वाहन क्षमता का पूरा उपयोग • पहली राइड पर फ्लैट 50% छूट",
-    hero_subtext: "अपनी पसंद का सटीक पिकअप और ड्रॉप चुनें। SahiRide का डायनामिक इंजन आपकी दिशा में जाने वाले यात्रियों को मिलाता है जिससे आपको 35% से 50% कम किराया मिलता है और ड्राइवर खाली वापसी को कमाई में बदलते हैं।",
-    cta_book_ride: "सवारी बुक करें / शेयर ऑटो",
+    hero_badge: "वाहन क्षमता का पूरा उपयोग • पहली ३ राइड्स बिल्कुल मुफ्त",
+    hero_subtext: "अपनी पसंद का सटीक पिकअप और ड्रॉप चुनें। पहली ३ राइड्स बिल्कुल मुफ्त पाएं, फिर हर यात्रा पर ३५% बचाएं और ड्राइवर खाली वापसी को कमाई में बदलें।",
+    cta_book_ride: "३ फ्री राइड्स पाएं / शेयर ऑटो",
     cta_driver_portal: "चालक पोर्टल और रूट मैच",
     cta_see_algorithm: "एल्गोरिदम देखें",
     diff1_tag: "विशेषता 1 • ड्राइवर घर वापसी राइड",
@@ -193,11 +194,11 @@ const I18N = {
     after_driver_title: "SahiRide के साथ: 'रूट सेट करें'",
     after_driver_desc: "ड्राइवर घर का गंतव्य डालता है। सिस्टम उसी रास्ते के यात्रियों को जोड़ता है। वापसी में ₹190+ का शुद्ध मुनाफा!",
     diff2_tag: "विशेषता 2 • डायनामिक शेयर ऑटो",
-    diff2_title: "100% मनचाहा पिकअप/ड्रॉप + 35% से 50% बचत",
+    diff2_title: "100% मनचाहा पिकअप/ड्रॉप + पहली ३ राइड्स फ्री",
     before_pass_title: "पहले: खाली सीटों का पूरा किराया",
     before_pass_desc: "अकेला यात्री पूरे ऑटो की 3 सीटों का ₹120 किराया अकेले भरता है।",
     after_pass_title: "SahiRide के साथ: 'शेयर और बचत'",
-    after_pass_desc: "यात्री अपना सटीक पिकअप/ड्रॉप चुनता है। 2-3 सवारियां जुड़ती हैं। पहली राइड पर सिर्फ ₹38, ड्राइवर कमाता है ₹220!",
+    after_pass_desc: "यात्री अपना सटीक पिकअप/ड्रॉप चुनता है। पहली ३ राइड्स ₹0 (मुफ्त), ड्राइवर कमाता है पूरा ₹220!",
     calc_pill: "वास्तविक आर्थिक लाभ",
     calc_title: "अपनी अतिरिक्त कमाई और मासिक बचत की गणना करें",
     calc_desc: "देखें कि ड्राइवर खाली वापसी से कितना कमाते हैं और यात्री शेयरिंग से कितना बचाते हैं।",
@@ -220,7 +221,7 @@ const I18N = {
     calc_pass_subtext: "रोजाना प्राइवेट ऑटो/कैब बुक करने की तुलना में बचत।",
     calc_solo_fare: "प्राइवेट किराया:",
     calc_shared_fare: "SahiRide शेयर किराया:",
-    calc_discount_rate: "प्रति ट्रिप छूट:",
+    calc_discount_rate: "स्वागत ऑफर:",
     calc_annual_savings: "सालाना बचत:",
     how_pill: "सच्ची पॉइंट-टू-पॉइंट सुविधा",
     how_title: "SahiRide पारंपरिक ऐप्स से बेहतर क्यों है",
@@ -229,8 +230,8 @@ const I18N = {
     feat1_desc: "कोई फिक्स्ड बस स्टॉप नहीं। सामान्य टैक्सी की तरह अपने घर के दरवाजे से पिकअप और गंतव्य पर ड्रॉप सेट करें।",
     feat2_title: "वेक्टर और कॉरिडोर मैचिंग",
     feat2_desc: "एल्गोरिदम सुनिश्चित करता है कि सह-यात्री एक ही दिशा में जा रहे हों और न्यूनतम चक्कर लगे।",
-    feat3_title: "सटीक दूरी के अनुसार किराया",
-    feat3_desc: "आप केवल अपनी व्यक्तिगत दूरी का भुगतान करते हैं जिस पर 35% पूल छूट तुरंत लागू होती है।",
+    feat3_title: "पहली ३ राइड्स बिल्कुल मुफ्त",
+    feat3_desc: "नए उपयोगकर्ताओं को पहली ३ राइड्स मुफ्त मिलती हैं। उसके बाद पारदर्शी दूरी-आधारित ३५% छूट मिलती है।",
     feat4_title: "महिला-विशेष और सुरक्षा शील्ड",
     feat4_desc: "महिला-विशेष पूल विकल्प, सत्यापित चालक, रीयल-टाइम ओटीपी, सुरक्षित प्रोफाइल और 24/7 एसओएस।",
     p_book_ride_title: "सवारी बुक करें"
@@ -242,9 +243,9 @@ const I18N = {
     nav_driver: "चालक पोर्टल",
     nav_algorithm: "मॅचिंग इंजिन",
     nav_admin: "ॲडमिन फ्लीट",
-    hero_badge: "वाहनांच्या क्षमतेचा पूर्ण वापर • पहिल्या राईडवर ५०% सूट",
-    hero_subtext: "तुमचा स्वतःचा पिकअप आणि ड्रॉप पॉईंट निवडा. SahiRide चे डायनॅमिक इंजिन एकाच दिशेने जाणाऱ्या प्रवाशांना एकत्र आणते, ज्यामुळे ३५% ते ५०% स्वस्त भाडे मिळते आणि चालकांना परतीच्या प्रवासात कमाई होते.",
-    cta_book_ride: "राईड बुक करा / शेअर ऑटो",
+    hero_badge: "वाहनांच्या क्षमतेचा पूर्ण वापर • पहिल्या ३ राईड्स मोफत",
+    hero_subtext: "तुमचा स्वतःचा पिकअप आणि ड्रॉप पॉईंट निवडा. पहिल्या ३ राईड्स मोफत मिळवा, नंतर ३५% बचत करा आणि चालकांना परतीच्या प्रवासात भरपूर कमाई होते.",
+    cta_book_ride: "३ मोफत राईड्स मिळवा / शेअर ऑटो",
     cta_driver_portal: "चालक पोर्टल आणि रूट मॅच",
     cta_see_algorithm: "अल्गोरिदम पहा",
     diff1_tag: "वैशिष्ट्य १ • चालक घरवापसी राईड",
@@ -254,11 +255,11 @@ const I18N = {
     after_driver_title: "SahiRide सोबत: 'रूट सेट करा'",
     after_driver_desc: "चालक घराचे ठिकाण टाकतो. सिस्टम त्याच मार्गावरील प्रवासी जोडते. परतीच्या प्रवासात ₹१९०+ चा निव्वळ नफा!",
     diff2_tag: "वैशिष्ट्य २ • डायनॅमिक शेअर ऑटो",
-    diff2_title: "१००% स्वतःचा पिकअप/ड्रॉप + ३५% ते ५०% बचत",
+    diff2_title: "१००% स्वतःचा पिकअप/ड्रॉप + पहिल्या ३ राईड्स मोफत",
     before_pass_title: "आधी: रिकाम्या सीट्सचे पूर्ण भाडे",
     before_pass_desc: "एकटा प्रवासी ऑटोच्या ३ जागांचे पूर्ण ₹१२० भाडे एकटाच भरतो.",
     after_pass_title: "SahiRide सोबत: 'शेअर आणि सेव्ह'",
-    after_pass_desc: "प्रवासी स्वतःचा पिकअप/ड्रॉप निवडतो. पहिल्या राईडवर फक्त ₹३८, चालक कमावतो ₹२२०!",
+    after_pass_desc: "प्रवासी स्वतःचा पिकअप/ड्रॉप निवडतो. पहिल्या ३ राईड्स ₹० (मोफत), चालक कमावतो ₹२२०!",
     calc_pill: "थेट आर्थिक फायदा",
     calc_title: "तुमची अतिरिक्त कमाई आणि मासिक बचत मोजा",
     calc_desc: "चालक परतीच्या प्रवासातून किती जास्त कमवू शकतात आणि प्रवासी शेअरिंगने किती वाचवू शकतात ते पहा.",
@@ -281,7 +282,7 @@ const I18N = {
     calc_pass_subtext: "दररोज खाजगी ऑटो/कॅब बुक करण्याच्या तुलनेत बचत.",
     calc_solo_fare: "खाजगी भाडे:",
     calc_shared_fare: "SahiRide शेअर भाडे:",
-    calc_discount_rate: "प्रत्येक ट्रिपवर सूट:",
+    calc_discount_rate: "स्वागत ऑफर:",
     calc_annual_savings: "वार्षिक बचत:",
     how_pill: "पॉईंट-टू-पॉईंट लवचिकता",
     how_title: "SahiRide पारंपारिक ॲप्सपेक्षा श्रेष्ठ का आहे",
@@ -290,8 +291,8 @@ const I18N = {
     feat1_desc: "कोणतेही फिक्स बस स्टॉप नाहीत. सामान्य टॅक्सीप्रमाणे घराच्या दारातून पिकअप आणि इच्छित स्थळी ड्रॉप मिळवा.",
     feat2_title: "व्हेक्टर आणि कॉरिडॉर मॅचिंग",
     feat2_desc: "अल्गोरिदम खात्री करतो की सहप्रवासी एकाच दिशेने जात आहेत आणि कमीतकमी वळण लागेल.",
-    feat3_title: "योग्य अंतरावर आधारित भाडे",
-    feat3_desc: "तुम्ही फक्त तुमच्या अंतराचे भाडे देता, ज्यावर ३५% पूल सूट आधीच लागू केली जाते.",
+    feat3_title: "पहिल्या ३ राईड्स १००% मोफत",
+    feat3_desc: "नवीन वापरकर्त्यांना ३ मोफत राईड्स मिळतात. त्यानंतर ३५% पूल सूट मिळते.",
     feat4_title: "महिला-विशेष आणि सुरक्षा शील्ड",
     feat4_desc: "महिलांसाठी स्वतंत्र पूल पर्याय, पडताळणी झालेले चालक, ओटीपी सुरक्षा आणि २४/७ एसओएस सुविधा.",
     p_book_ride_title: "राईड बुक करा"
@@ -428,7 +429,7 @@ function setAuthMode(mode) {
     if (title) title.textContent = 'Create New SahiRide Account';
     if (sub) sub.textContent = 'Join India’s smartest pooling & route match platform';
     if (btnText) btnText.textContent = 'Verify Mobile & Submit Registration';
-    if (btnVerify) btnVerify.textContent = 'Verify OTP & Activate New Account';
+    if (btnVerify) btnVerify.textContent = 'Verify OTP & Claim 3 Free Rides';
   } else {
     if (title) title.textContent = 'Welcome to SahiRide';
     if (sub) sub.textContent = 'Sign in to book pooled rides or accept homebound passengers';
@@ -494,7 +495,8 @@ function verifyLoginOtp() {
 
   if (state.authMode === 'signup') {
     state.userSession.isNewUser = true;
-    state.passenger.firstRideDiscountActive = true;
+    state.userSession.freeRidesRemaining = 3;
+    state.passenger.freeRidesPromoActive = true;
     if (state.userSession.role === 'driver') {
       const name = document.getElementById('signupDriverName').value.trim();
       state.userSession.name = name || 'Ramesh Shinde';
@@ -510,7 +512,7 @@ function verifyLoginOtp() {
   updateAuthUI();
 
   if (state.userSession.isNewUser && state.userSession.role === 'passenger') {
-    alert(`🎉 Welcome to SahiRide, ${state.userSession.name}!\nFlat 50% Discount coupon (FIRST50) has been applied to your first ride!`);
+    alert(`🎉 Welcome to SahiRide, ${state.userSession.name}!\nYou have unlocked your FIRST 3 RIDES 100% FREE! (Coupon: FREE3RIDES)`);
   } else if (state.userSession.isNewUser && state.userSession.role === 'driver') {
     alert(`🎉 Welcome Captain ${state.userSession.name}!\nDriver KYC Verification Approved ✓. You can now accept homebound & pooled rides!`);
   } else {
@@ -568,7 +570,7 @@ function openProfileModal() {
 
 function toggleUserNewStatus(status) {
   state.userSession.isNewUser = (status === 'new');
-  state.passenger.firstRideDiscountActive = (status === 'new');
+  state.passenger.freeRidesPromoActive = (status === 'new');
   
   const badge = document.getElementById('profileNewUserBadge');
   const headerBadge = document.getElementById('headerNewUserBadge');
@@ -580,7 +582,7 @@ function toggleUserNewStatus(status) {
 
   if (state.userSession.isNewUser) {
     if (tripsStat) tripsStat.textContent = '1st Ride';
-    if (savedStat) savedStat.textContent = 'Flat 50% Off';
+    if (savedStat) savedStat.textContent = `${state.userSession.freeRidesRemaining} / 3 FREE`;
   } else {
     if (tripsStat) tripsStat.textContent = '28 Rides';
     if (savedStat) savedStat.textContent = '₹3,420 Saved';
@@ -608,12 +610,12 @@ function saveUserProfile() {
   state.userSession.emergency = emergency;
   state.userSession.role = role;
   state.userSession.isNewUser = (status === 'new');
-  state.passenger.firstRideDiscountActive = (status === 'new');
+  state.passenger.freeRidesPromoActive = (status === 'new');
 
   updateAuthUI();
   recalcPassengerFares();
   closeModal('profileModal');
-  alert('Your profile details and welcome promo have been updated!');
+  alert('Your profile details and free ride pass have been updated!');
 
   if (role === 'driver' && state.currentView === 'passenger') {
     switchView('driver');
@@ -644,7 +646,7 @@ function updateAuthUI() {
     const shortName = state.userSession.name.split(' ')[0];
     if (label) label.textContent = `${shortName} (${state.userSession.role === 'driver' ? 'Driver' : 'Passenger'})`;
     if (dot) dot.style.background = 'var(--brand-secondary)';
-    if (headerBadge) headerBadge.style.display = state.passenger.firstRideDiscountActive ? 'inline-flex' : 'none';
+    if (headerBadge) headerBadge.style.display = (state.passenger.freeRidesPromoActive && state.userSession.freeRidesRemaining > 0) ? 'inline-flex' : 'none';
   } else {
     if (label) label.textContent = 'Login / Sign Up';
     if (dot) dot.style.background = 'var(--brand-primary)';
@@ -784,14 +786,14 @@ function acceptIncomingRidePopup() {
         <div class="step-num drop">3</div>
         <div class="step-details">
           <strong>Drop Off: Rahul M.</strong>
-          <p>Intermediate Dropoff • Fare: ₹75</p>
+          <p>Intermediate Dropoff • Payout: ₹75 (SahiRide Subsidized)</p>
         </div>
       </div>
       <div class="manifest-step">
         <div class="step-num drop">4</div>
         <div class="step-details">
           <strong>Drop Off: ${currentPendingRide.name}</strong>
-          <p>${currentPendingRide.drop.name} • Fare: ₹${currentPendingRide.addedPayout}</p>
+          <p>${currentPendingRide.drop.name} • Payout: ₹${currentPendingRide.addedPayout}</p>
         </div>
       </div>
     `;
@@ -808,7 +810,7 @@ function acceptIncomingRidePopup() {
   if (poolEarnings) poolEarnings.textContent = `₹${state.driver.todayEarnings.pool}`;
 
   renderDriverCockpitRoute();
-  alert(`✓ Ride Accepted!\nAdded ${currentPendingRide.name} to route. Next stop: ${currentPendingRide.pickup.name}.`);
+  alert(`✓ Ride Accepted!\nAdded ${currentPendingRide.name} to route. Next stop: ${currentPendingRide.pickup.name}. Guaranteed driver earnings: +₹${currentPendingRide.addedPayout}.`);
   initIcons();
 }
 
@@ -818,27 +820,27 @@ function declineIncomingRidePopup() {
 }
 
 // -------------------------------------------------------------
-// 8. FIRST RIDE 50% FLAT DISCOUNT TOGGLE
+// 8. FIRST 3 RIDES 100% FREE PROMO CONTROLLER
 // -------------------------------------------------------------
-function toggleFirstRideDiscount() {
-  state.passenger.firstRideDiscountActive = !state.passenger.firstRideDiscountActive;
+function toggleFreeRidesPromo() {
+  state.passenger.freeRidesPromoActive = !state.passenger.freeRidesPromoActive;
   const btn = document.getElementById('btnToggleFirstRideDiscount');
   const banner = document.getElementById('firstRidePromoBanner');
 
-  if (state.passenger.firstRideDiscountActive) {
+  if (state.passenger.freeRidesPromoActive && state.userSession.freeRidesRemaining > 0) {
     if (btn) {
-      btn.textContent = '50% OFF APPLIED ✓';
+      btn.textContent = 'FREE RIDE (₹0) ✓';
       btn.style.background = 'var(--brand-secondary)';
     }
     if (banner) banner.style.opacity = '1';
-    alert('🎉 Flat 50% First Ride Discount (Code: FIRST50) is ACTIVE!');
+    alert(`🎉 First 3 Rides FREE Offer (Code: FREE3RIDES) is ACTIVE!\nRemaining Free Rides: ${state.userSession.freeRidesRemaining} of 3.`);
   } else {
     if (btn) {
-      btn.textContent = 'APPLY 50% OFF';
+      btn.textContent = 'APPLY FREE RIDE';
       btn.style.background = 'var(--brand-primary)';
     }
     if (banner) banner.style.opacity = '0.7';
-    alert('First Ride 50% Discount removed. Standard fare applied.');
+    alert('Free Ride promo paused. Standard dynamic pooling fare applied.');
   }
 
   recalcPassengerFares();
@@ -1082,7 +1084,7 @@ async function useCurrentGpsLocation() {
 }
 
 // -------------------------------------------------------------
-// 12. PASSENGER MAP & FARE CALCULATION (WITH FLAT 50% FIRST RIDE)
+// 12. PASSENGER MAP & FARE CALCULATION (WITH FIRST 3 RIDES 100% FREE)
 // -------------------------------------------------------------
 function initPassengerMap() {
   if (passengerMap) {
@@ -1167,17 +1169,17 @@ function recalcPassengerFares() {
   const standardSoloFare = Math.round(base + state.passenger.distanceKm * rate);
   const standardSharePerSeat = Math.round(standardSoloFare * 0.62); // 38% pool discount
 
-  const is50Off = state.passenger.firstRideDiscountActive;
+  const isFreeRide = state.passenger.freeRidesPromoActive && state.userSession.freeRidesRemaining > 0;
   
-  let finalSoloFare = is50Off ? Math.round(standardSoloFare * 0.5) : standardSoloFare;
-  let finalSharePerSeat = is50Off ? Math.round(standardSharePerSeat * 0.5) : standardSharePerSeat;
-
   const seats = state.passenger.seatCount;
-  const totalShareFare = finalSharePerSeat * seats;
-  const totalPrivateFare = finalSoloFare;
+  const standardTotalShare = standardSharePerSeat * seats;
+  const standardTotalPrivate = standardSoloFare;
 
-  state.passenger.basePerSeatFare = finalSharePerSeat;
-  state.passenger.totalFare = state.passenger.mode === 'share' ? totalShareFare : totalPrivateFare;
+  let totalFare = isFreeRide ? 0 : (state.passenger.mode === 'share' ? standardTotalShare : standardTotalPrivate);
+  let perSeatFare = isFreeRide ? 0 : standardSharePerSeat;
+
+  state.passenger.basePerSeatFare = perSeatFare;
+  state.passenger.totalFare = totalFare;
 
   // Update UI pricing elements
   const passPrivateFare = document.getElementById('passPrivateFare');
@@ -1186,26 +1188,54 @@ function recalcPassengerFares() {
   const passShareStrike = document.getElementById('passShareStrike');
   const badgeShareDiscount = document.getElementById('badgeShareDiscount');
   const badgePrivateDiscount = document.getElementById('badgePrivateDiscount');
+  const remainingLabel = document.getElementById('lblPromoFreeRidesRemaining');
 
-  if (passPrivateFare) passPrivateFare.textContent = `₹${totalPrivateFare}`;
-  if (passPrivateStrike) {
-    passPrivateStrike.textContent = `₹${standardSoloFare}`;
-    passPrivateStrike.style.display = is50Off ? 'block' : 'none';
+  if (remainingLabel) {
+    remainingLabel.textContent = `Active: ${state.userSession.freeRidesRemaining} of 3 Free Rides Remaining (Coupon: FREE3RIDES)`;
   }
-  if (badgePrivateDiscount) badgePrivateDiscount.style.display = is50Off ? 'inline-block' : 'none';
 
-  if (passShareFare) passShareFare.textContent = `₹${totalShareFare}`;
-  if (passShareStrike) {
-    passShareStrike.textContent = `₹${standardSharePerSeat * seats}`;
-    passShareStrike.style.display = 'block';
-  }
-  if (badgeShareDiscount) {
-    badgeShareDiscount.textContent = is50Off ? 'Flat 50% Off' : 'Save 38%';
+  if (isFreeRide) {
+    if (passPrivateFare) passPrivateFare.textContent = `FREE (₹0)`;
+    if (passPrivateStrike) {
+      passPrivateStrike.textContent = `₹${standardSoloFare}`;
+      passPrivateStrike.style.display = 'block';
+    }
+    if (badgePrivateDiscount) {
+      badgePrivateDiscount.textContent = '100% FREE';
+      badgePrivateDiscount.style.display = 'inline-block';
+    }
+
+    if (passShareFare) passShareFare.textContent = `FREE (₹0)`;
+    if (passShareStrike) {
+      passShareStrike.textContent = `₹${standardTotalShare}`;
+      passShareStrike.style.display = 'block';
+    }
+    if (badgeShareDiscount) {
+      badgeShareDiscount.textContent = '100% FREE';
+    }
+  } else {
+    if (passPrivateFare) passPrivateFare.textContent = `₹${standardSoloFare}`;
+    if (passPrivateStrike) passPrivateStrike.style.display = 'none';
+    if (badgePrivateDiscount) badgePrivateDiscount.style.display = 'none';
+
+    if (passShareFare) passShareFare.textContent = `₹${standardTotalShare}`;
+    if (passShareStrike) {
+      passShareStrike.textContent = `₹${standardSoloFare * seats}`;
+      passShareStrike.style.display = 'block';
+    }
+    if (badgeShareDiscount) {
+      badgeShareDiscount.textContent = 'Save 38%';
+    }
   }
 
   const btnText = document.getElementById('btnConfirmRideText');
   if (btnText) {
-    btnText.textContent = `Confirm & ${state.passenger.mode === 'share' ? `Match Share Ride (${seats} Seat${seats > 1 ? 's' : ''})` : 'Book Private'} (₹${state.passenger.totalFare}${is50Off ? ' • Flat 50% Off' : ''})`;
+    if (isFreeRide) {
+      const freeRideNum = 4 - state.userSession.freeRidesRemaining;
+      btnText.textContent = `Confirm & Start Free Ride (₹0.00 • Free ${freeRideNum} of 3)`;
+    } else {
+      btnText.textContent = `Confirm & ${state.passenger.mode === 'share' ? `Match Share Ride (${seats} Seat${seats > 1 ? 's' : ''})` : 'Book Private'} (₹${state.passenger.totalFare})`;
+    }
   }
 
   // Payment Modal updates
@@ -1220,20 +1250,26 @@ function recalcPassengerFares() {
 
   const promoRow = document.getElementById('modalFirstRidePromoRow');
   const promoVal = document.getElementById('modalFirstRideDiscountVal');
-  if (promoRow) promoRow.style.display = is50Off ? 'flex' : 'none';
+  if (promoRow) promoRow.style.display = isFreeRide ? 'flex' : 'none';
   if (promoVal) {
-    const promoAmt = (state.passenger.mode === 'share' ? standardSharePerSeat * seats : standardSoloFare) - state.passenger.totalFare;
-    promoVal.textContent = `-₹${promoAmt}.00`;
+    const freeDiscount = (state.passenger.mode === 'share' ? standardTotalShare : standardSoloFare);
+    promoVal.textContent = `-₹${freeDiscount}.00 (100% OFF)`;
   }
 
   const modalPayable = document.getElementById('modalPayableAmount');
-  if (modalPayable) modalPayable.textContent = `₹${state.passenger.totalFare}.00`;
+  if (modalPayable) {
+    modalPayable.textContent = isFreeRide ? '₹0.00 (FREE RIDE)' : `₹${state.passenger.totalFare}.00`;
+  }
   
   const btnPayModal = document.getElementById('btnPayModalActionText');
-  if (btnPayModal) btnPayModal.textContent = `Pay ₹${state.passenger.totalFare}.00 (Instant UPI Handshake)`;
+  if (btnPayModal) {
+    btnPayModal.textContent = isFreeRide ? 'Confirm Booking (₹0.00 - 100% FREE)' : `Pay ₹${state.passenger.totalFare}.00 (Instant UPI Handshake)`;
+  }
 
   const btnPayModalText = document.getElementById('btnPayModalText');
-  if (btnPayModalText) btnPayModalText.textContent = `View Fare Split / Pay ₹${state.passenger.totalFare}${is50Off ? ' (50% Off)' : ''}`;
+  if (btnPayModalText) {
+    btnPayModalText.textContent = isFreeRide ? 'View Receipt (₹0.00 Free Ride)' : `View Fare Split / Pay ₹${state.passenger.totalFare}`;
+  }
 }
 
 function renderPassengerRoute() {
@@ -1297,6 +1333,12 @@ function requestPassengerRide() {
   state.passenger.otp = otp;
   state.passenger.rideActive = true;
 
+  if (state.passenger.freeRidesPromoActive && state.userSession.freeRidesRemaining > 0) {
+    const usedRideNum = 4 - state.userSession.freeRidesRemaining;
+    state.userSession.freeRidesRemaining--;
+    alert(`🎉 Free Ride ${usedRideNum} of 3 Confirmed!\nYou have ${state.userSession.freeRidesRemaining} Free Rides remaining.`);
+  }
+
   const coLabel = document.getElementById('coPassengersCountLabel');
   if (coLabel) {
     coLabel.textContent = `Matched Co-Passengers (${state.passenger.seatCount}/3 Seats)`;
@@ -1320,6 +1362,7 @@ function cancelOrResetRide() {
   state.passenger.rideActive = false;
   document.getElementById('passBookingPanel').style.display = 'block';
   document.getElementById('passTrackingPanel').style.display = 'none';
+  recalcPassengerFares();
   renderPassengerRoute();
 }
 
@@ -1695,7 +1738,7 @@ function openShareTripModal() {
 
 function completePaymentSimulation() {
   closeModal('paymentModal');
-  alert(`Payment of ₹${state.passenger.totalFare}.00 successful via UPI on SahiRide! Flat 50% First Ride Discount applied.`);
+  alert(`Payment Confirmed! Digital zero-balance pass applied. SahiRide subsidized the full trip for driver Ramesh Shinde.`);
 }
 
 function submitKYC() {

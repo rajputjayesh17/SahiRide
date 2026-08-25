@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SahiRide | Dynamic Auto &amp; Cab Pooling &amp; Homebound Route-Match</title>
-  <meta name="description" content="SahiRide maximizes vehicle capacity with dynamic point-to-point auto/cab pooling and homebound route matching. Free pickup & drop, 35% cheaper fares, and higher driver earnings.">
+  <meta name="description" content="SahiRide maximizes vehicle capacity with dynamic point-to-point auto/cab pooling and homebound route matching. Free pickup & drop, First 3 Rides FREE, and higher driver earnings.">
 
   <!-- Google Fonts: Plus Jakarta Sans & Space Grotesk -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -69,7 +69,7 @@
         <button class="user-profile-btn" id="userProfileBtn" onclick="openProfileModal()">
           <span class="user-avatar-dot" id="userStatusDot"></span>
           <span id="userProfileLabel">Jayesh (Passenger)</span>
-          <span class="badge-new-user" id="headerNewUserBadge" style="display:none;">50% OFF</span>
+          <span class="badge-new-user" id="headerNewUserBadge" style="display:none;">3 FREE RIDES</span>
           <i data-lucide="user" style="width:0.85rem; height:0.85rem; margin-left:0.2rem;"></i>
         </button>
 
@@ -134,18 +134,18 @@
           <!-- Carousel Slide 1 -->
           <div class="onboarding-slide-content" id="slide-1">
             <div class="slide-graphic-box">
-              <i data-lucide="users"></i>
+              <i data-lucide="gift" style="color:var(--brand-secondary);"></i>
             </div>
-            <h2 class="slide-title">Smart Dynamic Pooling</h2>
-            <div class="slide-subtitle">Doorstep Pickup &amp; Drop • 50% Off First Ride</div>
+            <h2 class="slide-title">First 3 Rides 100% FREE!</h2>
+            <div class="slide-subtitle">Doorstep Pickup &amp; Drop • ₹0 for Your First 3 Rides</div>
             <p class="slide-description">
-              Set your exact doorstep pickup and drop location freely — <strong>no fixed bus stops or rigid shuttle corridors</strong>. SahiRide's dynamic engine clubs co-passengers heading your way in real time.
+              Experience the power of dynamic pooling. Set your exact doorstep pickup and drop location freely — <strong>no fixed bus stops</strong>. Enjoy your <strong>first 3 rides completely free</strong>!
             </p>
           </div>
 
           <!-- Carousel Slide 2 -->
           <div class="onboarding-slide-content" id="slide-2" style="display:none;">
-            <div class="slide-graphic-box" style="color:var(--brand-secondary);">
+            <div class="slide-graphic-box" style="color:var(--brand-primary);">
               <i data-lucide="compass"></i>
             </div>
             <h2 class="slide-title">"Set My Route" for Drivers</h2>
@@ -222,11 +222,11 @@
           <div id="authFormContainer">
             <!-- NEW PASSENGER EXTRA DETAILS -->
             <div id="signupPassengerFields" style="display:none; margin-bottom:1rem;">
-              <div style="background:rgba(16,185,129,0.15); border:1px solid var(--brand-secondary); border-radius:var(--radius-md); padding:0.65rem 0.85rem; margin-bottom:0.85rem; display:flex; align-items:center; gap:0.5rem;">
-                <i data-lucide="gift" style="color:var(--brand-secondary);"></i>
-                <div style="font-size:0.8rem;">
-                  <strong>First Ride Flat 50% Discount Applied!</strong>
-                  <div style="color:var(--text-muted);">Coupon code <span style="color:var(--brand-secondary); font-weight:800;">FIRST50</span> activated automatically for your first ride!</div>
+              <div style="background:rgba(16,185,129,0.18); border:1px solid var(--brand-secondary); border-radius:var(--radius-md); padding:0.75rem 0.85rem; margin-bottom:0.85rem; display:flex; align-items:center; gap:0.6rem;">
+                <i data-lucide="gift" style="color:var(--brand-secondary); width:1.5rem; height:1.5rem; flex-shrink:0;"></i>
+                <div style="font-size:0.82rem;">
+                  <strong style="color:var(--brand-secondary);">🎉 Welcome Offer: First 3 Rides 100% FREE!</strong>
+                  <div style="color:var(--text-muted);">Coupon code <strong style="color:var(--text-main);">FREE3RIDES</strong> applied automatically upon signup!</div>
                 </div>
               </div>
 
@@ -336,7 +336,7 @@
               </div>
 
               <button class="btn-primary" style="width:100%; margin-top:0.75rem;" onclick="verifyLoginOtp()">
-                <i data-lucide="check-circle"></i> <span id="btnVerifyAuthText">Verify OTP &amp; Start SahiRide</span>
+                <i data-lucide="check-circle"></i> <span id="btnVerifyAuthText">Verify OTP &amp; Claim 3 Free Rides</span>
               </button>
               <div style="text-align:center; margin-top:0.75rem;">
                 <button class="pin-select-btn" style="background:transparent; border:none; color:var(--text-muted);" onclick="backToPhoneStep()">Change phone number</button>
@@ -358,7 +358,7 @@
         <div class="container" style="position:relative; z-index:2;">
           <div class="hero-badge-wrapper">
             <span class="badge-dot"></span>
-            <span class="badge-text" data-i18n="hero_badge">Maximizing Vehicle Capacity • Flat 50% Off First Ride</span>
+            <span class="badge-text" data-i18n="hero_badge">Maximizing Vehicle Capacity • First 3 Rides 100% FREE</span>
           </div>
 
           <h1 class="hero-title">
@@ -367,12 +367,12 @@
           </h1>
 
           <p class="hero-subtitle" data-i18n="hero_subtext">
-            Choose your exact pickup and drop point freely — just like a normal cab. SahiRide's dynamic engine clubs co-passengers heading your way for <strong>35% to 50% cheaper fares</strong>, while drivers turn empty return journeys into paid trips.
+            Choose your exact pickup and drop point freely — just like a normal cab. Enjoy your <strong>First 3 Rides completely FREE</strong>, then save 35% on every commute while drivers turn empty return trips into paid journeys.
           </p>
 
           <div class="hero-cta-group">
             <button class="btn-primary" onclick="switchView('passenger')">
-              <i data-lucide="map-pin"></i> <span data-i18n="cta_book_ride">Book a Ride / Share Auto</span>
+              <i data-lucide="gift"></i> <span data-i18n="cta_book_ride">Claim 3 Free Rides / Share Auto</span>
             </button>
             <button class="btn-secondary" onclick="switchView('driver')">
               <i data-lucide="car"></i> <span data-i18n="cta_driver_portal">Driver Portal &amp; Route Match</span>
@@ -414,13 +414,13 @@
               <div class="card-tag tag-passenger">
                 <i data-lucide="users"></i> <span data-i18n="diff2_tag">Differentiator 2 • Dynamic Share Auto</span>
               </div>
-              <h3 data-i18n="diff2_title">100% Free Pickup/Drop + 35% to 50% Savings</h3>
+              <h3 data-i18n="diff2_title">100% Free Pickup/Drop + First 3 Rides FREE</h3>
               
               <div class="before-after-boxes">
                 <div class="state-box before">
                   <div class="state-icon-wrap"><i data-lucide="x"></i></div>
                   <div class="state-content">
-                    <strong data-i18n="before_pass_title">Before: Paying for Empty Seats</strong>
+                    <strong data-i18n="before_pass_title">Before: Paying Full Solo Fares</strong>
                     <p data-i18n="before_pass_desc">Solo passenger pays full vehicle fare ₹120 for 3 seats in an auto-rickshaw even when travelling alone.</p>
                   </div>
                 </div>
@@ -428,7 +428,7 @@
                   <div class="state-icon-wrap"><i data-lucide="check"></i></div>
                   <div class="state-content">
                     <strong data-i18n="after_pass_title">With SahiRide: "Share &amp; Save"</strong>
-                    <p data-i18n="after_pass_desc">Passenger picks exact pickup &amp; drop. System clubs 2-3 riders seamlessly. <strong>Pays only ₹38 (First Ride 50% Off)</strong>, driver earns ₹220!</p>
+                    <p data-i18n="after_pass_desc">Passenger picks exact pickup &amp; drop. <strong>First 3 Rides cost ₹0 (100% Free)</strong>, driver still earns guaranteed ₹220!</p>
                   </div>
                 </div>
               </div>
@@ -572,8 +572,8 @@
                   <strong id="passBreakdownShare" style="color:var(--brand-secondary);">₹85 / trip</strong>
                 </div>
                 <div class="breakdown-item">
-                  <span data-i18n="calc_discount_rate">Discount Per Trip:</span>
-                  <strong style="color:var(--brand-primary);">38.5% Off</strong>
+                  <span data-i18n="calc_discount_rate">Welcome Offer:</span>
+                  <strong style="color:var(--brand-secondary);">3 Rides FREE</strong>
                 </div>
                 <div class="breakdown-item">
                   <span data-i18n="calc_annual_savings">Annual Savings:</span>
@@ -608,9 +608,9 @@
             </div>
 
             <div class="feature-box">
-              <div class="feature-icon-wrapper"><i data-lucide="pie-chart"></i></div>
-              <h4 data-i18n="feat3_title">Fair Segment Fare Splitting</h4>
-              <p data-i18n="feat3_desc">You only pay for the exact distance of your trip segment with an automated 35% pool discount applied upfront.</p>
+              <div class="feature-icon-wrapper"><i data-lucide="gift"></i></div>
+              <h4 data-i18n="feat3_title">First 3 Rides 100% FREE</h4>
+              <p data-i18n="feat3_desc">New users get 3 complimentary rides on us. Afterward, enjoy standard 35% pooled discounts with transparent per-km billing.</p>
             </div>
 
             <div class="feature-box">
@@ -637,17 +637,17 @@
               <span class="badge-dot" title="Live System Online"></span>
             </div>
 
-            <!-- PROMINENT FIRST RIDE FLAT 50% OFF PROMO BANNER -->
+            <!-- PROMINENT FIRST 3 RIDES 100% FREE PROMO BANNER -->
             <div class="first-ride-promo-card" id="firstRidePromoBanner">
               <div class="promo-left">
-                <div class="promo-icon-box">%</div>
+                <div class="promo-icon-box">🎁</div>
                 <div class="promo-texts">
-                  <strong>First Ride: Flat 50% Off!</strong>
-                  <span>Auto-applied with coupon <strong style="color:var(--brand-primary);">FIRST50</strong></span>
+                  <strong>First 3 Rides: 100% FREE!</strong>
+                  <span id="lblPromoFreeRidesRemaining">Active: 3 of 3 Free Rides Remaining (Coupon: FREE3RIDES)</span>
                 </div>
               </div>
-              <button class="promo-badge-tag" id="btnToggleFirstRideDiscount" onclick="toggleFirstRideDiscount()">
-                50% OFF APPLIED ✓
+              <button class="promo-badge-tag" id="btnToggleFirstRideDiscount" onclick="toggleFreeRidesPromo()">
+                FREE RIDE (₹0) ✓
               </button>
             </div>
 
@@ -712,13 +712,13 @@
                 <div class="mode-left">
                   <div class="mode-icon"><i data-lucide="users"></i></div>
                   <div class="mode-details">
-                    <h4>Share &amp; Save <span class="discount-badge" id="badgeShareDiscount">Flat 50% Off</span></h4>
+                    <h4>Share &amp; Save <span class="discount-badge" id="badgeShareDiscount">100% FREE</span></h4>
                     <p>Dynamic match along your path • Max +3 min detour</p>
                   </div>
                 </div>
                 <div class="mode-price">
                   <span class="price-strike" id="passShareStrike">₹75</span>
-                  <span class="price-main" id="passShareFare" style="color:var(--brand-secondary);">₹38</span>
+                  <span class="price-main" id="passShareFare" style="color:var(--brand-secondary); font-size:1.3rem;">FREE (₹0)</span>
                 </div>
               </div>
 
@@ -727,13 +727,13 @@
                 <div class="mode-left">
                   <div class="mode-icon"><i data-lucide="lock"></i></div>
                   <div class="mode-details">
-                    <h4>Book Private (Solo) <span class="discount-badge" id="badgePrivateDiscount" style="display:inline-block;">50% Off</span></h4>
+                    <h4>Book Private (Solo) <span class="discount-badge" id="badgePrivateDiscount" style="display:inline-block;">100% FREE</span></h4>
                     <p>Full vehicle exclusively • Direct direct path</p>
                   </div>
                 </div>
                 <div class="mode-price">
                   <span class="price-strike" id="passPrivateStrike" style="display:block;">₹120</span>
-                  <span class="price-main" id="passPrivateFare">₹60</span>
+                  <span class="price-main" id="passPrivateFare" style="color:var(--brand-secondary); font-size:1.3rem;">FREE (₹0)</span>
                 </div>
               </div>
             </div>
@@ -750,7 +750,7 @@
             </div>
 
             <button class="btn-primary" style="width:100%; margin-top:0.5rem;" onclick="requestPassengerRide()">
-              <i data-lucide="check-circle"></i> <span id="btnConfirmRideText">Confirm &amp; Match Ride (₹38 • Flat 50% Off)</span>
+              <i data-lucide="gift"></i> <span id="btnConfirmRideText">Confirm &amp; Start Free Ride (₹0.00 • Free 1 of 3)</span>
             </button>
           </div>
 
@@ -809,7 +809,7 @@
             <!-- Actions: Payment & Share Tracking & SOS -->
             <div style="display:flex; flex-direction:column; gap:0.5rem;">
               <button class="btn-secondary" style="width:100%;" onclick="openPaymentModal()">
-                <i data-lucide="credit-card"></i> <span id="btnPayModalText">View Fare Split / Pay ₹38 (50% Off)</span>
+                <i data-lucide="credit-card"></i> <span id="btnPayModalText">View Receipt (₹0.00 Free Ride)</span>
               </button>
               <button class="btn-secondary" style="width:100%; font-size:0.85rem;" onclick="openShareTripModal()">
                 <i data-lucide="share-2"></i> <span>Share Live Location with Family</span>
@@ -926,7 +926,7 @@
                 <div class="step-num drop">3</div>
                 <div class="step-details">
                   <strong>Drop Off: Rahul M.</strong>
-                  <p>Intermediate Dropoff • Fare: ₹75</p>
+                  <p>Intermediate Dropoff • Payout: ₹75 (SahiRide Subsidized)</p>
                 </div>
               </div>
 
@@ -934,7 +934,7 @@
                 <div class="step-num drop">4</div>
                 <div class="step-details">
                   <strong>Drop Off: Priya S.</strong>
-                  <p>Destination Junction • Fare: ₹120</p>
+                  <p>Destination Junction • Payout: ₹120</p>
                 </div>
               </div>
             </div>
@@ -1019,8 +1019,8 @@
 
           <div class="pillar-card">
             <div class="pillar-num">04</div>
-            <h4>Fair Segment Pricing</h4>
-            <p>Each passenger pays based on their individual traveled segment: \(Fare_i = (Base + d_i \times Rate) \times (1 - \text{Discount})\), ensuring complete fairness.</p>
+            <h4>Fair Segment Pricing &amp; Promos</h4>
+            <p>Each passenger pays based on individual traveled segment with upfront pool discounts, while the platform sponsors free trial onboarding rides for new riders.</p>
           </div>
         </div>
 
@@ -1304,7 +1304,7 @@
           <h3 id="profileModalNameDisplay">Jayesh Sharma</h3>
           <p id="profileModalRoleDisplay">
             Verified SahiRide Passenger 
-            <span class="badge-new-user" id="profileNewUserBadge" style="display:none; margin-left:0.35rem;">FIRST RIDE 50% OFF</span>
+            <span class="badge-new-user" id="profileNewUserBadge" style="display:none; margin-left:0.35rem;">3 FREE RIDES ACTIVE</span>
           </p>
         </div>
       </div>
@@ -1316,8 +1316,8 @@
           <strong id="profStatsTrips">1st Ride</strong>
         </div>
         <div class="profile-stat-box">
-          <span>First Ride Promo</span>
-          <strong style="color:var(--brand-secondary);" id="profStatsSaved">Flat 50% Off</strong>
+          <span>Free Rides Left</span>
+          <strong style="color:var(--brand-secondary);" id="profStatsSaved">3 / 3 FREE</strong>
         </div>
         <div class="profile-stat-box">
           <span>Sahi Points</span>
@@ -1362,7 +1362,7 @@
         <div class="input-group">
           <label style="font-size:0.85rem; font-weight:600;">Account Status &amp; Welcome Promo</label>
           <select id="profSelectUserStatus" onchange="toggleUserNewStatus(this.value)" style="background:var(--bg-surface-raised); color:var(--text-main); border:1px solid var(--border-medium); padding:0.65rem; border-radius:var(--radius-md); font-size:0.9rem;">
-            <option value="new" selected>🌱 New Member (First Ride • Flat 50% Off Active)</option>
+            <option value="new" selected>🌱 New Member (First 3 Rides 100% FREE Active)</option>
             <option value="regular">Regular Member (Gold Tier • 28 Rides)</option>
           </select>
         </div>
@@ -1388,13 +1388,13 @@
     </div>
   </div>
 
-  <!-- PAYMENT MODAL (Simulated Razorpay / UPI with Fair Split & Flat 50% Promo) -->
+  <!-- PAYMENT MODAL (Simulated Razorpay / UPI with Fair Split & First 3 Rides FREE) -->
   <div class="modal-backdrop" id="paymentModal">
     <div class="modal-dialog">
       <button class="modal-close-btn" onclick="closeModal('paymentModal')"><i data-lucide="x"></i></button>
       <div style="text-align:center; margin-bottom:1.25rem;">
         <div style="width:3.5rem; height:3.5rem; border-radius:50%; background:var(--brand-secondary-light); color:var(--brand-secondary); display:inline-flex; align-items:center; justify-content:center; margin-bottom:0.5rem;">
-          <i data-lucide="check-circle" style="width:2rem; height:2rem;"></i>
+          <i data-lucide="gift" style="width:2rem; height:2rem;"></i>
         </div>
         <h3 style="font-size:1.3rem;">Simulated Razorpay &amp; UPI</h3>
         <p style="font-size:0.85rem; color:var(--text-muted);">Transparent per-passenger segment pricing</p>
@@ -1410,35 +1410,35 @@
           <strong id="modalSeatsCount">1 Seat</strong>
         </div>
         <div style="display:flex; justify-content:space-between; margin-bottom:0.4rem; font-size:0.85rem;">
-          <span>Standard Base Fare</span>
+          <span>Standard Fare</span>
           <span style="text-decoration:line-through; color:var(--text-muted);" id="modalSoloRate">₹120.00</span>
         </div>
         <div style="display:flex; justify-content:space-between; margin-bottom:0.4rem; font-size:0.85rem; color:var(--brand-secondary);">
           <span>Dynamic Pool Discount (38%)</span>
           <strong id="modalDiscountRate">-₹45.00</strong>
         </div>
-        <div style="display:flex; justify-content:space-between; margin-bottom:0.4rem; font-size:0.85rem; color:var(--brand-primary);" id="modalFirstRidePromoRow">
-          <span>🎉 First Ride Welcome Discount (Flat 50%)</span>
-          <strong id="modalFirstRideDiscountVal">-₹37.00</strong>
+        <div style="display:flex; justify-content:space-between; margin-bottom:0.4rem; font-size:0.85rem; color:var(--brand-secondary);" id="modalFirstRidePromoRow">
+          <span>🎁 Welcome Offer: First 3 Rides 100% FREE</span>
+          <strong id="modalFirstRideDiscountVal">-₹75.00 (100% OFF)</strong>
         </div>
         <div style="display:flex; justify-content:space-between; font-size:1.1rem; font-weight:800; border-top:1px solid var(--border-subtle); padding-top:0.5rem; margin-top:0.4rem;">
           <span>Total Payable</span>
-          <span style="color:var(--brand-secondary);" id="modalPayableAmount">₹38.00</span>
+          <span style="color:var(--brand-secondary);" id="modalPayableAmount">₹0.00 (FREE)</span>
         </div>
       </div>
 
       <!-- Payment Method Selection -->
       <div style="display:flex; gap:0.5rem; margin-bottom:1rem;">
         <button class="veh-btn active" style="flex:1; font-size:0.8rem;">
-          <i data-lucide="smartphone"></i> <span>UPI (GPay / PhonePe)</span>
+          <i data-lucide="gift"></i> <span>SahiRide Free Ride Pass</span>
         </button>
         <button class="veh-btn" style="flex:1; font-size:0.8rem;">
-          <i data-lucide="credit-card"></i> <span>Card / NetBanking</span>
+          <i data-lucide="smartphone"></i> <span>UPI (GPay / PhonePe)</span>
         </button>
       </div>
 
       <button class="btn-primary" style="width:100%;" onclick="completePaymentSimulation()">
-        <i data-lucide="check"></i> <span id="btnPayModalActionText">Pay ₹38.00 (Instant UPI Handshake)</span>
+        <i data-lucide="check"></i> <span id="btnPayModalActionText">Confirm Booking (₹0.00 - 100% FREE)</span>
       </button>
     </div>
   </div>
