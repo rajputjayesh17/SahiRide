@@ -538,7 +538,7 @@ img {
   border: 1px solid var(--brand-accent);
   border-radius: var(--radius-md);
   padding: 0.75rem 1rem;
-  margin-bottom: 1rem;
+  margin-bottom: 0.85rem;
   display: flex;
   flex-direction: column;
   gap: 0.45rem;
@@ -606,6 +606,32 @@ img {
   color: #000;
   border-color: var(--brand-primary);
   box-shadow: 0 0 8px rgba(245, 158, 11, 0.5);
+}
+
+/* Dynamic Live Booking Reminder Nudge Box */
+.milestone-booking-reminder-box {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.65rem 0.85rem;
+  background: rgba(99, 102, 241, 0.12);
+  border: 1px dashed var(--brand-accent);
+  border-radius: var(--radius-md);
+  margin-bottom: 0.75rem;
+  font-size: 0.8rem;
+  animation: subtlePulse 3s infinite;
+}
+
+@keyframes subtlePulse {
+  0%, 100% { background: rgba(99, 102, 241, 0.1); }
+  50% { background: rgba(245, 158, 11, 0.15); border-color: var(--brand-primary); }
+}
+
+.milestone-booking-reminder-box i {
+  color: var(--brand-accent);
+  width: 1.25rem;
+  height: 1.25rem;
+  flex-shrink: 0;
 }
 
 /* -------------------------------------------------------------

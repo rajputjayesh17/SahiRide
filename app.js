@@ -11,6 +11,7 @@ const state = {
   currentLang: 'en',
   currentTheme: 'dark',
   currentSlide: 1,
+  totalSlides: 4, // 4 Onboarding Slides
   authMode: 'login', // 'login' (existing) | 'signup' (new user)
   userSession: {
     isLoggedIn: false,
@@ -376,11 +377,11 @@ function initIcons() {
 }
 
 // -------------------------------------------------------------
-// 4. ONBOARDING CAROUSEL ENGINE (SLIDES FIRST BEFORE LOGIN)
+// 4. ONBOARDING CAROUSEL ENGINE (4 SLIDES INCLUDING 5% 5TH RIDE)
 // -------------------------------------------------------------
 function goToSlide(slideNum) {
   state.currentSlide = slideNum;
-  for (let i = 1; i <= 3; i++) {
+  for (let i = 1; i <= state.totalSlides; i++) {
     const slide = document.getElementById(`slide-${i}`);
     if (slide) slide.style.display = i === slideNum ? 'flex' : 'none';
   }
@@ -391,18 +392,18 @@ function goToSlide(slideNum) {
   });
 
   const badge = document.getElementById('slideBadgeText');
-  if (badge) badge.textContent = `Feature ${slideNum} of 3`;
+  if (badge) badge.textContent = `Feature ${slideNum} of ${state.totalSlides}`;
 
   const nextBtn = document.getElementById('onboardingNextBtn');
   if (nextBtn) {
-    nextBtn.innerHTML = slideNum === 3 ? '<span>Get Started &rarr; Login</span>' : '<span>Next &rarr;</span>';
+    nextBtn.innerHTML = slideNum === state.totalSlides ? '<span>Get Started &rarr; Login</span>' : '<span>Next &rarr;</span>';
   }
 
   initIcons();
 }
 
 function nextSlide() {
-  if (state.currentSlide < 3) {
+  if (state.currentSlide < state.totalSlides) {
     goToSlide(state.currentSlide + 1);
   } else {
     skipOnboarding();
@@ -892,6 +893,7 @@ function updateLoyaltyMilestoneUI() {
   const lblStatus = document.getElementById('lblMilestoneStatusTag');
   const lblTitle = document.getElementById('lblLoyaltyMilestoneTitle');
   const profMilestone = document.getElementById('profStatsMilestone');
+  const bookingReminder = document.getElementById('lblBookingReminderText');
 
   if (isMilestone) {
     if (lblProgress) lblProgress.textContent = `🎉 Current: Ride #${rides} • 5% LOYALTY DISCOUNT ACTIVE!`;
@@ -901,6 +903,9 @@ function updateLoyaltyMilestoneUI() {
     }
     if (lblTitle) lblTitle.textContent = '🎖️ 5th Ride Milestone: 5% OFF Applied!';
     if (profMilestone) profMilestone.textContent = '5% OFF Active!';
+    if (bookingReminder) {
+      bookingReminder.innerHTML = `🎉 <strong>Milestone Active:</strong> You're saving an extra <strong>5% OFF</strong> on this 5th ride!`;
+    }
   } else {
     if (lblProgress) lblProgress.textContent = `Current: Ride #${rides} • ${remaining} ride${remaining > 1 ? 's' : ''} to 5% OFF milestone`;
     if (lblStatus) {
@@ -909,6 +914,13 @@ function updateLoyaltyMilestoneUI() {
     }
     if (lblTitle) lblTitle.textContent = 'Every 5th Ride: 5% OFF!';
     if (profMilestone) profMilestone.textContent = `${remaining} to 5% OFF`;
+    if (bookingReminder) {
+      if (remaining === 1) {
+        bookingReminder.innerHTML = `🔥 <strong>Almost there!</strong> Travel <strong>1 more ride</strong> to unlock your <strong>5% OFF Milestone Ride</strong>!`;
+      } else {
+        bookingReminder.innerHTML = `💡 <strong>Commuter Perk:</strong> Travel <strong>${remaining} more rides</strong> to unlock <strong>5% OFF</strong> on your 5th ride!`;
+      }
+    }
   }
 
   const btnSim = document.getElementById('btnSimulateFifthRide');

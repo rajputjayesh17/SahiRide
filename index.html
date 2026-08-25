@@ -121,30 +121,42 @@
 
   <main>
     <!-- =======================================================================
-         VIEW 0: INTRODUCTORY ONBOARDING SLIDES (COMES FIRST LIKE REAL APPS)
+         VIEW 0: INTRODUCTORY ONBOARDING SLIDES (4 SLIDES INCLUDING 5% 5TH RIDE)
          ======================================================================= -->
     <section id="view-onboarding" class="app-view active">
       <div class="onboarding-screen">
         <div class="onboarding-card">
           <div class="onboarding-top-bar">
-            <span class="onboarding-badge" id="slideBadgeText">Feature 1 of 3</span>
+            <span class="onboarding-badge" id="slideBadgeText">Feature 1 of 4</span>
             <button class="onboarding-skip-btn" onclick="skipOnboarding()">Skip &rarr; Login</button>
           </div>
 
-          <!-- Carousel Slide 1 -->
+          <!-- Carousel Slide 1: 3 Free Rides -->
           <div class="onboarding-slide-content" id="slide-1">
             <div class="slide-graphic-box">
               <i data-lucide="gift" style="color:var(--brand-secondary);"></i>
             </div>
             <h2 class="slide-title">First 3 Rides 100% FREE!</h2>
-            <div class="slide-subtitle">Plus Every 5th Ride 5% OFF Forever</div>
+            <div class="slide-subtitle">Doorstep Pickup &amp; Drop • ₹0 for Your First 3 Rides</div>
             <p class="slide-description">
-              Experience the power of dynamic pooling. Set your exact doorstep pickup and drop location freely — <strong>no fixed bus stops</strong>. Enjoy your <strong>first 3 rides free</strong> and <strong>5% OFF on every 5th ride</strong>!
+              Experience the power of dynamic pooling. Set your exact doorstep pickup and drop location freely — <strong>no fixed bus stops</strong>. Enjoy your <strong>first 3 rides completely free</strong>!
             </p>
           </div>
 
-          <!-- Carousel Slide 2 -->
+          <!-- Carousel Slide 2: Every 5th Ride 5% OFF Milestone -->
           <div class="onboarding-slide-content" id="slide-2" style="display:none;">
+            <div class="slide-graphic-box" style="color:var(--brand-accent);">
+              <i data-lucide="award"></i>
+            </div>
+            <h2 class="slide-title">Every 5th Ride: 5% OFF!</h2>
+            <div class="slide-subtitle">Recurring Loyalty Milestone Rewards</div>
+            <p class="slide-description">
+              Ride more, save more! Every 5th ride you complete on SahiRide automatically unlocks a <strong>flat 5% discount</strong> forever. Real daily savings for your regular college &amp; office commutes.
+            </p>
+          </div>
+
+          <!-- Carousel Slide 3: Set My Route for Drivers -->
+          <div class="onboarding-slide-content" id="slide-3" style="display:none;">
             <div class="slide-graphic-box" style="color:var(--brand-primary);">
               <i data-lucide="compass"></i>
             </div>
@@ -155,9 +167,9 @@
             </p>
           </div>
 
-          <!-- Carousel Slide 3 -->
-          <div class="onboarding-slide-content" id="slide-3" style="display:none;">
-            <div class="slide-graphic-box" style="color:var(--brand-accent);">
+          <!-- Carousel Slide 4: Safety & Fair Pricing -->
+          <div class="onboarding-slide-content" id="slide-4" style="display:none;">
+            <div class="slide-graphic-box" style="color:var(--brand-secondary);">
               <i data-lucide="shield-check"></i>
             </div>
             <h2 class="slide-title">Safety &amp; Fair Pricing</h2>
@@ -167,11 +179,12 @@
             </p>
           </div>
 
-          <!-- Slide Dots Indicator -->
+          <!-- Slide Dots Indicator (4 Dots) -->
           <div class="onboarding-dots">
             <span class="dot active" onclick="goToSlide(1)"></span>
             <span class="dot" onclick="goToSlide(2)"></span>
             <span class="dot" onclick="goToSlide(3)"></span>
+            <span class="dot" onclick="goToSlide(4)"></span>
           </div>
 
           <!-- Navigation Action -->
@@ -734,7 +747,7 @@
             </div>
 
             <!-- Ride Mode Selection (SHARE & SAVE vs BOOK PRIVATE) -->
-            <div class="input-group" style="margin-bottom:1rem;">
+            <div class="input-group" style="margin-bottom:0.75rem;">
               <label style="font-size:0.8rem; font-weight:700; color:var(--text-muted); text-transform:uppercase;">Choose Mode</label>
               
               <!-- Option A: Share & Save -->
@@ -779,7 +792,15 @@
               </label>
             </div>
 
-            <button class="btn-primary" style="width:100%; margin-top:0.5rem;" onclick="requestPassengerRide()">
+            <!-- MILESTONE REMINDER NUDGE BOX (REMIND USER WHILE BOOKING) -->
+            <div class="milestone-booking-reminder-box" id="milestoneBookingReminderBox">
+              <i data-lucide="sparkles"></i>
+              <div style="flex:1;">
+                <span id="lblBookingReminderText">💡 <strong>Commuter Perk:</strong> Travel <strong>4 more rides</strong> to unlock <strong>5% OFF</strong> on your 5th ride!</span>
+              </div>
+            </div>
+
+            <button class="btn-primary" style="width:100%; margin-top:0.35rem;" onclick="requestPassengerRide()">
               <i data-lucide="gift"></i> <span id="btnConfirmRideText">Confirm &amp; Start Free Ride (₹0.00 • Free 1 of 3)</span>
             </button>
           </div>
