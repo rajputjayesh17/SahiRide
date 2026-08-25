@@ -473,7 +473,7 @@ img {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 1rem;
+  margin-bottom: 0.75rem;
   animation: pulse-border 2.5s infinite;
   box-shadow: 0 4px 18px rgba(16, 185, 129, 0.2);
 }
@@ -528,6 +528,84 @@ img {
 
 .promo-badge-tag:hover {
   transform: scale(1.04);
+}
+
+/* -------------------------------------------------------------
+   EVERY 5TH RIDE 5% OFF LOYALTY CARD & PROGRESS
+   ------------------------------------------------------------- */
+.loyalty-milestone-card {
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.18), rgba(245, 158, 11, 0.15));
+  border: 1px solid var(--brand-accent);
+  border-radius: var(--radius-md);
+  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.loyalty-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.loyalty-header-left {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--brand-accent);
+}
+
+.loyalty-progress-track {
+  width: 100%;
+  height: 6px;
+  background: var(--bg-surface-raised);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.loyalty-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--brand-accent), var(--brand-primary));
+  border-radius: 3px;
+  transition: width 0.4s ease;
+}
+
+.loyalty-dots-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 0.2rem;
+}
+
+.loyalty-step-dot {
+  width: 1.35rem;
+  height: 1.35rem;
+  border-radius: 50%;
+  background: var(--bg-surface-raised);
+  border: 1px solid var(--border-medium);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.68rem;
+  font-weight: 800;
+  color: var(--text-muted);
+}
+
+.loyalty-step-dot.active {
+  background: var(--brand-accent);
+  color: #fff;
+  border-color: var(--brand-accent);
+}
+
+.loyalty-step-dot.milestone {
+  background: var(--brand-primary);
+  color: #000;
+  border-color: var(--brand-primary);
+  box-shadow: 0 0 8px rgba(245, 158, 11, 0.5);
 }
 
 /* -------------------------------------------------------------
@@ -1990,6 +2068,10 @@ img {
   border-radius: var(--radius-full);
   background: var(--brand-secondary);
   color: #fff;
+}
+
+.discount-badge.loyalty-badge {
+  background: var(--brand-accent);
 }
 
 .mode-details p {

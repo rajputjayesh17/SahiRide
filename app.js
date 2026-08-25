@@ -1,7 +1,8 @@
 /**
  * SahiRide - Dynamic Auto & Cab Pooling & Homebound Route Match Engine
  * Sahi Ride, Sahi Price • 100% Free Doorstep Pickup & Drop
- * Google Maps-Style Live Geocoding, Driver Incoming Ride Popups, Driver KYC & First 3 Rides 100% FREE Promo
+ * Google Maps-Style Live Geocoding, Driver Incoming Ride Popups, Driver KYC,
+ * First 3 Rides 100% FREE & Every 5th Ride 5% OFF Loyalty Milestone
  */
 
 // Global Application State
@@ -15,6 +16,7 @@ const state = {
     isLoggedIn: false,
     role: 'passenger', // 'passenger' | 'driver'
     isNewUser: true,
+    totalRidesTaken: 1, // Tracks completed rides to trigger every 5th ride 5% OFF
     freeRidesRemaining: 3, // First 3 Rides 100% FREE
     phone: '9876543210',
     name: 'Jayesh Sharma',
@@ -121,8 +123,8 @@ const I18N = {
     nav_driver: "Driver Cockpit",
     nav_algorithm: "Match Sandbox",
     nav_admin: "Admin Fleet",
-    hero_badge: "Maximizing Vehicle Capacity • First 3 Rides 100% FREE",
-    hero_subtext: "Choose your exact pickup and drop point freely — just like a normal cab. Enjoy your First 3 Rides completely FREE, then save 35% on every commute while drivers turn empty return trips into paid journeys.",
+    hero_badge: "Maximizing Vehicle Capacity • First 3 Rides 100% FREE • Every 5th Ride 5% OFF",
+    hero_subtext: "Choose your exact pickup and drop point freely — just like a normal cab. Enjoy your First 3 Rides completely FREE, get 5% OFF on every 5th ride, and save 35% on every daily commute.",
     cta_book_ride: "Claim 3 Free Rides / Share Auto",
     cta_driver_portal: "Driver Portal & Route Match",
     cta_see_algorithm: "See Algorithm in Action",
@@ -133,11 +135,11 @@ const I18N = {
     after_driver_title: "With SahiRide: 'Set My Route'",
     after_driver_desc: "Driver enters home destination. System matches passengers along that corridor. Earns ₹190+ profit on the return trip!",
     diff2_tag: "Differentiator 2 • Dynamic Share Auto",
-    diff2_title: "100% Free Pickup/Drop + First 3 Rides FREE",
+    diff2_title: "100% Free Pickup/Drop + 3 Free Rides & 5% Milestone",
     before_pass_title: "Before: Paying Full Solo Fares",
     before_pass_desc: "Solo passenger pays full vehicle fare ₹120 for 3 seats in an auto-rickshaw even when travelling alone.",
     after_pass_title: "With SahiRide: 'Share & Save'",
-    after_pass_desc: "Passenger picks exact pickup & drop. First 3 Rides cost ₹0 (100% Free), driver still earns guaranteed ₹220!",
+    after_pass_desc: "Passenger picks exact pickup & drop. First 3 Rides cost ₹0 (100% Free) + 5% OFF every 5th ride, driver still earns ₹220!",
     calc_pill: "Real-Time Financial Impact",
     calc_title: "Calculate Your Extra Earnings & Monthly Savings",
     calc_desc: "See exactly how much drivers gain from return routes and how much passengers save by sharing.",
@@ -160,7 +162,7 @@ const I18N = {
     calc_pass_subtext: "Saved compared to booking full private autos/cabs for everyday travel.",
     calc_solo_fare: "Solo Private Fare:",
     calc_shared_fare: "SahiRide Share Fare:",
-    calc_discount_rate: "Welcome Offer:",
+    calc_discount_rate: "Milestone Reward:",
     calc_annual_savings: "Annual Savings:",
     how_pill: "True Point-To-Point Flexibility",
     how_title: "Why SahiRide Outperforms Traditional Apps",
@@ -169,8 +171,8 @@ const I18N = {
     feat1_desc: "No fixed bus stops or meeting points. Set your own doorstep pickup and office drop just like a regular taxi booking.",
     feat2_title: "Vector & Corridor Matching",
     feat2_desc: "Algorithms ensure co-passengers are heading in the same general direction (≤ 30° deviation) with minimal detour (< 5 mins).",
-    feat3_title: "First 3 Rides 100% FREE",
-    feat3_desc: "New users get 3 complimentary rides on us. Afterward, enjoy standard 35% pooled discounts with transparent per-km billing.",
+    feat3_title: "First 3 Rides FREE & 5th Ride 5% OFF",
+    feat3_desc: "New users get 3 complimentary rides on us, plus an automatic 5% loyalty discount on every 5th ride forever.",
     feat4_title: "Women-Only & Safety Shield",
     feat4_desc: "Optional Women-Only pool filter, KYC-verified drivers, real-time OTP handshakes, masked rider contact info, and 24/7 SOS dispatch.",
     p_book_ride_title: "Book Your Ride"
@@ -182,8 +184,8 @@ const I18N = {
     nav_driver: "चालक पोर्टल",
     nav_algorithm: "मैचिंग इंजन",
     nav_admin: "एडमिन फ्लीट",
-    hero_badge: "वाहन क्षमता का पूरा उपयोग • पहली ३ राइड्स बिल्कुल मुफ्त",
-    hero_subtext: "अपनी पसंद का सटीक पिकअप और ड्रॉप चुनें। पहली ३ राइड्स बिल्कुल मुफ्त पाएं, फिर हर यात्रा पर ३५% बचाएं और ड्राइवर खाली वापसी को कमाई में बदलें।",
+    hero_badge: "वाहन क्षमता का पूरा उपयोग • पहली ३ राइड्स मुफ्त • हर ५वीं राइड पर ५% छूट",
+    hero_subtext: "अपनी पसंद का सटीक पिकअप और ड्रॉप चुनें। पहली ३ राइड्स बिल्कुल मुफ्त पाएं, हर ५वीं राइड पर ५% छूट पाएं और रोजाना ३५% बचाएं।",
     cta_book_ride: "३ फ्री राइड्स पाएं / शेयर ऑटो",
     cta_driver_portal: "चालक पोर्टल और रूट मैच",
     cta_see_algorithm: "एल्गोरिदम देखें",
@@ -194,11 +196,11 @@ const I18N = {
     after_driver_title: "SahiRide के साथ: 'रूट सेट करें'",
     after_driver_desc: "ड्राइवर घर का गंतव्य डालता है। सिस्टम उसी रास्ते के यात्रियों को जोड़ता है। वापसी में ₹190+ का शुद्ध मुनाफा!",
     diff2_tag: "विशेषता 2 • डायनामिक शेयर ऑटो",
-    diff2_title: "100% मनचाहा पिकअप/ड्रॉप + पहली ३ राइड्स फ्री",
+    diff2_title: "100% मनचाहा पिकअप/ड्रॉप + ३ फ्री राइड्स और ५% छूट",
     before_pass_title: "पहले: खाली सीटों का पूरा किराया",
     before_pass_desc: "अकेला यात्री पूरे ऑटो की 3 सीटों का ₹120 किराया अकेले भरता है।",
     after_pass_title: "SahiRide के साथ: 'शेयर और बचत'",
-    after_pass_desc: "यात्री अपना सटीक पिकअप/ड्रॉप चुनता है। पहली ३ राइड्स ₹0 (मुफ्त), ड्राइवर कमाता है पूरा ₹220!",
+    after_pass_desc: "यात्री अपना सटीक पिकअप/ड्रॉप चुनता है। पहली ३ राइड्स ₹0 + हर ५वीं राइड पर ५% छूट, ड्राइवर कमाता है ₹220!",
     calc_pill: "वास्तविक आर्थिक लाभ",
     calc_title: "अपनी अतिरिक्त कमाई और मासिक बचत की गणना करें",
     calc_desc: "देखें कि ड्राइवर खाली वापसी से कितना कमाते हैं और यात्री शेयरिंग से कितना बचाते हैं।",
@@ -221,7 +223,7 @@ const I18N = {
     calc_pass_subtext: "रोजाना प्राइवेट ऑटो/कैब बुक करने की तुलना में बचत।",
     calc_solo_fare: "प्राइवेट किराया:",
     calc_shared_fare: "SahiRide शेयर किराया:",
-    calc_discount_rate: "स्वागत ऑफर:",
+    calc_discount_rate: "माइलस्टोन ऑफर:",
     calc_annual_savings: "सालाना बचत:",
     how_pill: "सच्ची पॉइंट-टू-पॉइंट सुविधा",
     how_title: "SahiRide पारंपरिक ऐप्स से बेहतर क्यों है",
@@ -230,8 +232,8 @@ const I18N = {
     feat1_desc: "कोई फिक्स्ड बस स्टॉप नहीं। सामान्य टैक्सी की तरह अपने घर के दरवाजे से पिकअप और गंतव्य पर ड्रॉप सेट करें।",
     feat2_title: "वेक्टर और कॉरिडोर मैचिंग",
     feat2_desc: "एल्गोरिदम सुनिश्चित करता है कि सह-यात्री एक ही दिशा में जा रहे हों और न्यूनतम चक्कर लगे।",
-    feat3_title: "पहली ३ राइड्स बिल्कुल मुफ्त",
-    feat3_desc: "नए उपयोगकर्ताओं को पहली ३ राइड्स मुफ्त मिलती हैं। उसके बाद पारदर्शी दूरी-आधारित ३५% छूट मिलती है।",
+    feat3_title: "३ फ्री राइड्स और हर ५वीं राइड पर ५% छूट",
+    feat3_desc: "नए उपयोगकर्ताओं को पहली ३ राइड्स मुफ्त मिलती हैं, और नियमित यात्रियों को हर ५वीं राइड पर ५% लॉयल्टी छूट मिलती है।",
     feat4_title: "महिला-विशेष और सुरक्षा शील्ड",
     feat4_desc: "महिला-विशेष पूल विकल्प, सत्यापित चालक, रीयल-टाइम ओटीपी, सुरक्षित प्रोफाइल और 24/7 एसओएस।",
     p_book_ride_title: "सवारी बुक करें"
@@ -243,8 +245,8 @@ const I18N = {
     nav_driver: "चालक पोर्टल",
     nav_algorithm: "मॅचिंग इंजिन",
     nav_admin: "ॲडमिन फ्लीट",
-    hero_badge: "वाहनांच्या क्षमतेचा पूर्ण वापर • पहिल्या ३ राईड्स मोफत",
-    hero_subtext: "तुमचा स्वतःचा पिकअप आणि ड्रॉप पॉईंट निवडा. पहिल्या ३ राईड्स मोफत मिळवा, नंतर ३५% बचत करा आणि चालकांना परतीच्या प्रवासात भरपूर कमाई होते.",
+    hero_badge: "वाहनांच्या क्षमतेचा पूर्ण वापर • पहिल्या ३ राईड्स मोफत • प्रत्येक ५वी राईड ५% सूट",
+    hero_subtext: "तुमचा स्वतःचा पिकअप आणि ड्रॉप पॉईंट निवडा. पहिल्या ३ राईड्स मोफत मिळवा, प्रत्येक ५व्या राईडवर ५% सूट मिळवा आणि दररोज ३५% बचत करा.",
     cta_book_ride: "३ मोफत राईड्स मिळवा / शेअर ऑटो",
     cta_driver_portal: "चालक पोर्टल आणि रूट मॅच",
     cta_see_algorithm: "अल्गोरिदम पहा",
@@ -255,11 +257,11 @@ const I18N = {
     after_driver_title: "SahiRide सोबत: 'रूट सेट करा'",
     after_driver_desc: "चालक घराचे ठिकाण टाकतो. सिस्टम त्याच मार्गावरील प्रवासी जोडते. परतीच्या प्रवासात ₹१९०+ चा निव्वळ नफा!",
     diff2_tag: "वैशिष्ट्य २ • डायनॅमिक शेअर ऑटो",
-    diff2_title: "१००% स्वतःचा पिकअप/ड्रॉप + पहिल्या ३ राईड्स मोफत",
+    diff2_title: "१००% स्वतःचा पिकअप/ड्रॉप + ३ मोफत राईड्स आणि ५% सूट",
     before_pass_title: "आधी: रिकाम्या सीट्सचे पूर्ण भाडे",
     before_pass_desc: "एकटा प्रवासी ऑटोच्या ३ जागांचे पूर्ण ₹१२० भाडे एकटाच भरतो.",
     after_pass_title: "SahiRide सोबत: 'शेअर आणि सेव्ह'",
-    after_pass_desc: "प्रवासी स्वतःचा पिकअप/ड्रॉप निवडतो. पहिल्या ३ राईड्स ₹० (मोफत), चालक कमावतो ₹२२०!",
+    after_pass_desc: "प्रवासी स्वतःचा पिकअप/ड्रॉप निवडतो. पहिल्या ३ राईड्स मोफत + प्रत्येक ५व्या राईडवर ५% सूट, चालक कमावतो ₹२२०!",
     calc_pill: "थेट आर्थिक फायदा",
     calc_title: "तुमची अतिरिक्त कमाई आणि मासिक बचत मोजा",
     calc_desc: "चालक परतीच्या प्रवासातून किती जास्त कमवू शकतात आणि प्रवासी शेअरिंगने किती वाचवू शकतात ते पहा.",
@@ -282,7 +284,7 @@ const I18N = {
     calc_pass_subtext: "दररोज खाजगी ऑटो/कॅब बुक करण्याच्या तुलनेत बचत.",
     calc_solo_fare: "खाजगी भाडे:",
     calc_shared_fare: "SahiRide शेअर भाडे:",
-    calc_discount_rate: "स्वागत ऑफर:",
+    calc_discount_rate: "माईलस्टोन ऑफर:",
     calc_annual_savings: "वार्षिक बचत:",
     how_pill: "पॉईंट-टू-पॉईंट लवचिकता",
     how_title: "SahiRide पारंपारिक ॲप्सपेक्षा श्रेष्ठ का आहे",
@@ -291,8 +293,8 @@ const I18N = {
     feat1_desc: "कोणतेही फिक्स बस स्टॉप नाहीत. सामान्य टॅक्सीप्रमाणे घराच्या दारातून पिकअप आणि इच्छित स्थळी ड्रॉप मिळवा.",
     feat2_title: "व्हेक्टर आणि कॉरिडॉर मॅचिंग",
     feat2_desc: "अल्गोरिदम खात्री करतो की सहप्रवासी एकाच दिशेने जात आहेत आणि कमीतकमी वळण लागेल.",
-    feat3_title: "पहिल्या ३ राईड्स १००% मोफत",
-    feat3_desc: "नवीन वापरकर्त्यांना ३ मोफत राईड्स मिळतात. त्यानंतर ३५% पूल सूट मिळते.",
+    feat3_title: "३ मोफत राईड्स आणि प्रत्येक ५व्या राईडवर ५% सूट",
+    feat3_desc: "नवीन वापरकर्त्यांना ३ मोफत राईड्स मिळतात, तसेच प्रत्येक ५व्या राईडवर ५% लॉयल्टी सूट मिळते.",
     feat4_title: "महिला-विशेष आणि सुरक्षा शील्ड",
     feat4_desc: "महिलांसाठी स्वतंत्र पूल पर्याय, पडताळणी झालेले चालक, ओटीपी सुरक्षा आणि २४/७ एसओएस सुविधा.",
     p_book_ride_title: "राईड बुक करा"
@@ -322,7 +324,7 @@ function playSoundAlert(type) {
         osc.start(ctx.currentTime + idx * 0.12);
         osc.stop(ctx.currentTime + idx * 0.12 + 0.3);
       });
-    } else if (type === 'accept') {
+    } else if (type === 'accept' || type === 'milestone') {
       [523.25, 659.25, 783.99, 1046.50].forEach((f) => {
         const osc = ctx.createOscillator();
         const gain = ctx.createGain();
@@ -351,6 +353,7 @@ document.addEventListener('DOMContentLoaded', () => {
   updatePassengerCalc();
   initAdminChart();
   updateAuthUI();
+  updateLoyaltyMilestoneUI();
 
   // Close dropdowns on outside click
   document.addEventListener('click', (e) => {
@@ -512,7 +515,7 @@ function verifyLoginOtp() {
   updateAuthUI();
 
   if (state.userSession.isNewUser && state.userSession.role === 'passenger') {
-    alert(`🎉 Welcome to SahiRide, ${state.userSession.name}!\nYou have unlocked your FIRST 3 RIDES 100% FREE! (Coupon: FREE3RIDES)`);
+    alert(`🎉 Welcome to SahiRide, ${state.userSession.name}!\nYou have unlocked your FIRST 3 RIDES 100% FREE! Plus 5% OFF on every 5th ride!`);
   } else if (state.userSession.isNewUser && state.userSession.role === 'driver') {
     alert(`🎉 Welcome Captain ${state.userSession.name}!\nDriver KYC Verification Approved ✓. You can now accept homebound & pooled rides!`);
   } else {
@@ -544,6 +547,7 @@ function openProfileModal() {
   const emergencyInput = document.getElementById('profInputEmergency');
   const roleSelect = document.getElementById('profSelectRole');
   const statusSelect = document.getElementById('profSelectUserStatus');
+  const tripsInput = document.getElementById('profInputLifetimeTrips');
 
   if (nameInput) nameInput.value = state.userSession.name;
   if (phoneInput) phoneInput.value = state.userSession.phone;
@@ -551,6 +555,7 @@ function openProfileModal() {
   if (emergencyInput) emergencyInput.value = state.userSession.emergency || 'Pooja Sharma (+91-98765-00000)';
   if (roleSelect) roleSelect.value = state.userSession.role;
   if (statusSelect) statusSelect.value = state.userSession.isNewUser ? 'new' : 'regular';
+  if (tripsInput) tripsInput.value = state.userSession.totalRidesTaken;
 
   const modalName = document.getElementById('profileModalNameDisplay');
   if (modalName) modalName.textContent = state.userSession.name;
@@ -568,6 +573,22 @@ function openProfileModal() {
   openModal('profileModal');
 }
 
+function updateLifetimeTripsSim(val) {
+  const num = parseInt(val) || 1;
+  state.userSession.totalRidesTaken = num;
+  updateLoyaltyMilestoneUI();
+  recalcPassengerFares();
+}
+
+function setSimTrips(n) {
+  state.userSession.totalRidesTaken = n;
+  const input = document.getElementById('profInputLifetimeTrips');
+  if (input) input.value = n;
+  updateLoyaltyMilestoneUI();
+  recalcPassengerFares();
+  alert(`Simulated trip count updated to ${n}! Milestone status recalculated.`);
+}
+
 function toggleUserNewStatus(status) {
   state.userSession.isNewUser = (status === 'new');
   state.passenger.freeRidesPromoActive = (status === 'new');
@@ -581,13 +602,14 @@ function toggleUserNewStatus(status) {
   if (headerBadge) headerBadge.style.display = state.userSession.isNewUser ? 'inline-flex' : 'none';
 
   if (state.userSession.isNewUser) {
-    if (tripsStat) tripsStat.textContent = '1st Ride';
+    if (tripsStat) tripsStat.textContent = `Ride #${state.userSession.totalRidesTaken}`;
     if (savedStat) savedStat.textContent = `${state.userSession.freeRidesRemaining} / 3 FREE`;
   } else {
-    if (tripsStat) tripsStat.textContent = '28 Rides';
+    if (tripsStat) tripsStat.textContent = `${state.userSession.totalRidesTaken} Rides`;
     if (savedStat) savedStat.textContent = '₹3,420 Saved';
   }
 
+  updateLoyaltyMilestoneUI();
   recalcPassengerFares();
 }
 
@@ -598,6 +620,7 @@ function saveUserProfile() {
   const emergency = document.getElementById('profInputEmergency').value.trim();
   const role = document.getElementById('profSelectRole').value;
   const status = document.getElementById('profSelectUserStatus').value;
+  const trips = parseInt(document.getElementById('profInputLifetimeTrips').value) || 1;
 
   if (!name || !phone) {
     alert('Name and Phone Number cannot be blank.');
@@ -609,13 +632,15 @@ function saveUserProfile() {
   state.userSession.email = email;
   state.userSession.emergency = emergency;
   state.userSession.role = role;
+  state.userSession.totalRidesTaken = trips;
   state.userSession.isNewUser = (status === 'new');
   state.passenger.freeRidesPromoActive = (status === 'new');
 
   updateAuthUI();
+  updateLoyaltyMilestoneUI();
   recalcPassengerFares();
   closeModal('profileModal');
-  alert('Your profile details and free ride pass have been updated!');
+  alert('Your profile details and ride settings have been saved!');
 
   if (role === 'driver' && state.currentView === 'passenger') {
     switchView('driver');
@@ -820,7 +845,7 @@ function declineIncomingRidePopup() {
 }
 
 // -------------------------------------------------------------
-// 8. FIRST 3 RIDES 100% FREE PROMO CONTROLLER
+// 8. FIRST 3 RIDES 100% FREE & EVERY 5TH RIDE 5% OFF CONTROLLER
 // -------------------------------------------------------------
 function toggleFreeRidesPromo() {
   state.passenger.freeRidesPromoActive = !state.passenger.freeRidesPromoActive;
@@ -840,9 +865,67 @@ function toggleFreeRidesPromo() {
       btn.style.background = 'var(--brand-primary)';
     }
     if (banner) banner.style.opacity = '0.7';
-    alert('Free Ride promo paused. Standard dynamic pooling fare applied.');
+    alert('Free Ride promo paused. Standard pooling / milestone rate applied.');
   }
 
+  recalcPassengerFares();
+}
+
+function updateLoyaltyMilestoneUI() {
+  const rides = state.userSession.totalRidesTaken;
+  const stepInCycle = ((rides - 1) % 5) + 1; // 1 to 5
+  const isMilestone = (rides % 5 === 0);
+  const remaining = isMilestone ? 0 : (5 - (rides % 5));
+
+  const progressPercent = (stepInCycle / 5) * 100;
+  const fill = document.getElementById('loyaltyProgressFill');
+  if (fill) fill.style.width = `${progressPercent}%`;
+
+  for (let i = 1; i <= 5; i++) {
+    const dot = document.getElementById(`ldot-${i}`);
+    if (dot) {
+      dot.classList.toggle('active', i <= stepInCycle);
+    }
+  }
+
+  const lblProgress = document.getElementById('lblMilestoneProgressText');
+  const lblStatus = document.getElementById('lblMilestoneStatusTag');
+  const lblTitle = document.getElementById('lblLoyaltyMilestoneTitle');
+  const profMilestone = document.getElementById('profStatsMilestone');
+
+  if (isMilestone) {
+    if (lblProgress) lblProgress.textContent = `🎉 Current: Ride #${rides} • 5% LOYALTY DISCOUNT ACTIVE!`;
+    if (lblStatus) {
+      lblStatus.textContent = '5% OFF APPLIED ✓';
+      lblStatus.style.color = 'var(--brand-primary)';
+    }
+    if (lblTitle) lblTitle.textContent = '🎖️ 5th Ride Milestone: 5% OFF Applied!';
+    if (profMilestone) profMilestone.textContent = '5% OFF Active!';
+  } else {
+    if (lblProgress) lblProgress.textContent = `Current: Ride #${rides} • ${remaining} ride${remaining > 1 ? 's' : ''} to 5% OFF milestone`;
+    if (lblStatus) {
+      lblStatus.textContent = `Milestone in ${remaining}`;
+      lblStatus.style.color = 'var(--brand-accent)';
+    }
+    if (lblTitle) lblTitle.textContent = 'Every 5th Ride: 5% OFF!';
+    if (profMilestone) profMilestone.textContent = `${remaining} to 5% OFF`;
+  }
+
+  const btnSim = document.getElementById('btnSimulateFifthRide');
+  if (btnSim) {
+    btnSim.textContent = isMilestone ? 'Reset to Ride 1' : 'Simulate 5th Ride';
+  }
+}
+
+function simulateFifthRideMilestone() {
+  if (state.userSession.totalRidesTaken % 5 === 0) {
+    state.userSession.totalRidesTaken = 1;
+  } else {
+    state.userSession.totalRidesTaken = 5;
+    playSoundAlert('milestone');
+  }
+
+  updateLoyaltyMilestoneUI();
   recalcPassengerFares();
 }
 
@@ -1084,7 +1167,7 @@ async function useCurrentGpsLocation() {
 }
 
 // -------------------------------------------------------------
-// 12. PASSENGER MAP & FARE CALCULATION (WITH FIRST 3 RIDES 100% FREE)
+// 12. PASSENGER MAP & FARE CALCULATION (FIRST 3 FREE + 5TH RIDE 5% OFF)
 // -------------------------------------------------------------
 function initPassengerMap() {
   if (passengerMap) {
@@ -1170,13 +1253,28 @@ function recalcPassengerFares() {
   const standardSharePerSeat = Math.round(standardSoloFare * 0.62); // 38% pool discount
 
   const isFreeRide = state.passenger.freeRidesPromoActive && state.userSession.freeRidesRemaining > 0;
+  const isMilestoneRide = !isFreeRide && (state.userSession.totalRidesTaken % 5 === 0);
   
   const seats = state.passenger.seatCount;
-  const standardTotalShare = standardSharePerSeat * seats;
-  const standardTotalPrivate = standardSoloFare;
+  let standardTotalShare = standardSharePerSeat * seats;
+  let standardTotalPrivate = standardSoloFare;
 
-  let totalFare = isFreeRide ? 0 : (state.passenger.mode === 'share' ? standardTotalShare : standardTotalPrivate);
-  let perSeatFare = isFreeRide ? 0 : standardSharePerSeat;
+  let totalFare = 0;
+  let perSeatFare = 0;
+  let milestoneDiscountAmount = 0;
+
+  if (isFreeRide) {
+    totalFare = 0;
+    perSeatFare = 0;
+  } else if (isMilestoneRide) {
+    const rawTotal = state.passenger.mode === 'share' ? standardTotalShare : standardTotalPrivate;
+    milestoneDiscountAmount = Math.round(rawTotal * 0.05 * 100) / 100; // 5% discount
+    totalFare = Math.max(10, Math.round((rawTotal - milestoneDiscountAmount) * 100) / 100);
+    perSeatFare = Math.round((standardSharePerSeat * 0.95) * 100) / 100;
+  } else {
+    totalFare = state.passenger.mode === 'share' ? standardTotalShare : standardTotalPrivate;
+    perSeatFare = standardSharePerSeat;
+  }
 
   state.passenger.basePerSeatFare = perSeatFare;
   state.passenger.totalFare = totalFare;
@@ -1213,6 +1311,28 @@ function recalcPassengerFares() {
     if (badgeShareDiscount) {
       badgeShareDiscount.textContent = '100% FREE';
     }
+  } else if (isMilestoneRide) {
+    const discountedSolo = Math.round(standardSoloFare * 0.95);
+    const discountedShare = Math.round(standardTotalShare * 0.95);
+
+    if (passPrivateFare) passPrivateFare.textContent = `₹${discountedSolo}`;
+    if (passPrivateStrike) {
+      passPrivateStrike.textContent = `₹${standardSoloFare}`;
+      passPrivateStrike.style.display = 'block';
+    }
+    if (badgePrivateDiscount) {
+      badgePrivateDiscount.textContent = '5% MILESTONE';
+      badgePrivateDiscount.style.display = 'inline-block';
+    }
+
+    if (passShareFare) passShareFare.textContent = `₹${discountedShare}`;
+    if (passShareStrike) {
+      passShareStrike.textContent = `₹${standardTotalShare}`;
+      passShareStrike.style.display = 'block';
+    }
+    if (badgeShareDiscount) {
+      badgeShareDiscount.textContent = '38% + 5% OFF';
+    }
   } else {
     if (passPrivateFare) passPrivateFare.textContent = `₹${standardSoloFare}`;
     if (passPrivateStrike) passPrivateStrike.style.display = 'none';
@@ -1233,6 +1353,8 @@ function recalcPassengerFares() {
     if (isFreeRide) {
       const freeRideNum = 4 - state.userSession.freeRidesRemaining;
       btnText.textContent = `Confirm & Start Free Ride (₹0.00 • Free ${freeRideNum} of 3)`;
+    } else if (isMilestoneRide) {
+      btnText.textContent = `Confirm & Match Ride (₹${state.passenger.totalFare} • 5% OFF Milestone!)`;
     } else {
       btnText.textContent = `Confirm & ${state.passenger.mode === 'share' ? `Match Share Ride (${seats} Seat${seats > 1 ? 's' : ''})` : 'Book Private'} (₹${state.passenger.totalFare})`;
     }
@@ -1248,6 +1370,7 @@ function recalcPassengerFares() {
   const modalDiscountRate = document.getElementById('modalDiscountRate');
   if (modalDiscountRate) modalDiscountRate.textContent = `-₹${standardSoloFare - standardSharePerSeat}.00`;
 
+  // First 3 free promo row
   const promoRow = document.getElementById('modalFirstRidePromoRow');
   const promoVal = document.getElementById('modalFirstRideDiscountVal');
   if (promoRow) promoRow.style.display = isFreeRide ? 'flex' : 'none';
@@ -1256,14 +1379,26 @@ function recalcPassengerFares() {
     promoVal.textContent = `-₹${freeDiscount}.00 (100% OFF)`;
   }
 
+  // 5th Ride loyalty milestone row
+  const milestoneRow = document.getElementById('modalLoyaltyMilestoneRow');
+  const milestoneVal = document.getElementById('modalLoyaltyMilestoneVal');
+  if (milestoneRow) milestoneRow.style.display = isMilestoneRide ? 'flex' : 'none';
+  if (milestoneVal) milestoneVal.textContent = `-₹${milestoneDiscountAmount.toFixed(2)} (5% OFF)`;
+
   const modalPayable = document.getElementById('modalPayableAmount');
   if (modalPayable) {
-    modalPayable.textContent = isFreeRide ? '₹0.00 (FREE RIDE)' : `₹${state.passenger.totalFare}.00`;
+    modalPayable.textContent = isFreeRide ? '₹0.00 (FREE RIDE)' : `₹${state.passenger.totalFare.toFixed(2)}`;
   }
   
   const btnPayModal = document.getElementById('btnPayModalActionText');
   if (btnPayModal) {
-    btnPayModal.textContent = isFreeRide ? 'Confirm Booking (₹0.00 - 100% FREE)' : `Pay ₹${state.passenger.totalFare}.00 (Instant UPI Handshake)`;
+    if (isFreeRide) {
+      btnPayModal.textContent = 'Confirm Booking (₹0.00 - 100% FREE)';
+    } else if (isMilestoneRide) {
+      btnPayModal.textContent = `Pay ₹${state.passenger.totalFare.toFixed(2)} (5% Milestone Discount Applied)`;
+    } else {
+      btnPayModal.textContent = `Pay ₹${state.passenger.totalFare.toFixed(2)} (Instant UPI Handshake)`;
+    }
   }
 
   const btnPayModalText = document.getElementById('btnPayModalText');
@@ -1337,7 +1472,12 @@ function requestPassengerRide() {
     const usedRideNum = 4 - state.userSession.freeRidesRemaining;
     state.userSession.freeRidesRemaining--;
     alert(`🎉 Free Ride ${usedRideNum} of 3 Confirmed!\nYou have ${state.userSession.freeRidesRemaining} Free Rides remaining.`);
+  } else if (state.userSession.totalRidesTaken % 5 === 0) {
+    alert(`🎖️ Congratulations! This was your 5th Ride Milestone! A flat 5% discount was applied to your trip.`);
   }
+
+  state.userSession.totalRidesTaken++;
+  updateLoyaltyMilestoneUI();
 
   const coLabel = document.getElementById('coPassengersCountLabel');
   if (coLabel) {
@@ -1738,7 +1878,7 @@ function openShareTripModal() {
 
 function completePaymentSimulation() {
   closeModal('paymentModal');
-  alert(`Payment Confirmed! Digital zero-balance pass applied. SahiRide subsidized the full trip for driver Ramesh Shinde.`);
+  alert(`Payment Confirmed! Digital pass applied. SahiRide compensated driver Ramesh Shinde in full.`);
 }
 
 function submitKYC() {
