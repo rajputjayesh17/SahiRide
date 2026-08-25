@@ -768,6 +768,133 @@ img {
 }
 
 /* -------------------------------------------------------------
+   ONBOARDING ADVERTISEMENT SPECIAL STYLING (5% OFF REWARD)
+   ------------------------------------------------------------- */
+.onboarding-ad-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.85rem;
+  border-radius: var(--radius-full);
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.25), rgba(245, 158, 11, 0.25));
+  border: 1px solid var(--brand-accent);
+  color: var(--brand-accent);
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.85rem;
+  animation: pulse-border 2.5s infinite;
+}
+
+.onboarding-ad-graphic {
+  width: 100%;
+  max-width: 440px;
+  background: linear-gradient(145deg, rgba(99, 102, 241, 0.12), rgba(17, 24, 39, 0.95));
+  border: 1px solid rgba(99, 102, 241, 0.35);
+  border-radius: var(--radius-lg);
+  padding: 1rem;
+  margin: 1rem 0;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+.ad-milestone-track-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+  margin-bottom: 0.75rem;
+  padding: 0 0.5rem;
+}
+
+.ad-step-pill {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  z-index: 2;
+}
+
+.ad-step-circle {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  background: var(--bg-surface-raised);
+  border: 1px solid var(--border-medium);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.ad-step-pill.completed .ad-step-circle {
+  background: var(--brand-secondary);
+  color: #fff;
+  border-color: var(--brand-secondary);
+}
+
+.ad-step-pill.milestone-highlight .ad-step-circle {
+  width: 2.35rem;
+  height: 2.35rem;
+  background: linear-gradient(135deg, var(--brand-accent), var(--brand-primary));
+  color: #000;
+  font-size: 0.9rem;
+  border: 2px solid #fff;
+  box-shadow: 0 0 16px rgba(245, 158, 11, 0.6);
+  animation: pulse-gold 2s infinite;
+}
+
+.ad-step-label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.ad-step-pill.milestone-highlight .ad-step-label {
+  color: var(--brand-primary);
+  font-weight: 800;
+}
+
+.onboarding-perk-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 0.6rem;
+  width: 100%;
+  margin-top: 0.5rem;
+}
+
+.onboarding-perk-card {
+  background: var(--bg-surface-raised);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 0.6rem 0.4rem;
+  text-align: center;
+}
+
+.onboarding-perk-card i {
+  width: 1.25rem;
+  height: 1.25rem;
+  color: var(--brand-accent);
+  margin-bottom: 0.25rem;
+}
+
+.onboarding-perk-card strong {
+  display: block;
+  font-size: 0.76rem;
+  color: var(--text-main);
+  line-height: 1.2;
+}
+
+.onboarding-perk-card span {
+  font-size: 0.68rem;
+  color: var(--text-muted);
+  display: block;
+  margin-top: 2px;
+}
+
+/* -------------------------------------------------------------
    0. LOGIN & SIGNUP (NEW / EXISTING USER MODES)
    ------------------------------------------------------------- */
 .login-screen {
