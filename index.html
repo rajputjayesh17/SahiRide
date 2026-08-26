@@ -1403,146 +1403,292 @@
     </section>
 
     <!-- =======================================================================
-         VIEW 7: SETTINGS & ACCOUNT CONTROL (DIRECTLY VISIBLE & EDITABLE)
+         VIEW 7: PROFESSIONAL NATIVE PROFILE & SETTINGS (RAPIDO / UBER STYLE)
          ======================================================================= -->
     <section id="view-settings" class="app-view">
-      <div class="container settings-section">
-        <div style="margin-bottom:1.5rem;">
-          <h2 style="font-size:1.6rem; font-weight:800;">⚙️ Account &amp; App Settings</h2>
-          <p style="font-size:0.85rem; color:var(--text-muted);">Manage your profile, vehicle info, role mode &amp; preferences</p>
+      <div class="profile-native-screen">
+        
+        <!-- Header Bar -->
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.25rem;">
+          <h2 style="font-size:1.5rem; font-weight:800;" id="nativeProfileHeaderTitle">Profile</h2>
+          <button class="btn-secondary" style="padding:0.4rem 0.85rem; font-size:0.8rem; border-radius:var(--radius-full);" onclick="openHelpSupportModal()">
+            <i data-lucide="help-circle"></i> <span>Help</span>
+          </button>
         </div>
 
-        <!-- Role Mode Switcher Card -->
-        <div class="role-switcher-card">
-          <div>
-            <strong style="font-size:1rem; color:var(--text-main); display:block;">Active Account Mode</strong>
-            <span style="font-size:0.825rem; color:var(--text-muted);" id="settingsCurrentRoleDesc">Currently active: Passenger (Book Rides)</span>
-          </div>
-          <div class="role-switch-buttons">
-            <button class="role-chip-btn" id="setRoleBtnPassenger" onclick="switchUserRoleMode('passenger')">
-              <i data-lucide="navigation"></i> <span>Customer / Rider</span>
-            </button>
-            <button class="role-chip-btn" id="setRoleBtnDriver" onclick="switchUserRoleMode('driver')">
-              <i data-lucide="car"></i> <span>Driver / Captain</span>
-            </button>
-          </div>
-        </div>
-
-        <!-- Profile Personal Details Card -->
-        <div class="settings-card">
-          <div class="settings-title-row">
-            <i data-lucide="user" style="color:var(--brand-primary); width:1.3rem; height:1.3rem;"></i>
-            <h3>Personal Information</h3>
-          </div>
-
-          <div class="settings-field-grid">
-            <div class="settings-input-box">
-              <label>Full Name</label>
-              <input type="text" id="settingsInputName" value="Jayesh Sharma" oninput="liveUpdateSetting('name', this.value)">
-            </div>
-            <div class="settings-input-box">
-              <label>Mobile Number (Registered)</label>
-              <input type="tel" id="settingsInputPhone" value="9876543210" oninput="liveUpdateSetting('phone', this.value)">
-            </div>
-          </div>
-
-          <div class="settings-field-grid">
-            <div class="settings-input-box">
-              <label>Email Address</label>
-              <input type="email" id="settingsInputEmail" value="jayesh@example.com" oninput="liveUpdateSetting('email', this.value)">
-            </div>
-            <div class="settings-input-box">
-              <label>Emergency Contact (Name &amp; Phone)</label>
-              <input type="text" id="settingsInputEmergency" value="Pooja Sharma (+91-98765-00000)" oninput="liveUpdateSetting('emergency', this.value)">
-            </div>
-          </div>
-
-          <div style="display:flex; justify-content:flex-end; margin-top:0.75rem;">
-            <button class="btn-primary" style="padding:0.6rem 1.25rem; font-size:0.9rem;" onclick="saveAllSettings()">
-              <i data-lucide="check"></i> <span>Save Profile Info</span>
-            </button>
-          </div>
-        </div>
-
-        <!-- Driver Specific Vehicle & KYC Details Card (Visible in Driver Mode) -->
-        <div class="settings-card" id="settingsDriverVehicleCard" style="display:none;">
-          <div class="settings-title-row">
-            <i data-lucide="truck" style="color:var(--brand-secondary); width:1.3rem; height:1.3rem;"></i>
-            <h3>Driver Vehicle &amp; KYC Credentials</h3>
-          </div>
-
-          <div class="settings-field-grid">
-            <div class="settings-input-box">
-              <label>Vehicle Registration Number</label>
-              <input type="text" id="settingsInputVehNo" value="MH 12 QX 4920" oninput="liveUpdateSetting('vehNo', this.value)">
-            </div>
-            <div class="settings-input-box">
-              <label>Vehicle Type &amp; Capacity</label>
-              <select id="settingsSelectVehType" onchange="liveUpdateSetting('vehType', this.value)">
-                <option value="auto">Bajaj RE Auto (3 Passenger Capacity)</option>
-                <option value="cab">Mini Cab / Sedan (4 Passenger Capacity)</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="settings-field-grid">
-            <div class="settings-input-box">
-              <label>Commercial Driving License</label>
-              <input type="text" id="settingsInputDL" value="MH12-2018-004928" oninput="liveUpdateSetting('dlNo', this.value)">
-            </div>
-            <div class="settings-input-box">
-              <label>DigiLocker KYC Verification</label>
-              <div style="display:flex; align-items:center; gap:0.5rem; padding:0.65rem 0.85rem; background:var(--bg-surface-raised); border:1px solid var(--border-medium); border-radius:var(--radius-md);">
-                <i data-lucide="shield-check" style="color:var(--brand-secondary); width:1.2rem; height:1.2rem;"></i>
-                <strong style="color:var(--brand-secondary); font-size:0.88rem;">KYC Verified ✓</strong>
+        <!-- 1. Top Profile Summary Card -->
+        <div class="native-profile-header-card">
+          <div class="native-user-info-row" onclick="openEditProfileModal()">
+            <div class="native-user-avatar-wrap">
+              <div class="native-user-avatar-circle" id="nativeAvatarCircle">
+                <span id="nativeAvatarText">JR</span>
+                <div class="native-avatar-badge-edit">
+                  <i data-lucide="edit-3" style="width:0.65rem; height:0.65rem;"></i>
+                </div>
+              </div>
+              <div class="native-user-details">
+                <h3 id="nativeProfileName">Jayesh Rajput</h3>
+                <p id="nativeProfilePhone">+91 98765 43210</p>
+                <span style="display:inline-block; font-size:0.72rem; color:var(--brand-secondary); font-weight:700;" id="nativeProfileBadge">✓ Verified Rider</span>
               </div>
             </div>
+            <i data-lucide="chevron-right" class="native-item-chevron"></i>
+          </div>
+
+          <div class="native-rating-row" onclick="openRatingModal()">
+            <div class="native-rating-pill">
+              <i data-lucide="star"></i>
+              <span>5.00 My Rating</span>
+            </div>
+            <i data-lucide="chevron-right" class="native-item-chevron"></i>
           </div>
         </div>
 
-        <!-- Preferences & Theme Card -->
-        <div class="settings-card">
-          <div class="settings-title-row">
-            <i data-lucide="sliders" style="color:var(--brand-accent); width:1.3rem; height:1.3rem;"></i>
-            <h3>App &amp; Security Preferences</h3>
-          </div>
+        <!-- 2. Commute & Account Menu Group -->
+        <div class="native-menu-group">
+          <div class="native-group-header">Commute &amp; Services</div>
 
-          <div style="display:flex; flex-direction:column; gap:1rem;">
-            <div style="display:flex; align-items:center; justify-content:space-between; padding:0.75rem; background:var(--bg-surface-raised); border-radius:var(--radius-md); border:1px solid var(--border-subtle);">
-              <div>
-                <strong style="font-size:0.9rem; display:block;">Theme Mode</strong>
-                <span style="font-size:0.78rem; color:var(--text-muted);">Toggle between High-Contrast Dark and Clean Light</span>
+          <button class="native-menu-item" onclick="openHelpSupportModal()">
+            <div class="native-item-left">
+              <div class="native-item-icon"><i data-lucide="help-circle"></i></div>
+              <div class="native-item-info">
+                <span class="native-item-title">Help &amp; Support</span>
+                <span class="native-item-subtitle">Ride queries, lost items &amp; 24x7 helpdesk</span>
               </div>
-              <button class="btn-secondary" style="padding:0.45rem 0.9rem; font-size:0.85rem;" onclick="toggleTheme()">
-                <i data-lucide="sun" id="settingsThemeIcon"></i> <span id="settingsThemeLabel">Toggle Light Theme</span>
-              </button>
             </div>
+            <div class="native-item-right">
+              <i data-lucide="chevron-right" class="native-item-chevron"></i>
+            </div>
+          </button>
 
-            <div style="display:flex; align-items:center; justify-content:space-between; padding:0.75rem; background:var(--bg-surface-raised); border-radius:var(--radius-md); border:1px solid var(--border-subtle);">
-              <div>
-                <strong style="font-size:0.9rem; display:block;">Audio Chimes &amp; Alerts</strong>
-                <span style="font-size:0.78rem; color:var(--text-muted);">Sound notifications for incoming ride popups and arrival</span>
+          <button class="native-menu-item" onclick="openNativePaymentModal()">
+            <div class="native-item-left">
+              <div class="native-item-icon"><i data-lucide="credit-card"></i></div>
+              <div class="native-item-info">
+                <span class="native-item-title">Payment &amp; Wallet</span>
+                <span class="native-item-subtitle">SahiRide Pay, UPI, Cards &amp; Auto-Pay</span>
               </div>
-              <label class="switch">
-                <input type="checkbox" id="settingsAudioAlerts" checked>
-                <span class="slider"></span>
-              </label>
             </div>
-          </div>
+            <div class="native-item-right">
+              <span class="native-item-tag">₹250.00</span>
+              <i data-lucide="chevron-right" class="native-item-chevron"></i>
+            </div>
+          </button>
+
+          <button class="native-menu-item" onclick="switchView('history')">
+            <div class="native-item-left">
+              <div class="native-item-icon"><i data-lucide="history"></i></div>
+              <div class="native-item-info">
+                <span class="native-item-title">My Rides</span>
+                <span class="native-item-subtitle">Trip receipts, route invoices &amp; savings</span>
+              </div>
+            </div>
+            <div class="native-item-right">
+              <i data-lucide="chevron-right" class="native-item-chevron"></i>
+            </div>
+          </button>
+
+          <button class="native-menu-item" onclick="openSafetyModal()">
+            <div class="native-item-left">
+              <div class="native-item-icon"><i data-lucide="shield-check" style="color:var(--brand-secondary);"></i></div>
+              <div class="native-item-info">
+                <span class="native-item-title">Safety &amp; Emergency SOS</span>
+                <span class="native-item-subtitle">Emergency contacts, 112 link &amp; ride protection</span>
+              </div>
+            </div>
+            <div class="native-item-right">
+              <span class="native-item-tag" style="background:rgba(16,185,129,0.15); color:var(--brand-secondary);">Verified</span>
+              <i data-lucide="chevron-right" class="native-item-chevron"></i>
+            </div>
+          </button>
         </div>
 
-        <!-- Danger Zone / Sign Out -->
-        <div class="settings-card" style="border-color:rgba(239,68,68,0.3);">
-          <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:1rem;">
-            <div>
-              <strong style="color:var(--brand-danger); font-size:0.95rem; display:block;">Sign Out of Account</strong>
-              <span style="font-size:0.78rem; color:var(--text-muted);">Log out of your current session on this device</span>
+        <!-- 3. Rewards & Savings Group -->
+        <div class="native-menu-group">
+          <div class="native-group-header">Offers &amp; Rewards</div>
+
+          <button class="native-menu-item" onclick="openReferModal()">
+            <div class="native-item-left">
+              <div class="native-item-icon"><i data-lucide="gift" style="color:var(--brand-accent);"></i></div>
+              <div class="native-item-info">
+                <span class="native-item-title">Refer and Earn</span>
+                <span class="native-item-subtitle">Share SahiRide with friends and earn rewards</span>
+              </div>
             </div>
-            <button class="btn-secondary" style="background:rgba(239,68,68,0.15); color:var(--brand-danger); border-color:rgba(239,68,68,0.3);" onclick="confirmLogout()">
-              <i data-lucide="log-out"></i> <span>Log Out</span>
-            </button>
-          </div>
+            <div class="native-item-right">
+              <span class="native-item-tag" style="background:rgba(245,158,11,0.15); color:var(--brand-accent);">Get ₹50</span>
+              <i data-lucide="chevron-right" class="native-item-chevron"></i>
+            </div>
+          </button>
+
+          <button class="native-menu-item" onclick="openRewardsModal()">
+            <div class="native-item-left">
+              <div class="native-item-icon"><i data-lucide="award" style="color:var(--brand-primary);"></i></div>
+              <div class="native-item-info">
+                <span class="native-item-title">My Rewards</span>
+                <span class="native-item-subtitle">5% OFF on every 5th ride &amp; loyalty perks</span>
+              </div>
+            </div>
+            <div class="native-item-right">
+              <i data-lucide="chevron-right" class="native-item-chevron"></i>
+            </div>
+          </button>
+
+          <button class="native-menu-item" onclick="openPowerPassModal()">
+            <div class="native-item-left">
+              <div class="native-item-icon"><i data-lucide="ticket"></i></div>
+              <div class="native-item-info">
+                <span class="native-item-title">Power Pass</span>
+                <span class="native-item-subtitle">Corridor monthly commute passes &amp; flat rates</span>
+              </div>
+            </div>
+            <div class="native-item-right">
+              <i data-lucide="chevron-right" class="native-item-chevron"></i>
+            </div>
+          </button>
+
+          <button class="native-menu-item" onclick="openCoinsModal()">
+            <div class="native-item-left">
+              <div class="native-item-icon"><i data-lucide="circle-dollar-sign" style="color:var(--brand-secondary);"></i></div>
+              <div class="native-item-info">
+                <span class="native-item-title">SahiRide Coins</span>
+                <span class="native-item-subtitle">Cashback coins redeemable on rides</span>
+              </div>
+            </div>
+            <div class="native-item-right">
+              <span class="native-item-tag">150 Coins</span>
+              <i data-lucide="chevron-right" class="native-item-chevron"></i>
+            </div>
+          </button>
         </div>
+
+        <!-- 4. General Settings & Preferences -->
+        <div class="native-menu-group">
+          <div class="native-group-header">General &amp; System</div>
+
+          <button class="native-menu-item" onclick="openFavouritesModal()">
+            <div class="native-item-left">
+              <div class="native-item-icon"><i data-lucide="heart" style="color:#EC4899;"></i></div>
+              <div class="native-item-info">
+                <span class="native-item-title">Favourites</span>
+                <span class="native-item-subtitle">Manage Home, Work &amp; College locations</span>
+              </div>
+            </div>
+            <div class="native-item-right">
+              <i data-lucide="chevron-right" class="native-item-chevron"></i>
+            </div>
+          </button>
+
+          <button class="native-menu-item" onclick="openNotificationsModal()">
+            <div class="native-item-left">
+              <div class="native-item-icon"><i data-lucide="bell"></i></div>
+              <div class="native-item-info">
+                <span class="native-item-title">Notifications &amp; Chimes</span>
+                <span class="native-item-subtitle">Trip status alerts &amp; audio notifications</span>
+              </div>
+            </div>
+            <div class="native-item-right">
+              <i data-lucide="chevron-right" class="native-item-chevron"></i>
+            </div>
+          </button>
+
+          <button class="native-menu-item" onclick="toggleTheme()">
+            <div class="native-item-left">
+              <div class="native-item-icon"><i data-lucide="sun" id="nativeThemeIcon"></i></div>
+              <div class="native-item-info">
+                <span class="native-item-title">Theme Mode</span>
+                <span class="native-item-subtitle" id="nativeThemeSub">Dark Mode Active</span>
+              </div>
+            </div>
+            <div class="native-item-right">
+              <span class="native-item-tag" id="nativeThemeTag">Toggle</span>
+              <i data-lucide="chevron-right" class="native-item-chevron"></i>
+            </div>
+          </button>
+
+          <button class="native-menu-item" onclick="toggleLanguageMenu()">
+            <div class="native-item-left">
+              <div class="native-item-icon"><i data-lucide="globe"></i></div>
+              <div class="native-item-info">
+                <span class="native-item-title">Language / भाषा</span>
+                <span class="native-item-subtitle">English • हिन्दी • मराठी</span>
+              </div>
+            </div>
+            <div class="native-item-right">
+              <span class="native-item-tag" id="nativeLangTag">English</span>
+              <i data-lucide="chevron-right" class="native-item-chevron"></i>
+            </div>
+          </button>
+        </div>
+
+        <!-- 5. App Info & Other Controls -->
+        <div class="native-menu-group">
+          <div class="native-group-header">Others</div>
+
+          <button class="native-menu-item" onclick="openAboutModal()">
+            <div class="native-item-left">
+              <div class="native-item-icon"><i data-lucide="info"></i></div>
+              <div class="native-item-info">
+                <span class="native-item-title">About</span>
+                <span class="native-item-subtitle">SahiRide v2.4.0 (Build 8.118.0)</span>
+              </div>
+            </div>
+            <div class="native-item-right">
+              <i data-lucide="chevron-right" class="native-item-chevron"></i>
+            </div>
+          </button>
+
+          <button class="native-menu-item" onclick="subscribeToBeta()">
+            <div class="native-item-left">
+              <div class="native-item-icon"><i data-lucide="bug"></i></div>
+              <div class="native-item-info">
+                <span class="native-item-title">Subscribe to Beta</span>
+                <span class="native-item-subtitle">Get early access to latest AI pooling features</span>
+              </div>
+            </div>
+            <div class="native-item-right">
+              <i data-lucide="chevron-right" class="native-item-chevron"></i>
+            </div>
+          </button>
+
+          <button class="native-menu-item" onclick="confirmLogout()">
+            <div class="native-item-left">
+              <div class="native-item-icon"><i data-lucide="log-out"></i></div>
+              <div class="native-item-info">
+                <span class="native-item-title">Logout</span>
+                <span class="native-item-subtitle">Sign out of current account</span>
+              </div>
+            </div>
+            <div class="native-item-right">
+              <i data-lucide="chevron-right" class="native-item-chevron"></i>
+            </div>
+          </button>
+
+          <button class="native-menu-item" onclick="confirmDeleteAccount()" style="color:var(--brand-danger);">
+            <div class="native-item-left">
+              <div class="native-item-icon" style="color:var(--brand-danger); background:rgba(239,68,68,0.1);"><i data-lucide="trash-2"></i></div>
+              <div class="native-item-info">
+                <span class="native-item-title" style="color:var(--brand-danger);">Delete Account</span>
+                <span class="native-item-subtitle">Permanently erase profile &amp; data</span>
+              </div>
+            </div>
+            <div class="native-item-right">
+              <i data-lucide="chevron-right" class="native-item-chevron" style="color:var(--brand-danger);"></i>
+            </div>
+          </button>
+        </div>
+
+        <!-- 6. Bottom Banner: Become a Captain / Switch Mode -->
+        <div class="native-captain-banner">
+          <div class="native-captain-banner-text">
+            <h4 id="nativeBannerTitle">Earn money with SahiRide</h4>
+            <p id="nativeBannerDesc">Become a Captain! Earn ₹35,000+/mo on homebound routes.</p>
+          </div>
+          <button class="btn-primary" style="padding:0.6rem 1rem; font-size:0.85rem; white-space:nowrap;" id="nativeBannerActionBtn" onclick="toggleRoleFromBanner()">
+            <i data-lucide="car"></i> <span id="nativeBannerActionText">Captain Mode</span>
+          </button>
+        </div>
+
       </div>
     </section>
   </main>
@@ -1865,6 +2011,268 @@
           <span>Dismiss / False Alarm</span>
         </button>
       </div>
+    </div>
+  </div>
+
+  <!-- EDIT PROFILE MODAL (RAPIDO / UBER STYLE) -->
+  <div class="modal-backdrop" id="editProfileModal">
+    <div class="modal-dialog">
+      <button class="modal-close-btn" onclick="closeModal('editProfileModal')"><i data-lucide="x"></i></button>
+      <div style="text-align:center; margin-bottom:1.25rem;">
+        <div class="native-user-avatar-circle" style="margin:0 auto 0.5rem; width:4rem; height:4rem; font-size:1.5rem;" id="editAvatarCircle">
+          <span id="editAvatarText">JR</span>
+        </div>
+        <h3 style="font-size:1.2rem;">Edit Personal Profile</h3>
+        <p style="font-size:0.8rem; color:var(--text-muted);">Update your registered identity and emergency contacts</p>
+      </div>
+
+      <div class="profile-form-grid">
+        <div class="input-group">
+          <label style="font-size:0.85rem; font-weight:600;">Full Name</label>
+          <div class="loc-field">
+            <i data-lucide="user"></i>
+            <input type="text" id="editProfileInputName" value="Jayesh Rajput">
+          </div>
+        </div>
+
+        <div class="input-group">
+          <label style="font-size:0.85rem; font-weight:600;">Registered Phone</label>
+          <div class="loc-field">
+            <i data-lucide="phone"></i>
+            <input type="tel" id="editProfileInputPhone" value="9876543210">
+          </div>
+        </div>
+
+        <div class="input-group">
+          <label style="font-size:0.85rem; font-weight:600;">Email Address</label>
+          <div class="loc-field">
+            <i data-lucide="mail"></i>
+            <input type="email" id="editProfileInputEmail" value="jayesh@example.com">
+          </div>
+        </div>
+
+        <div class="input-group">
+          <label style="font-size:0.85rem; font-weight:600;">Emergency Contact (Safety SOS)</label>
+          <div class="loc-field">
+            <i data-lucide="shield-alert" style="color:var(--brand-danger);"></i>
+            <input type="text" id="editProfileInputEmergency" value="Pooja Sharma (+91-98765-00000)">
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex; gap:0.75rem; margin-top:1rem;">
+        <button class="btn-primary" style="flex:1;" onclick="saveNativeProfile()">
+          <i data-lucide="check"></i> <span>Save Profile</span>
+        </button>
+        <button class="btn-secondary" onclick="closeModal('editProfileModal')">
+          <span>Cancel</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- HELP & SUPPORT MODAL -->
+  <div class="modal-backdrop" id="helpSupportModal">
+    <div class="modal-dialog">
+      <button class="modal-close-btn" onclick="closeModal('helpSupportModal')"><i data-lucide="x"></i></button>
+      <div style="text-align:center; margin-bottom:1.25rem;">
+        <div style="width:3.5rem; height:3.5rem; border-radius:50%; background:var(--brand-primary-light); color:var(--brand-primary); display:inline-flex; align-items:center; justify-content:center; margin-bottom:0.5rem;">
+          <i data-lucide="help-circle" style="width:2rem; height:2rem;"></i>
+        </div>
+        <h3 style="font-size:1.3rem;">24x7 Help &amp; Support</h3>
+        <p style="font-size:0.825rem; color:var(--text-muted);">How can we assist you with your SahiRide journey today?</p>
+      </div>
+
+      <div style="display:flex; flex-direction:column; gap:0.6rem; margin-bottom:1.25rem;">
+        <button class="native-menu-item" style="border:1px solid var(--border-medium); border-radius:var(--radius-md); padding:0.75rem;" onclick="alert('Support Ticket opened for recent ride. Agent will connect in 60s.')">
+          <div class="native-item-left">
+            <i data-lucide="package-search" style="color:var(--brand-primary);"></i>
+            <div class="native-item-info">
+              <span class="native-item-title" style="font-size:0.88rem;">I lost an item in the auto</span>
+              <span class="native-item-subtitle">Report belongings left in your recent trip</span>
+            </div>
+          </div>
+          <i data-lucide="chevron-right" class="native-item-chevron"></i>
+        </button>
+
+        <button class="native-menu-item" style="border:1px solid var(--border-medium); border-radius:var(--radius-md); padding:0.75rem;" onclick="alert('Pricing breakdown: SahiRide charges flat fair per-seat rates with 0% surge.')">
+          <div class="native-item-left">
+            <i data-lucide="receipt" style="color:var(--brand-secondary);"></i>
+            <div class="native-item-info">
+              <span class="native-item-title" style="font-size:0.88rem;">Fare &amp; Billing Query</span>
+              <span class="native-item-subtitle">Discounts, milestone rewards &amp; UPI refunds</span>
+            </div>
+          </div>
+          <i data-lucide="chevron-right" class="native-item-chevron"></i>
+        </button>
+
+        <button class="native-menu-item" style="border:1px solid var(--border-medium); border-radius:var(--radius-md); padding:0.75rem;" onclick="alert('Safety Team Helpline: 1800-SAHI-RIDE (Toll-Free 24x7). Connecting...')">
+          <div class="native-item-left">
+            <i data-lucide="shield-alert" style="color:var(--brand-danger);"></i>
+            <div class="native-item-info">
+              <span class="native-item-title" style="font-size:0.88rem;">Safety &amp; Driver Feedback</span>
+              <span class="native-item-subtitle">Report captain conduct or vehicle safety</span>
+            </div>
+          </div>
+          <i data-lucide="chevron-right" class="native-item-chevron"></i>
+        </button>
+      </div>
+
+      <button class="btn-primary" style="width:100%;" onclick="alert('Connecting to live WhatsApp / In-App Concierge...')">
+        <i data-lucide="message-square"></i> <span>Chat with Live SahiRide Agent</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- NATIVE PAYMENT & WALLET MODAL -->
+  <div class="modal-backdrop" id="nativePaymentModal">
+    <div class="modal-dialog">
+      <button class="modal-close-btn" onclick="closeModal('nativePaymentModal')"><i data-lucide="x"></i></button>
+      <div style="margin-bottom:1.25rem;">
+        <h3 style="font-size:1.25rem; font-weight:800;">💳 Payment &amp; SahiPay Wallet</h3>
+        <p style="font-size:0.825rem; color:var(--text-muted);">Manage payment modes, UPI auto-pay &amp; commuter balance</p>
+      </div>
+
+      <!-- Wallet Balance Card -->
+      <div style="background:linear-gradient(135deg, rgba(16,185,129,0.15), rgba(99,102,241,0.15)); border:1.5px solid var(--brand-secondary); border-radius:var(--radius-lg); padding:1rem; margin-bottom:1rem; display:flex; justify-content:space-between; align-items:center;">
+        <div>
+          <span style="font-size:0.75rem; color:var(--text-muted); text-transform:uppercase; font-weight:700;">SahiRide Cash Balance</span>
+          <div style="font-size:1.6rem; font-weight:900; color:var(--brand-secondary); font-family:var(--font-heading);">₹250.00</div>
+        </div>
+        <button class="btn-primary" style="padding:0.45rem 0.9rem; font-size:0.8rem;" onclick="alert('₹500 added to SahiRide Wallet via Instant UPI!')">
+          <i data-lucide="plus"></i> <span>Add Money</span>
+        </button>
+      </div>
+
+      <!-- Payment Methods List -->
+      <div style="display:flex; flex-direction:column; gap:0.5rem;">
+        <div style="display:flex; align-items:center; justify-content:space-between; padding:0.75rem; background:var(--bg-surface-raised); border:1px solid var(--border-subtle); border-radius:var(--radius-md);">
+          <div style="display:flex; align-items:center; gap:0.75rem;">
+            <i data-lucide="smartphone" style="color:var(--brand-primary);"></i>
+            <div>
+              <strong style="font-size:0.88rem; display:block;">Google Pay / PhonePe UPI</strong>
+              <span style="font-size:0.75rem; color:var(--text-muted);">jayesh@okhdfcbank (Primary)</span>
+            </div>
+          </div>
+          <span class="native-item-tag">Default ✓</span>
+        </div>
+
+        <div style="display:flex; align-items:center; justify-content:space-between; padding:0.75rem; background:var(--bg-surface-raised); border:1px solid var(--border-subtle); border-radius:var(--radius-md);">
+          <div style="display:flex; align-items:center; gap:0.75rem;">
+            <i data-lucide="banknote" style="color:var(--brand-secondary);"></i>
+            <div>
+              <strong style="font-size:0.88rem; display:block;">Direct Cash to Driver</strong>
+              <span style="font-size:0.75rem; color:var(--text-muted);">Exact change or QR handover</span>
+            </div>
+          </div>
+          <button class="pin-select-btn" onclick="alert('Cash handover set as secondary fallback mode.')">Select</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FAVOURITES MODAL -->
+  <div class="modal-backdrop" id="favouritesModal">
+    <div class="modal-dialog">
+      <button class="modal-close-btn" onclick="closeModal('favouritesModal')"><i data-lucide="x"></i></button>
+      <div style="margin-bottom:1.25rem;">
+        <h3 style="font-size:1.25rem; font-weight:800;">💖 Saved Locations &amp; Favourites</h3>
+        <p style="font-size:0.825rem; color:var(--text-muted);">1-click booking shortcuts for daily commute</p>
+      </div>
+
+      <div style="display:flex; flex-direction:column; gap:0.75rem; margin-bottom:1rem;">
+        <div style="display:flex; align-items:center; justify-content:space-between; padding:0.85rem; background:var(--bg-surface-raised); border:1px solid var(--border-subtle); border-radius:var(--radius-md);">
+          <div style="display:flex; align-items:center; gap:0.75rem;">
+            <div class="native-item-icon" style="background:rgba(236,72,153,0.15); color:#EC4899;"><i data-lucide="home"></i></div>
+            <div>
+              <strong style="font-size:0.9rem; display:block;">Home</strong>
+              <span style="font-size:0.78rem; color:var(--text-muted);">Kothrud Stand, Pune</span>
+            </div>
+          </div>
+          <button class="btn-secondary" style="padding:0.35rem 0.75rem; font-size:0.75rem;" onclick="setFavAsDestination('Kothrud Stand, Pune', 18.5074, 73.8077)">Book Ride</button>
+        </div>
+
+        <div style="display:flex; align-items:center; justify-content:space-between; padding:0.85rem; background:var(--bg-surface-raised); border:1px solid var(--border-subtle); border-radius:var(--radius-md);">
+          <div style="display:flex; align-items:center; gap:0.75rem;">
+            <div class="native-item-icon" style="background:rgba(99,102,241,0.15); color:var(--brand-primary);"><i data-lucide="briefcase"></i></div>
+            <div>
+              <strong style="font-size:0.9rem; display:block;">Work / Office</strong>
+              <span style="font-size:0.78rem; color:var(--text-muted);">Hinjewadi Phase 1 Infotech Park</span>
+            </div>
+          </div>
+          <button class="btn-secondary" style="padding:0.35rem 0.75rem; font-size:0.75rem;" onclick="setFavAsDestination('Hinjewadi Phase 1, Pune', 18.5913, 73.7389)">Book Ride</button>
+        </div>
+
+        <div style="display:flex; align-items:center; justify-content:space-between; padding:0.85rem; background:var(--bg-surface-raised); border:1px solid var(--border-subtle); border-radius:var(--radius-md);">
+          <div style="display:flex; align-items:center; gap:0.75rem;">
+            <div class="native-item-icon" style="background:rgba(245,158,11,0.15); color:var(--brand-accent);"><i data-lucide="graduation-cap"></i></div>
+            <div>
+              <strong style="font-size:0.9rem; display:block;">College / University</strong>
+              <span style="font-size:0.78rem; color:var(--text-muted);">PCCOE Akurdi / COEP Pune</span>
+            </div>
+          </div>
+          <button class="btn-secondary" style="padding:0.35rem 0.75rem; font-size:0.75rem;" onclick="setFavAsDestination('PCCOE - Pimpri Chinchwad College of Engineering', 18.6517, 73.7628)">Book Ride</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- REFER & EARN MODAL -->
+  <div class="modal-backdrop" id="referModal">
+    <div class="modal-dialog">
+      <button class="modal-close-btn" onclick="closeModal('referModal')"><i data-lucide="x"></i></button>
+      <div style="text-align:center; margin-bottom:1.25rem;">
+        <div style="width:3.5rem; height:3.5rem; border-radius:50%; background:rgba(245,158,11,0.15); color:var(--brand-accent); display:inline-flex; align-items:center; justify-content:center; margin-bottom:0.5rem;">
+          <i data-lucide="gift" style="width:2rem; height:2rem;"></i>
+        </div>
+        <h3 style="font-size:1.3rem;">Refer Friends, Earn ₹50</h3>
+        <p style="font-size:0.825rem; color:var(--text-muted);">Your friends get 3 FREE RIDES, and you get ₹50 wallet credit on their 1st completed trip!</p>
+      </div>
+
+      <div style="background:var(--bg-surface-raised); border:1.5px dashed var(--brand-accent); border-radius:var(--radius-md); padding:1rem; text-align:center; margin-bottom:1.25rem;">
+        <span style="font-size:0.75rem; color:var(--text-muted);">YOUR EXCLUSIVE REFERRAL CODE</span>
+        <div style="font-size:1.4rem; font-weight:900; color:var(--brand-accent); letter-spacing:0.15em; margin:0.25rem 0;">SAHIJAYESH50</div>
+        <button class="btn-secondary" style="padding:0.35rem 0.85rem; font-size:0.8rem;" onclick="navigator.clipboard?.writeText('https://sahiride.in/invite?code=SAHIJAYESH50'); alert('Referral link copied to clipboard!');">
+          <i data-lucide="copy"></i> <span>Copy Invite Link</span>
+        </button>
+      </div>
+
+      <button class="btn-primary" style="width:100%;" onclick="alert('Opening WhatsApp Share...')">
+        <i data-lucide="share-2"></i> <span>Share on WhatsApp</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- RATING BREAKDOWN MODAL -->
+  <div class="modal-backdrop" id="ratingModal">
+    <div class="modal-dialog">
+      <button class="modal-close-btn" onclick="closeModal('ratingModal')"><i data-lucide="x"></i></button>
+      <div style="text-align:center; margin-bottom:1.25rem;">
+        <div style="display:inline-flex; align-items:center; gap:0.5rem; font-size:2.2rem; font-weight:900; font-family:var(--font-heading); color:#F59E0B;">
+          ★ 5.00
+        </div>
+        <h3 style="font-size:1.15rem; margin-top:0.25rem;">Champion Rider Rating</h3>
+        <p style="font-size:0.825rem; color:var(--text-muted);">Calculated across your last 50 completed pooled &amp; private trips</p>
+      </div>
+
+      <div style="display:flex; flex-direction:column; gap:0.5rem; background:var(--bg-surface-raised); padding:1rem; border-radius:var(--radius-md); border:1px solid var(--border-subtle); margin-bottom:1rem; font-size:0.85rem;">
+        <div style="display:flex; justify-content:space-between;">
+          <span>On-Time Pickup Boarding</span>
+          <strong style="color:var(--brand-secondary);">100%</strong>
+        </div>
+        <div style="display:flex; justify-content:space-between;">
+          <span>Co-Passenger Courtesy</span>
+          <strong style="color:var(--brand-secondary);">5.0 ★</strong>
+        </div>
+        <div style="display:flex; justify-content:space-between;">
+          <span>Driver Respect &amp; Cleanliness</span>
+          <strong style="color:var(--brand-secondary);">5.0 ★</strong>
+        </div>
+      </div>
+
+      <button class="btn-primary" style="width:100%;" onclick="closeModal('ratingModal')">
+        <span>Got It</span>
+      </button>
     </div>
   </div>
 

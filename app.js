@@ -2748,52 +2748,75 @@ function refreshHistoryData() {
 }
 
 // -------------------------------------------------------------
-// 20. SETTINGS & EDITABLE PROFILE ENGINE
+// 20. NATIVE PROFILE & SETTINGS APP ENGINE (RAPIDO / UBER STYLE)
 // -------------------------------------------------------------
 function renderSettingsUI() {
   const isDriver = state.userSession.role === 'driver';
 
-  const desc = document.getElementById('settingsCurrentRoleDesc');
-  if (desc) desc.textContent = `Currently active: ${isDriver ? 'Driver / Captain (Accept & Set Route)' : 'Passenger / Customer (Book Rides)'}`;
+  // 1. Top Profile Header Card Data
+  const profileNameEl = document.getElementById('nativeProfileName');
+  if (profileNameEl) profileNameEl.textContent = state.userSession.name || 'Jayesh Rajput';
 
-  const btnPass = document.getElementById('setRoleBtnPassenger');
-  const btnDriver = document.getElementById('setRoleBtnDriver');
-  if (btnPass) btnPass.classList.toggle('active', !isDriver);
-  if (btnDriver) btnDriver.classList.toggle('active', isDriver);
+  const profilePhoneEl = document.getElementById('nativeProfilePhone');
+  if (profilePhoneEl) profilePhoneEl.textContent = `+91 ${state.userSession.phone || '98765 43210'}`;
 
-  const inpName = document.getElementById('settingsInputName');
-  if (inpName) inpName.value = state.userSession.name;
+  const initials = (state.userSession.name || 'JR').split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+  const avatarTextEl = document.getElementById('nativeAvatarText');
+  if (avatarTextEl) avatarTextEl.textContent = initials;
 
-  const inpPhone = document.getElementById('settingsInputPhone');
-  if (inpPhone) inpPhone.value = state.userSession.phone;
+  const badgeEl = document.getElementById('nativeProfileBadge');
+  if (badgeEl) {
+    badgeEl.textContent = isDriver ? '✓ Verified Captain (Auto MH 12 QX 4920)' : '✓ Verified Rider (Gold Tier)';
+  }
 
-  const inpEmail = document.getElementById('settingsInputEmail');
-  if (inpEmail) inpEmail.value = state.userSession.email;
+  // 2. Theme subtext
+  const themeSub = document.getElementById('nativeThemeSub');
+  if (themeSub) {
+    const isDark = document.documentElement.getAttribute('data-theme') !== 'light';
+    themeSub.textContent = isDark ? 'High-Contrast Dark Mode' : 'Clean Light Mode';
+  }
 
-  const inpEmerg = document.getElementById('settingsInputEmergency');
-  if (inpEmerg) inpEmerg.value = state.userSession.emergency;
+  // 3. Bottom Captain Switch Banner
+  const bannerTitle = document.getElementById('nativeBannerTitle');
+  const bannerDesc = document.getElementById('nativeBannerDesc');
+  const bannerBtnText = document.getElementById('nativeBannerActionText');
 
-  const driverCard = document.getElementById('settingsDriverVehicleCard');
-  if (driverCard) driverCard.style.display = isDriver ? 'block' : 'none';
+  if (isDriver) {
+    if (bannerTitle) bannerTitle.textContent = 'Need a Ride as a Passenger?';
+    if (bannerDesc) bannerDesc.textContent = 'Switch to Passenger Mode to book pooled & solo auto trips.';
+    if (bannerBtnText) bannerBtnText.textContent = 'Passenger Mode';
+  } else {
+    if (bannerTitle) bannerTitle.textContent = 'Earn money with SahiRide';
+    if (bannerDesc) bannerDesc.textContent = 'Become a Captain! Earn ₹35,000+/mo on homebound routes.';
+    if (bannerBtnText) bannerBtnText.textContent = 'Captain Mode';
+  }
 
   initIcons();
 }
 
-function liveUpdateSetting(field, value) {
-  if (field === 'name') state.userSession.name = value;
-  else if (field === 'phone') state.userSession.phone = value;
-  else if (field === 'email') state.userSession.email = value;
-  else if (field === 'emergency') state.userSession.emergency = value;
+function openEditProfileModal() {
+  const nameInput = document.getElementById('editProfileInputName');
+  const phoneInput = document.getElementById('editProfileInputPhone');
+  const emailInput = document.getElementById('editProfileInputEmail');
+  const emergInput = document.getElementById('editProfileInputEmergency');
+  const avatarText = document.getElementById('editAvatarText');
 
-  localStorage.setItem('sahiride_session', JSON.stringify(state.userSession));
-  updateAuthUI();
+  if (nameInput) nameInput.value = state.userSession.name;
+  if (phoneInput) phoneInput.value = state.userSession.phone;
+  if (emailInput) emailInput.value = state.userSession.email;
+  if (emergInput) emergInput.value = state.userSession.emergency;
+
+  const initials = (state.userSession.name || 'JR').split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+  if (avatarText) avatarText.textContent = initials;
+
+  openModal('editProfileModal');
 }
 
-function saveAllSettings() {
-  const name = document.getElementById('settingsInputName')?.value || state.userSession.name;
-  const phone = document.getElementById('settingsInputPhone')?.value || state.userSession.phone;
-  const email = document.getElementById('settingsInputEmail')?.value || state.userSession.email;
-  const emergency = document.getElementById('settingsInputEmergency')?.value || state.userSession.emergency;
+function saveNativeProfile() {
+  const name = document.getElementById('editProfileInputName')?.value || state.userSession.name;
+  const phone = document.getElementById('editProfileInputPhone')?.value || state.userSession.phone;
+  const email = document.getElementById('editProfileInputEmail')?.value || state.userSession.email;
+  const emergency = document.getElementById('editProfileInputEmergency')?.value || state.userSession.emergency;
 
   state.userSession.name = name;
   state.userSession.phone = phone;
@@ -2802,7 +2825,88 @@ function saveAllSettings() {
 
   localStorage.setItem('sahiride_session', JSON.stringify(state.userSession));
   updateAuthUI();
-  alert('✓ Profile settings saved successfully!');
+  renderSettingsUI();
+  closeModal('editProfileModal');
+  alert('✓ Profile successfully updated!');
+}
+
+function openHelpSupportModal() {
+  openModal('helpSupportModal');
+}
+
+function openNativePaymentModal() {
+  openModal('nativePaymentModal');
+}
+
+function openFavouritesModal() {
+  openModal('favouritesModal');
+}
+
+function setFavAsDestination(address, lat, lng) {
+  closeModal('favouritesModal');
+  switchView('passenger');
+  state.passenger.drop = [lat, lng];
+  state.passenger.dropAddress = address;
+  const dropInput = document.getElementById('passDropInput');
+  if (dropInput) dropInput.value = address;
+  renderPassengerRoute();
+}
+
+function openReferModal() {
+  openModal('referModal');
+}
+
+function openRewardsModal() {
+  const totalRides = state.userSession.totalRidesTaken || 1;
+  const nextIn = 5 - (totalRides % 5 || 5);
+  alert(`🏆 SahiRide Commuter Rewards:\n• Total Completed Rides: ${totalRides}\n• 5th-Ride Milestone: 5% flat discount on every 5th trip!\n• Next 5% discount unlocks in ${nextIn} ride(s).`);
+}
+
+function openPowerPassModal() {
+  alert('🎟️ SahiRide Power Pass:\n• Unlimited 38% Shared Auto pooling discounts on all Pune corridors.\n• Priority pickup matching during peak office hours.\n• Active Status: Subscribed (Gold Tier).');
+}
+
+function openCoinsModal() {
+  alert('🪙 SahiRide Coins Balance: 150 Coins (Value: ₹15.00)\n• Earn 10 Coins per completed shared trip.\n• Redeem directly against auto fares on checkout.');
+}
+
+function openRatingModal() {
+  openModal('ratingModal');
+}
+
+function openNotificationsModal() {
+  alert('🔔 Notifications & Sounds:\n✓ Trip arrival audio alerts enabled\n✓ Real-time co-passenger match pings enabled\n✓ SMS OTP dispatch active');
+}
+
+function toggleLanguageMenu() {
+  const currentLang = document.getElementById('nativeLangTag')?.textContent || 'English';
+  let nextLang = 'हिन्दी';
+  if (currentLang === 'हिन्दी') nextLang = 'मराठी';
+  else if (currentLang === 'मराठी') nextLang = 'English';
+
+  const tag = document.getElementById('nativeLangTag');
+  if (tag) tag.textContent = nextLang;
+  alert(`🌐 Language switched to ${nextLang}!`);
+}
+
+function openAboutModal() {
+  alert('ℹ️ SahiRide - AI Shared Auto & Homebound Corridor Routing\nVersion: 2.4.0 (Build 8.118.0)\nMade with ❤️ for Pune & Indian Commuters.');
+}
+
+function subscribeToBeta() {
+  alert('🧪 You have subscribed to SahiRide Beta Fleet!\nYou will receive early access to dynamic detour multi-hop passenger matching.');
+}
+
+function confirmDeleteAccount() {
+  if (confirm('⚠️ Are you sure you want to delete your SahiRide account? This will erase your ride history, wallet balance, and saved locations.')) {
+    localStorage.removeItem('sahiride_session');
+    location.reload();
+  }
+}
+
+function toggleRoleFromBanner() {
+  const newRole = state.userSession.role === 'driver' ? 'passenger' : 'driver';
+  switchUserRoleMode(newRole);
 }
 
 function switchUserRoleMode(targetRole) {
