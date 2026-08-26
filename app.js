@@ -450,6 +450,13 @@ document.addEventListener('DOMContentLoaded', () => {
   // Always initialize onboarding slide 1
   goToSlide(1);
 
+  // Auto-advance features showcase every 6 seconds
+  setInterval(() => {
+    if (!state.userSession.isLoggedIn && state.currentView === 'onboarding') {
+      nextSlide();
+    }
+  }, 6000);
+
   if (!state.userSession.isLoggedIn) {
     switchView('onboarding');
   } else {
@@ -466,6 +473,8 @@ function initIcons() {
 // -------------------------------------------------------------
 // 5. ONBOARDING CAROUSEL ENGINE (4 SLIDES INCLUDING 5% 5TH RIDE)
 // -------------------------------------------------------------
+let carouselAutoPlayTimer = null;
+
 function goToSlide(slideNum) {
   state.currentSlide = slideNum;
   for (let i = 1; i <= state.totalSlides; i++) {
@@ -483,7 +492,7 @@ function goToSlide(slideNum) {
 
   const nextBtn = document.getElementById('onboardingNextBtn');
   if (nextBtn) {
-    nextBtn.innerHTML = slideNum === state.totalSlides ? '<span>Get Started &rarr; Login</span>' : '<span>Next &rarr;</span>';
+    nextBtn.innerHTML = slideNum === state.totalSlides ? '<span>First Feature &olarr;</span>' : '<span>Next Feature &rarr;</span>';
   }
 
   initIcons();
@@ -493,12 +502,21 @@ function nextSlide() {
   if (state.currentSlide < state.totalSlides) {
     goToSlide(state.currentSlide + 1);
   } else {
-    skipOnboarding();
+    goToSlide(1);
+  }
+}
+
+function prevSlide() {
+  if (state.currentSlide > 1) {
+    goToSlide(state.currentSlide - 1);
+  } else {
+    goToSlide(state.totalSlides);
   }
 }
 
 function skipOnboarding() {
-  switchView('login');
+  const phoneInput = document.getElementById('loginPhoneInput');
+  if (phoneInput) phoneInput.focus();
 }
 
 // -------------------------------------------------------------

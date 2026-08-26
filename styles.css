@@ -712,8 +712,35 @@ textarea::placeholder {
 }
 
 /* -------------------------------------------------------------
-   0. ONBOARDING CAROUSEL SLIDES (BEFORE LOGIN)
+   0. UNIFIED PRE-LOGIN EXPERIENCE (FEATURES CAROUSEL + LOGIN SCREEN)
    ------------------------------------------------------------- */
+.prelogin-unified-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2.5rem 1.5rem;
+  background: radial-gradient(circle at 50% 20%, rgba(245, 158, 11, 0.1), transparent 60%);
+  width: 100%;
+}
+
+.prelogin-grid-layout {
+  display: grid;
+  grid-template-columns: 1.15fr 1fr;
+  gap: 2rem;
+  max-width: 1140px;
+  width: 100%;
+  align-items: stretch;
+}
+
+@media (max-width: 960px) {
+  .prelogin-grid-layout {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+}
+
 .onboarding-screen {
   min-height: 100vh;
   display: flex;
@@ -726,12 +753,11 @@ textarea::placeholder {
 }
 
 .onboarding-card {
-  max-width: 580px;
   width: 100%;
   background: var(--bg-surface);
   border: 1px solid var(--border-medium);
   border-radius: var(--radius-xl);
-  padding: 2.5rem 2rem;
+  padding: 2.25rem 2rem;
   box-shadow: var(--shadow-lg);
   position: relative;
   text-align: center;
