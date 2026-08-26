@@ -357,6 +357,13 @@ textarea::placeholder {
   background: var(--brand-primary-light);
 }
 
+.user-profile-btn.active {
+  border-color: var(--brand-primary);
+  background: var(--brand-primary);
+  color: #000;
+  box-shadow: var(--shadow-sm);
+}
+
 .user-avatar-dot {
   width: 0.6rem;
   height: 0.6rem;

@@ -795,7 +795,6 @@ function updateRoleAccessUI() {
   const tabPassenger = document.getElementById('tabBtn-passenger');
   const tabDriver = document.getElementById('tabBtn-driver');
   const tabHistory = document.getElementById('tabBtn-history');
-  const tabSettings = document.getElementById('tabBtn-settings');
   const tabLabelHistory = document.getElementById('tabLabelHistory');
 
   const mTabLanding = document.getElementById('mTab-landing');
@@ -817,12 +816,12 @@ function updateRoleAccessUI() {
   if (role === 'passenger') {
     // ==========================================
     // 👤 CUSTOMER / PASSENGER MODE:
-    // Only sees: [ Book Ride ] [ My Rides ] [ Settings ]
+    // Only sees: [ Book Ride ] [ My Rides & Receipts ]
+    // (Profile & Settings accessed via User Profile pill)
     // ==========================================
     if (tabPassenger) tabPassenger.style.display = 'inline-flex';
     if (tabDriver) tabDriver.style.display = 'none';
     if (tabHistory) tabHistory.style.display = 'inline-flex';
-    if (tabSettings) tabSettings.style.display = 'inline-flex';
     if (tabLabelHistory) tabLabelHistory.textContent = 'My Rides & Receipts';
 
     if (mTabPassenger) mTabPassenger.style.display = 'flex';
@@ -841,13 +840,12 @@ function updateRoleAccessUI() {
   } else {
     // ==========================================
     // 🚖 DRIVER / CAPTAIN MODE:
-    // Only sees: [ Driver Cockpit ] [ Daily Income & History ] [ Settings ]
-    // (NO Free Rides, NO Customer views)
+    // Only sees: [ Driver Cockpit ] [ Daily Income & History ]
+    // (Profile & Settings accessed via User Profile pill)
     // ==========================================
     if (tabPassenger) tabPassenger.style.display = 'none';
     if (tabDriver) tabDriver.style.display = 'inline-flex';
     if (tabHistory) tabHistory.style.display = 'inline-flex';
-    if (tabSettings) tabSettings.style.display = 'inline-flex';
     if (tabLabelHistory) tabLabelHistory.textContent = 'Daily Income & History';
 
     if (mTabPassenger) mTabPassenger.style.display = 'none';
@@ -903,6 +901,12 @@ function switchView(viewName) {
   document.querySelectorAll('.view-tab-btn').forEach(btn => btn.classList.remove('active'));
   const targetBtn = document.getElementById(`tabBtn-${viewName}`);
   if (targetBtn) targetBtn.classList.add('active');
+
+  // Highlight User Profile Pill when viewing Settings/Profile
+  const userProfileBtn = document.getElementById('userProfileBtn');
+  if (userProfileBtn) {
+    userProfileBtn.classList.toggle('active', viewName === 'settings');
+  }
 
   document.querySelectorAll('.mobile-nav-item').forEach(m => m.classList.remove('active'));
   const targetMobileBtn = document.getElementById(`mTab-${viewName}`);
