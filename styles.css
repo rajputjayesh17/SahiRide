@@ -196,7 +196,6 @@ textarea::placeholder {
   border: none;
 }
 
-/* Explicit high-visibility white font in dark theme, dark in light theme */
 [data-theme="dark"] .phone-input-row input,
 [data-theme="dark"] #loginPhoneInput {
   color: #FFFFFF !important;
@@ -339,7 +338,6 @@ textarea::placeholder {
   gap: 0.6rem;
 }
 
-/* User Account Profile Pill / Login Trigger */
 .user-profile-btn {
   display: inline-flex;
   align-items: center;
@@ -1374,7 +1372,6 @@ textarea::placeholder {
   stroke-width: 2.5;
 }
 
-/* Pulsating Real-Time GPS Radar Ripple */
 .vehicle-radar-pulse {
   position: absolute;
   width: 50px;
@@ -1671,6 +1668,241 @@ textarea::placeholder {
 .profile-btn-row {
   display: flex;
   gap: 0.75rem;
+}
+
+/* -------------------------------------------------------------
+   6. RIDE HISTORY & EARNINGS VIEW STYLES
+   ------------------------------------------------------------- */
+.history-section {
+  padding: 1.5rem 0;
+  max-width: 920px;
+  margin: 0 auto;
+}
+
+.history-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.history-summary-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.history-summary-card span {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  font-weight: 600;
+  display: block;
+}
+
+.history-summary-card strong {
+  font-family: var(--font-heading);
+  font-size: 1.75rem;
+  color: var(--brand-secondary);
+  display: block;
+  margin-top: 0.2rem;
+}
+
+.history-filter-row {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.25rem;
+  overflow-x: auto;
+  padding-bottom: 0.35rem;
+}
+
+.history-filter-chip {
+  padding: 0.4rem 0.85rem;
+  border-radius: var(--radius-full);
+  background: var(--bg-surface-raised);
+  border: 1px solid var(--border-subtle);
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all var(--transition-fast);
+}
+
+.history-filter-chip.active {
+  background: var(--brand-primary);
+  color: #000;
+  border-color: var(--brand-primary);
+}
+
+.trip-history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.trip-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem;
+  transition: transform var(--transition-fast), border-color var(--transition-fast);
+}
+
+.trip-card:hover {
+  border-color: var(--brand-primary);
+}
+
+.trip-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.6rem;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.trip-id-date strong {
+  font-size: 0.95rem;
+  color: var(--text-main);
+}
+
+.trip-id-date span {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  display: block;
+}
+
+.trip-payout-badge {
+  font-family: var(--font-heading);
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--brand-secondary);
+  text-align: right;
+}
+
+.trip-payout-badge span {
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  display: block;
+}
+
+.trip-card-route {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.trip-route-stop {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.88rem;
+}
+
+.trip-route-stop i {
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+}
+
+.trip-card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  padding-top: 0.5rem;
+  border-top: 1px dashed var(--border-subtle);
+}
+
+/* -------------------------------------------------------------
+   7. SETTINGS & PROFILE VIEW STYLES
+   ------------------------------------------------------------- */
+.settings-section {
+  padding: 1.5rem 0;
+  max-width: 780px;
+  margin: 0 auto;
+}
+
+.settings-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-xl);
+  padding: 1.75rem;
+  box-shadow: var(--shadow-lg);
+  margin-bottom: 1.5rem;
+}
+
+.settings-title-row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 1.25rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.settings-title-row h3 {
+  font-size: 1.15rem;
+}
+
+.settings-field-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+@media (max-width: 600px) {
+  .settings-field-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.settings-input-box {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.settings-input-box label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.settings-input-box input,
+.settings-input-box select {
+  background: var(--bg-surface-raised);
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-md);
+  padding: 0.7rem 0.85rem;
+  color: var(--text-main) !important;
+  font-size: 0.92rem;
+  font-weight: 600;
+  width: 100%;
+}
+
+.settings-input-box input:focus,
+.settings-input-box select:focus {
+  border-color: var(--brand-primary);
+}
+
+.role-switcher-card {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.12), rgba(16, 185, 129, 0.12));
+  border: 2px solid var(--brand-primary);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem;
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
 }
 
 /* -------------------------------------------------------------
@@ -2578,7 +2810,6 @@ input:checked + .slider:before {
   color: var(--brand-danger);
 }
 
-/* Driver Ride Mode Selector */
 .driver-mode-selector {
   display: flex;
   gap: 0.4rem;
@@ -2603,17 +2834,6 @@ input:checked + .slider:before {
   font-weight: 700;
 }
 
-.dmode-btn.active-route {
-  background: var(--brand-accent);
-  color: #fff;
-}
-
-.dmode-btn.active-pool {
-  background: var(--brand-secondary);
-  color: #fff;
-}
-
-/* Set My Route (Homebound) Card */
 .homebound-config-card {
   background: var(--bg-surface-raised);
   border: 1px solid var(--brand-accent);
@@ -2632,12 +2852,10 @@ input:checked + .slider:before {
   margin-bottom: 0.6rem;
 }
 
-/* Detour Radius Slider */
 .detour-slider-row {
   margin-top: 0.75rem;
 }
 
-/* Sequenced Passenger Manifest */
 .manifest-card {
   background: var(--bg-surface);
   border: 1px solid var(--border-medium);

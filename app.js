@@ -764,35 +764,37 @@ function updateRoleAccessUI() {
 
   const tabPassenger = document.getElementById('tabBtn-passenger');
   const tabDriver = document.getElementById('tabBtn-driver');
-  const tabMatching = document.getElementById('tabBtn-matching');
-  const tabAdmin = document.getElementById('tabBtn-admin');
+  const tabHistory = document.getElementById('tabBtn-history');
+  const tabSettings = document.getElementById('tabBtn-settings');
+  const tabLabelHistory = document.getElementById('tabLabelHistory');
 
   const mTabPassenger = document.getElementById('mTab-passenger');
   const mTabDriver = document.getElementById('mTab-driver');
-  const mTabMatching = document.getElementById('mTab-matching');
-  const mTabAdmin = document.getElementById('mTab-admin');
+  const mTabHistory = document.getElementById('mTab-history');
+  const mTabSettings = document.getElementById('mTab-settings');
+  const mTabLabelHistory = document.getElementById('mTabLabelHistory');
 
   const heroBtnPassenger = document.getElementById('heroBtnPassenger');
   const heroBtnDriver = document.getElementById('heroBtnDriver');
   const heroBtnSandbox = document.getElementById('heroBtnSandbox');
 
-  // Internal developer / admin tabs are always hidden from main view
-  if (tabMatching) tabMatching.style.display = 'none';
-  if (tabAdmin) tabAdmin.style.display = 'none';
-  if (mTabMatching) mTabMatching.style.display = 'none';
-  if (mTabAdmin) mTabAdmin.style.display = 'none';
   if (heroBtnSandbox) heroBtnSandbox.style.display = 'none';
 
   if (role === 'passenger') {
     // ==========================================
     // 👤 CUSTOMER / PASSENGER MODE:
-    // User sees ONLY Customer / Passenger Window
     // ==========================================
     if (tabPassenger) tabPassenger.style.display = 'inline-flex';
     if (tabDriver) tabDriver.style.display = 'none';
+    if (tabHistory) tabHistory.style.display = 'inline-flex';
+    if (tabSettings) tabSettings.style.display = 'inline-flex';
+    if (tabLabelHistory) tabLabelHistory.textContent = 'My Rides & Receipts';
 
     if (mTabPassenger) mTabPassenger.style.display = 'flex';
     if (mTabDriver) mTabDriver.style.display = 'none';
+    if (mTabHistory) mTabHistory.style.display = 'flex';
+    if (mTabSettings) mTabSettings.style.display = 'flex';
+    if (mTabLabelHistory) mTabLabelHistory.textContent = 'My Rides';
 
     if (heroBtnPassenger) heroBtnPassenger.style.display = 'inline-flex';
     if (heroBtnDriver) heroBtnDriver.style.display = 'none';
@@ -804,13 +806,18 @@ function updateRoleAccessUI() {
   } else {
     // ==========================================
     // 🚖 DRIVER / CAPTAIN MODE:
-    // User sees ONLY Driver Window
     // ==========================================
     if (tabPassenger) tabPassenger.style.display = 'none';
     if (tabDriver) tabDriver.style.display = 'inline-flex';
+    if (tabHistory) tabHistory.style.display = 'inline-flex';
+    if (tabSettings) tabSettings.style.display = 'inline-flex';
+    if (tabLabelHistory) tabLabelHistory.textContent = 'Daily Income & History';
 
     if (mTabPassenger) mTabPassenger.style.display = 'none';
     if (mTabDriver) mTabDriver.style.display = 'flex';
+    if (mTabHistory) mTabHistory.style.display = 'flex';
+    if (mTabSettings) mTabSettings.style.display = 'flex';
+    if (mTabLabelHistory) mTabLabelHistory.textContent = 'Earnings';
 
     if (heroBtnPassenger) heroBtnPassenger.style.display = 'none';
     if (heroBtnDriver) heroBtnDriver.style.display = 'inline-flex';
@@ -858,6 +865,10 @@ function switchView(viewName) {
       initPassengerMap();
     } else if (viewName === 'driver') {
       initDriverMap();
+    } else if (viewName === 'history') {
+      renderHistoryUI();
+    } else if (viewName === 'settings') {
+      renderSettingsUI();
     } else if (viewName === 'matching') {
       initSandboxMap();
     } else if (viewName === 'admin') {
@@ -1448,11 +1459,11 @@ function recalcPassengerFares() {
   // =========================================================================
   // DRIVER GUARANTEED PAYOUT CALCULATION:
   // - SahiRide 100% funds & subsidizes customer free rides and 5% discounts.
-  // - Driver is paid based on standard gross fare, minus 15% platform fee.
+  // - Driver is paid based on standard gross fare, minus 17% platform fee.
   // - Deduction is never exposed to driver; driver sees net guaranteed payout.
   // =========================================================================
   const grossTripValue = (state.passenger.mode === 'share' ? standardTotalShare : standardSoloFare);
-  const driverNetPayout = Math.round(grossTripValue * 0.85); // 15% platform fee deducted silently
+  const driverNetPayout = Math.round(grossTripValue * 0.83); // 17% platform fee deducted silently
   state.passenger.driverNetPayout = driverNetPayout;
 
   // Update UI pricing elements
@@ -2366,4 +2377,359 @@ function calculateHaversineKm(lat1, lon1, lat2, lon2) {
             Math.sin(dLon / 2) * Math.sin(dLon / 2);
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   return R * c;
+}
+
+// -------------------------------------------------------------
+// 19. RIDE HISTORY & DRIVER INCOME MANAGEMENT ENGINE
+// -------------------------------------------------------------
+const driverTripHistoryDatabase = [
+  {
+    id: "SR-9812",
+    time: "Today, 10:45 PM",
+    pickup: "FC Road, Shivajinagar",
+    drop: "Kothrud Depot, Pune",
+    type: "route",
+    typeName: "✨ Homebound Route Match",
+    pax: "Pooja T. (1 Seat)",
+    dist: "8.2 km",
+    grossFare: 98.00,
+    netPayout: 81.00, // 83% of gross (17% platform fee)
+    status: "Completed ✓",
+    paymentMode: "UPI Instant Credit"
+  },
+  {
+    id: "SR-9804",
+    time: "Today, 08:30 PM",
+    pickup: "Hinjewadi Phase 1",
+    drop: "Baner High Street",
+    type: "pool",
+    typeName: "👥 Shared Auto Pool (3/3)",
+    pax: "Rahul M. + Priya S. + Amit K.",
+    dist: "12.4 km",
+    grossFare: 223.00,
+    netPayout: 185.00,
+    status: "Completed ✓",
+    paymentMode: "SahiRide Direct Auto-Pay"
+  },
+  {
+    id: "SR-9790",
+    time: "Today, 06:15 PM",
+    pickup: "PCCOE Akurdi",
+    drop: "Shivajinagar Station",
+    type: "pool",
+    typeName: "👥 Shared Auto Pool (2/3)",
+    pax: "Sneha R. + Rohit P.",
+    dist: "14.1 km",
+    grossFare: 175.00,
+    netPayout: 145.00,
+    status: "Completed ✓",
+    paymentMode: "UPI Instant Credit"
+  },
+  {
+    id: "SR-9778",
+    time: "Today, 04:00 PM",
+    pickup: "Swargate Bus Stand",
+    drop: "Pune Airport, Lohegaon",
+    type: "solo",
+    typeName: "🚖 Private Solo Cab",
+    pax: "Vikram Malhotra",
+    dist: "16.8 km",
+    grossFare: 295.00,
+    netPayout: 245.00,
+    status: "Completed ✓",
+    paymentMode: "Cash Handover"
+  },
+  {
+    id: "SR-9762",
+    time: "Today, 01:20 PM",
+    pickup: "Deccan Gymkhana",
+    drop: "Aundh D-Mart",
+    type: "pool",
+    typeName: "👥 Shared Auto Pool (2/3)",
+    pax: "Kunal S. + Ananya D.",
+    dist: "7.6 km",
+    grossFare: 115.00,
+    netPayout: 95.00,
+    status: "Completed ✓",
+    paymentMode: "UPI Instant Credit"
+  },
+  {
+    id: "SR-9740",
+    time: "Yesterday, 09:10 PM",
+    pickup: "Kothrud Stand",
+    drop: "Pune Railway Station",
+    type: "route",
+    typeName: "✨ Homebound Route Match",
+    pax: "Aditya Deshmukh",
+    dist: "9.5 km",
+    grossFare: 120.00,
+    netPayout: 100.00,
+    status: "Completed ✓",
+    paymentMode: "UPI Instant Credit"
+  },
+  {
+    id: "SR-9725",
+    time: "Yesterday, 06:40 PM",
+    pickup: "Magarpatta Cybercity",
+    drop: "Koregaon Park",
+    type: "pool",
+    typeName: "👥 Shared Auto Pool (3/3)",
+    pax: "Meera K. + Varun J. + Neha G.",
+    dist: "6.8 km",
+    grossFare: 180.00,
+    netPayout: 150.00,
+    status: "Completed ✓",
+    paymentMode: "SahiRide Direct Auto-Pay"
+  },
+  {
+    id: "SR-9710",
+    time: "Yesterday, 03:15 PM",
+    pickup: "Hadapsar Gadital",
+    drop: "Camp / MG Road",
+    type: "solo",
+    typeName: "🛺 Solo Auto Ride",
+    pax: "Suresh Patil",
+    dist: "7.2 km",
+    grossFare: 115.00,
+    netPayout: 95.00,
+    status: "Completed ✓",
+    paymentMode: "UPI Instant Credit"
+  }
+];
+
+let currentHistoryFilter = 'all';
+
+function renderHistoryUI(filterType = currentHistoryFilter) {
+  currentHistoryFilter = filterType;
+  const isDriver = state.userSession.role === 'driver';
+
+  const title = document.getElementById('historyPageTitle');
+  const subtitle = document.getElementById('historyPageSubtitle');
+  const metricsGrid = document.getElementById('historyMetricsGrid');
+  const filterRow = document.getElementById('historyFilterRow');
+  const list = document.getElementById('tripHistoryList');
+
+  if (isDriver) {
+    if (title) title.innerHTML = '💰 Driver Daily Income &amp; Trip History';
+    if (subtitle) subtitle.textContent = 'Real-time daily earnings, homebound return profit & net guaranteed payouts (17% platform fee retained)';
+
+    if (metricsGrid) {
+      metricsGrid.innerHTML = `
+        <div class="history-summary-card">
+          <span>Today's Total Net Payout</span>
+          <strong>₹1,460.00</strong>
+          <p style="font-size:0.75rem; color:var(--brand-secondary); font-weight:700; margin-top:0.2rem;">✓ 8 Completed Trips</p>
+        </div>
+        <div class="history-summary-card">
+          <span>Homebound Corridor Extra</span>
+          <strong style="color:var(--brand-accent);">₹420.00</strong>
+          <p style="font-size:0.75rem; color:var(--text-muted); margin-top:0.2rem;">2 Empty Deadheads Eliminated</p>
+        </div>
+        <div class="history-summary-card">
+          <span>Shared Pool Capacity</span>
+          <strong>₹680.00</strong>
+          <p style="font-size:0.75rem; color:var(--text-muted); margin-top:0.2rem;">4 Trips (3/3 Seats Filled)</p>
+        </div>
+        <div class="history-summary-card">
+          <span>Solo Rides Payout</span>
+          <strong style="color:var(--brand-primary);">₹360.00</strong>
+          <p style="font-size:0.75rem; color:var(--text-muted); margin-top:0.2rem;">2 Direct Point-to-Point</p>
+        </div>
+      `;
+    }
+
+    if (filterRow) {
+      filterRow.innerHTML = `
+        <button class="history-filter-chip ${filterType === 'all' ? 'active' : ''}" onclick="filterHistory('all', this)">All Trips (8)</button>
+        <button class="history-filter-chip ${filterType === 'today' ? 'active' : ''}" onclick="filterHistory('today', this)">Today (5)</button>
+        <button class="history-filter-chip ${filterType === 'route' ? 'active' : ''}" onclick="filterHistory('route', this)">Homebound Matches (2)</button>
+        <button class="history-filter-chip ${filterType === 'pool' ? 'active' : ''}" onclick="filterHistory('pool', this)">Shared Auto Pools (4)</button>
+        <button class="history-filter-chip ${filterType === 'solo' ? 'active' : ''}" onclick="filterHistory('solo', this)">Solo Rides (2)</button>
+      `;
+    }
+
+    if (list) {
+      let filtered = driverTripHistoryDatabase;
+      if (filterType === 'today') filtered = driverTripHistoryDatabase.filter(t => t.time.includes('Today'));
+      else if (filterType === 'route') filtered = driverTripHistoryDatabase.filter(t => t.type === 'route');
+      else if (filterType === 'pool') filtered = driverTripHistoryDatabase.filter(t => t.type === 'pool');
+      else if (filterType === 'solo') filtered = driverTripHistoryDatabase.filter(t => t.type === 'solo');
+
+      list.innerHTML = filtered.map(t => `
+        <div class="trip-card">
+          <div class="trip-card-header">
+            <div class="trip-id-date">
+              <strong>${t.typeName} • #${t.id}</strong>
+              <span>${t.time} • ${t.pax}</span>
+            </div>
+            <div class="trip-payout-badge">
+              +₹${t.netPayout.toFixed(2)}
+              <span>Net Driver Payout</span>
+            </div>
+          </div>
+          <div class="trip-card-route">
+            <div class="trip-route-stop">
+              <i data-lucide="navigation" style="color:var(--brand-secondary);"></i>
+              <div><strong>Pickup:</strong> ${t.pickup}</div>
+            </div>
+            <div class="trip-route-stop">
+              <i data-lucide="map-pin" style="color:var(--brand-danger);"></i>
+              <div><strong>Dropoff:</strong> ${t.drop}</div>
+            </div>
+          </div>
+          <div class="trip-card-footer">
+            <span><i data-lucide="check-circle-2" style="width:0.85rem; height:0.85rem; color:var(--brand-secondary); display:inline-block; vertical-align:middle;"></i> ${t.status} (${t.dist})</span>
+            <span style="color:var(--text-muted);">${t.paymentMode}</span>
+          </div>
+        </div>
+      `).join('');
+    }
+  } else {
+    // Passenger / Customer View
+    if (title) title.innerHTML = '📜 My Past Rides &amp; Receipts';
+    if (subtitle) subtitle.textContent = 'View your completed journeys, discount savings & digital trip receipts';
+
+    if (metricsGrid) {
+      metricsGrid.innerHTML = `
+        <div class="history-summary-card">
+          <span>Total Rides Taken</span>
+          <strong>${state.userSession.totalRidesTaken} Rides</strong>
+          <p style="font-size:0.75rem; color:var(--brand-secondary); font-weight:700; margin-top:0.2rem;">Next loyalty discount in ${5 - (state.userSession.totalRidesTaken % 5 || 5)} rides</p>
+        </div>
+        <div class="history-summary-card">
+          <span>Free Rides Remaining</span>
+          <strong style="color:var(--brand-primary);">${state.userSession.freeRidesRemaining} of 3</strong>
+          <p style="font-size:0.75rem; color:var(--text-muted); margin-top:0.2rem;">Coupon: FREE3RIDES (100% OFF)</p>
+        </div>
+        <div class="history-summary-card">
+          <span>Total Commute Savings</span>
+          <strong>₹485.00</strong>
+          <p style="font-size:0.75rem; color:var(--brand-secondary); font-weight:700; margin-top:0.2rem;">38% Pool + Welcome Free</p>
+        </div>
+      `;
+    }
+
+    if (filterRow) {
+      filterRow.innerHTML = `
+        <button class="history-filter-chip active">All My Bookings</button>
+      `;
+    }
+
+    if (list) {
+      list.innerHTML = `
+        <div class="trip-card">
+          <div class="trip-card-header">
+            <div class="trip-id-date">
+              <strong>🛺 Shared Auto (38% OFF Pool) • #SR-8492</strong>
+              <span>Today, 10:15 PM • Captain: Ramesh Shinde (4.9 ★)</span>
+            </div>
+            <div class="trip-payout-badge" style="color:var(--brand-secondary);">
+              ₹0.00
+              <span style="color:var(--brand-secondary);">100% FREE (Welcome Pass)</span>
+            </div>
+          </div>
+          <div class="trip-card-route">
+            <div class="trip-route-stop">
+              <i data-lucide="navigation" style="color:var(--brand-secondary);"></i>
+              <div><strong>Pickup:</strong> FC Road, Shivajinagar, Pune</div>
+            </div>
+            <div class="trip-route-stop">
+              <i data-lucide="map-pin" style="color:var(--brand-danger);"></i>
+              <div><strong>Dropoff:</strong> Kothrud Stand, Pune</div>
+            </div>
+          </div>
+          <div class="trip-card-footer">
+            <span><i data-lucide="shield-check" style="color:var(--brand-secondary); width:0.85rem; height:0.85rem; display:inline-block; vertical-align:middle;"></i> SahiRide Company Subsidized Driver in Full</span>
+            <span>OTP: 5839 • Auto MH12 QX 4920</span>
+          </div>
+        </div>
+      `;
+    }
+  }
+
+  initIcons();
+}
+
+function filterHistory(type, btn) {
+  document.querySelectorAll('.history-filter-chip').forEach(c => c.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  renderHistoryUI(type);
+}
+
+function refreshHistoryData() {
+  renderHistoryUI();
+  alert('Trip history and daily earnings refreshed!');
+}
+
+// -------------------------------------------------------------
+// 20. SETTINGS & EDITABLE PROFILE ENGINE
+// -------------------------------------------------------------
+function renderSettingsUI() {
+  const isDriver = state.userSession.role === 'driver';
+
+  const desc = document.getElementById('settingsCurrentRoleDesc');
+  if (desc) desc.textContent = `Currently active: ${isDriver ? 'Driver / Captain (Accept & Set Route)' : 'Passenger / Customer (Book Rides)'}`;
+
+  const btnPass = document.getElementById('setRoleBtnPassenger');
+  const btnDriver = document.getElementById('setRoleBtnDriver');
+  if (btnPass) btnPass.classList.toggle('active', !isDriver);
+  if (btnDriver) btnDriver.classList.toggle('active', isDriver);
+
+  const inpName = document.getElementById('settingsInputName');
+  if (inpName) inpName.value = state.userSession.name;
+
+  const inpPhone = document.getElementById('settingsInputPhone');
+  if (inpPhone) inpPhone.value = state.userSession.phone;
+
+  const inpEmail = document.getElementById('settingsInputEmail');
+  if (inpEmail) inpEmail.value = state.userSession.email;
+
+  const inpEmerg = document.getElementById('settingsInputEmergency');
+  if (inpEmerg) inpEmerg.value = state.userSession.emergency;
+
+  const driverCard = document.getElementById('settingsDriverVehicleCard');
+  if (driverCard) driverCard.style.display = isDriver ? 'block' : 'none';
+
+  initIcons();
+}
+
+function liveUpdateSetting(field, value) {
+  if (field === 'name') state.userSession.name = value;
+  else if (field === 'phone') state.userSession.phone = value;
+  else if (field === 'email') state.userSession.email = value;
+  else if (field === 'emergency') state.userSession.emergency = value;
+
+  localStorage.setItem('sahiride_session', JSON.stringify(state.userSession));
+  updateAuthUI();
+}
+
+function saveAllSettings() {
+  const name = document.getElementById('settingsInputName')?.value || state.userSession.name;
+  const phone = document.getElementById('settingsInputPhone')?.value || state.userSession.phone;
+  const email = document.getElementById('settingsInputEmail')?.value || state.userSession.email;
+  const emergency = document.getElementById('settingsInputEmergency')?.value || state.userSession.emergency;
+
+  state.userSession.name = name;
+  state.userSession.phone = phone;
+  state.userSession.email = email;
+  state.userSession.emergency = emergency;
+
+  localStorage.setItem('sahiride_session', JSON.stringify(state.userSession));
+  updateAuthUI();
+  alert('✓ Profile settings saved successfully!');
+}
+
+function switchUserRoleMode(targetRole) {
+  state.userSession.role = targetRole;
+  localStorage.setItem('sahiride_session', JSON.stringify(state.userSession));
+  
+  updateAuthUI();
+  updateRoleAccessUI();
+  renderSettingsUI();
+
+  if (targetRole === 'passenger') {
+    switchView('passenger');
+  } else {
+    switchView('driver');
+  }
 }

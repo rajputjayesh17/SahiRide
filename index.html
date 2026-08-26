@@ -46,27 +46,33 @@
 
       <!-- Main View Tabs Nav (Desktop) -->
       <nav class="view-tabs-nav">
-        <button class="view-tab-btn" id="tabBtn-landing" onclick="switchView('landing')">
-          <i data-lucide="home"></i> <span data-i18n="nav_home">Home</span>
-        </button>
         <button class="view-tab-btn" id="tabBtn-passenger" onclick="switchView('passenger')">
-          <i data-lucide="user"></i> <span data-i18n="nav_passenger">Passenger App</span>
+          <i data-lucide="navigation"></i> <span>Book Ride</span>
         </button>
         <button class="view-tab-btn" id="tabBtn-driver" onclick="switchView('driver')">
-          <i data-lucide="car"></i> <span data-i18n="nav_driver">Driver Cockpit</span>
+          <i data-lucide="car"></i> <span>Driver Cockpit</span>
         </button>
-        <button class="view-tab-btn" id="tabBtn-matching" onclick="switchView('matching')">
-          <i data-lucide="cpu"></i> <span data-i18n="nav_algorithm">Match Sandbox</span>
+        <button class="view-tab-btn" id="tabBtn-history" onclick="switchView('history')">
+          <i data-lucide="history"></i> <span id="tabLabelHistory">Ride History &amp; Earnings</span>
         </button>
-        <button class="view-tab-btn" id="tabBtn-admin" onclick="switchView('admin')">
-          <i data-lucide="shield-check"></i> <span data-i18n="nav_admin">Admin Fleet</span>
+        <button class="view-tab-btn" id="tabBtn-settings" onclick="switchView('settings')">
+          <i data-lucide="settings"></i> <span>Settings</span>
+        </button>
+        <button class="view-tab-btn" id="tabBtn-landing" onclick="switchView('landing')" style="display:none;">
+          <i data-lucide="home"></i> <span>Home</span>
+        </button>
+        <button class="view-tab-btn" id="tabBtn-matching" onclick="switchView('matching')" style="display:none;">
+          <i data-lucide="cpu"></i> <span>Match Sandbox</span>
+        </button>
+        <button class="view-tab-btn" id="tabBtn-admin" onclick="switchView('admin')" style="display:none;">
+          <i data-lucide="shield-check"></i> <span>Admin Fleet</span>
         </button>
       </nav>
 
       <!-- Header Controls: User Profile / Login, Language, Theme, SOS -->
       <div class="header-actions">
         <!-- User Account Profile Button (Opens User Details & Logout Window) -->
-        <button class="user-profile-btn" id="userProfileBtn" onclick="openProfileModal()">
+        <button class="user-profile-btn" id="userProfileBtn" onclick="switchView('settings')">
           <span class="user-avatar-dot" id="userStatusDot"></span>
           <span id="userProfileLabel">Jayesh (Passenger)</span>
           <span class="badge-new-user" id="headerNewUserBadge" style="display:none;">3 FREE RIDES</span>
@@ -102,20 +108,20 @@
        MOBILE BOTTOM NAVIGATION BAR
        ========================================================================= -->
   <div class="mobile-bottom-bar">
-    <button class="mobile-nav-item" id="mTab-landing" onclick="switchView('landing')">
-      <i data-lucide="home"></i> <span>Home</span>
-    </button>
     <button class="mobile-nav-item" id="mTab-passenger" onclick="switchView('passenger')">
-      <i data-lucide="user"></i> <span>Rider</span>
+      <i data-lucide="navigation"></i> <span>Book Ride</span>
     </button>
     <button class="mobile-nav-item" id="mTab-driver" onclick="switchView('driver')">
-      <i data-lucide="car"></i> <span>Driver</span>
+      <i data-lucide="car"></i> <span>Cockpit</span>
     </button>
-    <button class="mobile-nav-item" id="mTab-matching" onclick="switchView('matching')">
-      <i data-lucide="cpu"></i> <span>Engine</span>
+    <button class="mobile-nav-item" id="mTab-history" onclick="switchView('history')">
+      <i data-lucide="history"></i> <span id="mTabLabelHistory">History</span>
     </button>
-    <button class="mobile-nav-item" id="mTab-admin" onclick="switchView('admin')">
-      <i data-lucide="shield"></i> <span>Admin</span>
+    <button class="mobile-nav-item" id="mTab-settings" onclick="switchView('settings')">
+      <i data-lucide="settings"></i> <span>Settings</span>
+    </button>
+    <button class="mobile-nav-item" id="mTab-landing" onclick="switchView('landing')" style="display:none;">
+      <i data-lucide="home"></i> <span>Home</span>
     </button>
   </div>
 
@@ -1344,6 +1350,187 @@
           <h3 style="margin-bottom:1rem;"><i data-lucide="bar-chart-3" style="color:var(--brand-secondary);"></i> Platform Revenue &amp; Deadhead Elimination by Ride Type</h3>
           <div style="height:280px; width:100%;">
             <canvas id="adminRevenueChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =======================================================================
+         VIEW 6: RIDE HISTORY & EARNINGS DASHBOARD (DRIVER & CUSTOMER MODES)
+         ======================================================================= -->
+    <section id="view-history" class="app-view">
+      <div class="container history-section">
+        <!-- Dynamic Header based on Role -->
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.25rem; flex-wrap:wrap; gap:0.5rem;">
+          <div>
+            <h2 id="historyPageTitle" style="font-size:1.6rem; font-weight:800;">💰 Driver Daily Income &amp; Trip History</h2>
+            <p id="historyPageSubtitle" style="font-size:0.85rem; color:var(--text-muted);">Real-time trip records, homebound matches &amp; guaranteed payouts</p>
+          </div>
+          <button class="btn-secondary" style="padding:0.45rem 0.9rem; font-size:0.8rem;" onclick="refreshHistoryData()">
+            <i data-lucide="refresh-cw"></i> <span>Refresh</span>
+          </button>
+        </div>
+
+        <!-- Metric Summary Cards -->
+        <div class="history-summary-grid" id="historyMetricsGrid">
+          <!-- Injected dynamically via renderHistoryUI() -->
+        </div>
+
+        <!-- Filter Chips Row -->
+        <div class="history-filter-row" id="historyFilterRow">
+          <button class="history-filter-chip active" onclick="filterHistory('all', this)">All Trips (8)</button>
+          <button class="history-filter-chip" onclick="filterHistory('today', this)">Today (5)</button>
+          <button class="history-filter-chip" onclick="filterHistory('route', this)">Homebound Matches (2)</button>
+          <button class="history-filter-chip" onclick="filterHistory('pool', this)">Shared Auto Pools (4)</button>
+          <button class="history-filter-chip" onclick="filterHistory('solo', this)">Solo Rides (2)</button>
+        </div>
+
+        <!-- Itemized Trip History List -->
+        <div class="trip-history-list" id="tripHistoryList">
+          <!-- Injected dynamically via renderHistoryUI() -->
+        </div>
+      </div>
+    </section>
+
+    <!-- =======================================================================
+         VIEW 7: SETTINGS & ACCOUNT CONTROL (DIRECTLY VISIBLE & EDITABLE)
+         ======================================================================= -->
+    <section id="view-settings" class="app-view">
+      <div class="container settings-section">
+        <div style="margin-bottom:1.5rem;">
+          <h2 style="font-size:1.6rem; font-weight:800;">⚙️ Account &amp; App Settings</h2>
+          <p style="font-size:0.85rem; color:var(--text-muted);">Manage your profile, vehicle info, role mode &amp; preferences</p>
+        </div>
+
+        <!-- Role Mode Switcher Card -->
+        <div class="role-switcher-card">
+          <div>
+            <strong style="font-size:1rem; color:var(--text-main); display:block;">Active Account Mode</strong>
+            <span style="font-size:0.825rem; color:var(--text-muted);" id="settingsCurrentRoleDesc">Currently active: Passenger (Book Rides)</span>
+          </div>
+          <div class="role-switch-buttons">
+            <button class="role-chip-btn" id="setRoleBtnPassenger" onclick="switchUserRoleMode('passenger')">
+              <i data-lucide="navigation"></i> <span>Customer / Rider</span>
+            </button>
+            <button class="role-chip-btn" id="setRoleBtnDriver" onclick="switchUserRoleMode('driver')">
+              <i data-lucide="car"></i> <span>Driver / Captain</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Profile Personal Details Card -->
+        <div class="settings-card">
+          <div class="settings-title-row">
+            <i data-lucide="user" style="color:var(--brand-primary); width:1.3rem; height:1.3rem;"></i>
+            <h3>Personal Information</h3>
+          </div>
+
+          <div class="settings-field-grid">
+            <div class="settings-input-box">
+              <label>Full Name</label>
+              <input type="text" id="settingsInputName" value="Jayesh Sharma" oninput="liveUpdateSetting('name', this.value)">
+            </div>
+            <div class="settings-input-box">
+              <label>Mobile Number (Registered)</label>
+              <input type="tel" id="settingsInputPhone" value="9876543210" oninput="liveUpdateSetting('phone', this.value)">
+            </div>
+          </div>
+
+          <div class="settings-field-grid">
+            <div class="settings-input-box">
+              <label>Email Address</label>
+              <input type="email" id="settingsInputEmail" value="jayesh@example.com" oninput="liveUpdateSetting('email', this.value)">
+            </div>
+            <div class="settings-input-box">
+              <label>Emergency Contact (Name &amp; Phone)</label>
+              <input type="text" id="settingsInputEmergency" value="Pooja Sharma (+91-98765-00000)" oninput="liveUpdateSetting('emergency', this.value)">
+            </div>
+          </div>
+
+          <div style="display:flex; justify-content:flex-end; margin-top:0.75rem;">
+            <button class="btn-primary" style="padding:0.6rem 1.25rem; font-size:0.9rem;" onclick="saveAllSettings()">
+              <i data-lucide="check"></i> <span>Save Profile Info</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Driver Specific Vehicle & KYC Details Card (Visible in Driver Mode) -->
+        <div class="settings-card" id="settingsDriverVehicleCard" style="display:none;">
+          <div class="settings-title-row">
+            <i data-lucide="truck" style="color:var(--brand-secondary); width:1.3rem; height:1.3rem;"></i>
+            <h3>Driver Vehicle &amp; KYC Credentials</h3>
+          </div>
+
+          <div class="settings-field-grid">
+            <div class="settings-input-box">
+              <label>Vehicle Registration Number</label>
+              <input type="text" id="settingsInputVehNo" value="MH 12 QX 4920" oninput="liveUpdateSetting('vehNo', this.value)">
+            </div>
+            <div class="settings-input-box">
+              <label>Vehicle Type &amp; Capacity</label>
+              <select id="settingsSelectVehType" onchange="liveUpdateSetting('vehType', this.value)">
+                <option value="auto">Bajaj RE Auto (3 Passenger Capacity)</option>
+                <option value="cab">Mini Cab / Sedan (4 Passenger Capacity)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="settings-field-grid">
+            <div class="settings-input-box">
+              <label>Commercial Driving License</label>
+              <input type="text" id="settingsInputDL" value="MH12-2018-004928" oninput="liveUpdateSetting('dlNo', this.value)">
+            </div>
+            <div class="settings-input-box">
+              <label>DigiLocker KYC Verification</label>
+              <div style="display:flex; align-items:center; gap:0.5rem; padding:0.65rem 0.85rem; background:var(--bg-surface-raised); border:1px solid var(--border-medium); border-radius:var(--radius-md);">
+                <i data-lucide="shield-check" style="color:var(--brand-secondary); width:1.2rem; height:1.2rem;"></i>
+                <strong style="color:var(--brand-secondary); font-size:0.88rem;">KYC Verified ✓</strong>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Preferences & Theme Card -->
+        <div class="settings-card">
+          <div class="settings-title-row">
+            <i data-lucide="sliders" style="color:var(--brand-accent); width:1.3rem; height:1.3rem;"></i>
+            <h3>App &amp; Security Preferences</h3>
+          </div>
+
+          <div style="display:flex; flex-direction:column; gap:1rem;">
+            <div style="display:flex; align-items:center; justify-content:space-between; padding:0.75rem; background:var(--bg-surface-raised); border-radius:var(--radius-md); border:1px solid var(--border-subtle);">
+              <div>
+                <strong style="font-size:0.9rem; display:block;">Theme Mode</strong>
+                <span style="font-size:0.78rem; color:var(--text-muted);">Toggle between High-Contrast Dark and Clean Light</span>
+              </div>
+              <button class="btn-secondary" style="padding:0.45rem 0.9rem; font-size:0.85rem;" onclick="toggleTheme()">
+                <i data-lucide="sun" id="settingsThemeIcon"></i> <span id="settingsThemeLabel">Toggle Light Theme</span>
+              </button>
+            </div>
+
+            <div style="display:flex; align-items:center; justify-content:space-between; padding:0.75rem; background:var(--bg-surface-raised); border-radius:var(--radius-md); border:1px solid var(--border-subtle);">
+              <div>
+                <strong style="font-size:0.9rem; display:block;">Audio Chimes &amp; Alerts</strong>
+                <span style="font-size:0.78rem; color:var(--text-muted);">Sound notifications for incoming ride popups and arrival</span>
+              </div>
+              <label class="switch">
+                <input type="checkbox" id="settingsAudioAlerts" checked>
+                <span class="slider"></span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Danger Zone / Sign Out -->
+        <div class="settings-card" style="border-color:rgba(239,68,68,0.3);">
+          <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:1rem;">
+            <div>
+              <strong style="color:var(--brand-danger); font-size:0.95rem; display:block;">Sign Out of Account</strong>
+              <span style="font-size:0.78rem; color:var(--text-muted);">Log out of your current session on this device</span>
+            </div>
+            <button class="btn-secondary" style="background:rgba(239,68,68,0.15); color:var(--brand-danger); border-color:rgba(239,68,68,0.3);" onclick="confirmLogout()">
+              <i data-lucide="log-out"></i> <span>Log Out</span>
+            </button>
           </div>
         </div>
       </div>
