@@ -789,7 +789,7 @@ function updateAuthUI() {
   if (state.userSession.isLoggedIn) {
     const isDriver = state.userSession.role === 'driver';
     const shortName = (state.userSession.name || 'User').split(' ')[0];
-    if (label) label.textContent = `${shortName} (${isDriver ? 'Driver' : 'Passenger'})`;
+    if (label) label.textContent = shortName;
     if (dot) dot.style.background = 'var(--brand-secondary)';
     if (headerBadge) {
       // FREE RIDES PROMO BADGE ONLY FOR NEW PASSENGERS (NEVER FOR DRIVER OR EXISTING USERS)
