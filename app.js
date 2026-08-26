@@ -16,7 +16,7 @@ const state = {
   authMode: 'login', // 'login' (existing) | 'signup' (new user)
   simSpeed: 1, // Speed multiplier for real-time live auto simulation (1x, 3x, 10x)
   userSession: {
-    isLoggedIn: false,
+    isLoggedIn: true, // Active Customer Session by default
     role: 'passenger', // 'passenger' | 'driver'
     isNewUser: true,
     totalRidesTaken: 1, // Tracks completed rides to trigger every 5th ride 5% OFF
@@ -760,46 +760,65 @@ function updateAuthUI() {
 }
 
 function updateRoleAccessUI() {
-  const isLoggedIn = state.userSession.isLoggedIn;
   const role = state.userSession.role; // 'passenger' | 'driver'
 
   const tabPassenger = document.getElementById('tabBtn-passenger');
   const tabDriver = document.getElementById('tabBtn-driver');
+  const tabMatching = document.getElementById('tabBtn-matching');
+  const tabAdmin = document.getElementById('tabBtn-admin');
+
   const mTabPassenger = document.getElementById('mTab-passenger');
   const mTabDriver = document.getElementById('mTab-driver');
+  const mTabMatching = document.getElementById('mTab-matching');
+  const mTabAdmin = document.getElementById('mTab-admin');
 
   const heroBtnPassenger = document.getElementById('heroBtnPassenger');
   const heroBtnDriver = document.getElementById('heroBtnDriver');
+  const heroBtnSandbox = document.getElementById('heroBtnSandbox');
 
-  if (isLoggedIn) {
-    if (role === 'passenger') {
-      // CUSTOMER / PASSENGER MODE: Show customer part ONLY
-      if (tabPassenger) tabPassenger.style.display = 'inline-flex';
-      if (tabDriver) tabDriver.style.display = 'none';
-      if (mTabPassenger) mTabPassenger.style.display = 'flex';
-      if (mTabDriver) mTabDriver.style.display = 'none';
+  // Internal developer / admin tabs are always hidden from main view
+  if (tabMatching) tabMatching.style.display = 'none';
+  if (tabAdmin) tabAdmin.style.display = 'none';
+  if (mTabMatching) mTabMatching.style.display = 'none';
+  if (mTabAdmin) mTabAdmin.style.display = 'none';
+  if (heroBtnSandbox) heroBtnSandbox.style.display = 'none';
 
-      if (heroBtnPassenger) heroBtnPassenger.style.display = 'inline-flex';
-      if (heroBtnDriver) heroBtnDriver.style.display = 'none';
-    } else {
-      // DRIVER / CAPTAIN MODE: Show driver part ONLY
-      if (tabPassenger) tabPassenger.style.display = 'none';
-      if (tabDriver) tabDriver.style.display = 'inline-flex';
-      if (mTabPassenger) mTabPassenger.style.display = 'none';
-      if (mTabDriver) mTabDriver.style.display = 'flex';
-
-      if (heroBtnPassenger) heroBtnPassenger.style.display = 'none';
-      if (heroBtnDriver) heroBtnDriver.style.display = 'inline-flex';
-    }
-  } else {
-    // GUEST / NOT LOGGED IN: Show all for discovery
+  if (role === 'passenger') {
+    // ==========================================
+    // 👤 CUSTOMER / PASSENGER MODE:
+    // User sees ONLY Customer / Passenger Window
+    // ==========================================
     if (tabPassenger) tabPassenger.style.display = 'inline-flex';
-    if (tabDriver) tabDriver.style.display = 'inline-flex';
+    if (tabDriver) tabDriver.style.display = 'none';
+
     if (mTabPassenger) mTabPassenger.style.display = 'flex';
-    if (mTabDriver) mTabDriver.style.display = 'flex';
+    if (mTabDriver) mTabDriver.style.display = 'none';
 
     if (heroBtnPassenger) heroBtnPassenger.style.display = 'inline-flex';
+    if (heroBtnDriver) heroBtnDriver.style.display = 'none';
+
+    // Show Passenger Savings Calculator Tab
+    setCalcTab('passenger');
+    const calcDriverTab = document.getElementById('calcTabDriver');
+    if (calcDriverTab) calcDriverTab.style.display = 'none';
+  } else {
+    // ==========================================
+    // 🚖 DRIVER / CAPTAIN MODE:
+    // User sees ONLY Driver Window
+    // ==========================================
+    if (tabPassenger) tabPassenger.style.display = 'none';
+    if (tabDriver) tabDriver.style.display = 'inline-flex';
+
+    if (mTabPassenger) mTabPassenger.style.display = 'none';
+    if (mTabDriver) mTabDriver.style.display = 'flex';
+
+    if (heroBtnPassenger) heroBtnPassenger.style.display = 'none';
     if (heroBtnDriver) heroBtnDriver.style.display = 'inline-flex';
+
+    // Show Driver Earnings Calculator Tab
+    setCalcTab('driver');
+    const calcPassTab = document.getElementById('calcTabPassenger');
+    if (calcPassTab) calcPassTab.style.display = 'none';
   }
 }
 
@@ -807,13 +826,13 @@ function updateRoleAccessUI() {
 // 7. VIEW NAVIGATION & MANAGEMENT
 // -------------------------------------------------------------
 function switchView(viewName) {
-  // Role Access Guard: Prevent Cross-Role Access
-  if (state.userSession.isLoggedIn) {
-    if (state.userSession.role === 'passenger' && viewName === 'driver') {
-      alert('🔒 Access Restricted: You are logged in as a Passenger / Customer. Switch your profile to Driver to access the Driver Cockpit.');
+  // Strict Role-Based View Guard:
+  if (state.userSession.role === 'passenger') {
+    if (viewName === 'driver' || viewName === 'admin' || viewName === 'matching') {
       viewName = 'passenger';
-    } else if (state.userSession.role === 'driver' && viewName === 'passenger') {
-      alert('🔒 Access Restricted: You are logged in as a Driver / Captain. Switch your profile to Passenger to access the Passenger App.');
+    }
+  } else if (state.userSession.role === 'driver') {
+    if (viewName === 'passenger' || viewName === 'admin' || viewName === 'matching') {
       viewName = 'driver';
     }
   }
