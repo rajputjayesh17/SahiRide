@@ -8,7 +8,7 @@
 
 // Global Application State
 const state = {
-  currentView: 'passenger', // Direct entry to active customer view
+  currentView: 'onboarding', // Start with onboarding feature slides & clean brand header
   currentLang: 'en',
   currentTheme: 'dark',
   currentSlide: 1,
@@ -16,7 +16,7 @@ const state = {
   authMode: 'login', // 'login' (existing) | 'signup' (new user)
   simSpeed: 1, // Speed multiplier for real-time live auto simulation (1x, 3x, 10x)
   userSession: {
-    isLoggedIn: true, // Active Customer Session by default
+    isLoggedIn: false, // Start unauthenticated: user sees ONLY brand quote, logo & features before login
     role: 'passenger', // 'passenger' | 'driver'
     isNewUser: false, // Default: Existing user gets standard fares; ONLY new users get 3 free rides
     totalRidesTaken: 4, // 4th ride (next ride is 5th -> gets 5% milestone discount)
