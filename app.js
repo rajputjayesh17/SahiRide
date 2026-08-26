@@ -755,12 +755,69 @@ function updateAuthUI() {
     if (dot) dot.style.background = 'var(--brand-primary)';
     if (headerBadge) headerBadge.style.display = 'none';
   }
+
+  updateRoleAccessUI();
+}
+
+function updateRoleAccessUI() {
+  const isLoggedIn = state.userSession.isLoggedIn;
+  const role = state.userSession.role; // 'passenger' | 'driver'
+
+  const tabPassenger = document.getElementById('tabBtn-passenger');
+  const tabDriver = document.getElementById('tabBtn-driver');
+  const mTabPassenger = document.getElementById('mTab-passenger');
+  const mTabDriver = document.getElementById('mTab-driver');
+
+  const heroBtnPassenger = document.getElementById('heroBtnPassenger');
+  const heroBtnDriver = document.getElementById('heroBtnDriver');
+
+  if (isLoggedIn) {
+    if (role === 'passenger') {
+      // CUSTOMER / PASSENGER MODE: Show customer part ONLY
+      if (tabPassenger) tabPassenger.style.display = 'inline-flex';
+      if (tabDriver) tabDriver.style.display = 'none';
+      if (mTabPassenger) mTabPassenger.style.display = 'flex';
+      if (mTabDriver) mTabDriver.style.display = 'none';
+
+      if (heroBtnPassenger) heroBtnPassenger.style.display = 'inline-flex';
+      if (heroBtnDriver) heroBtnDriver.style.display = 'none';
+    } else {
+      // DRIVER / CAPTAIN MODE: Show driver part ONLY
+      if (tabPassenger) tabPassenger.style.display = 'none';
+      if (tabDriver) tabDriver.style.display = 'inline-flex';
+      if (mTabPassenger) mTabPassenger.style.display = 'none';
+      if (mTabDriver) mTabDriver.style.display = 'flex';
+
+      if (heroBtnPassenger) heroBtnPassenger.style.display = 'none';
+      if (heroBtnDriver) heroBtnDriver.style.display = 'inline-flex';
+    }
+  } else {
+    // GUEST / NOT LOGGED IN: Show all for discovery
+    if (tabPassenger) tabPassenger.style.display = 'inline-flex';
+    if (tabDriver) tabDriver.style.display = 'inline-flex';
+    if (mTabPassenger) mTabPassenger.style.display = 'flex';
+    if (mTabDriver) mTabDriver.style.display = 'flex';
+
+    if (heroBtnPassenger) heroBtnPassenger.style.display = 'inline-flex';
+    if (heroBtnDriver) heroBtnDriver.style.display = 'inline-flex';
+  }
 }
 
 // -------------------------------------------------------------
 // 7. VIEW NAVIGATION & MANAGEMENT
 // -------------------------------------------------------------
 function switchView(viewName) {
+  // Role Access Guard: Prevent Cross-Role Access
+  if (state.userSession.isLoggedIn) {
+    if (state.userSession.role === 'passenger' && viewName === 'driver') {
+      alert('🔒 Access Restricted: You are logged in as a Passenger / Customer. Switch your profile to Driver to access the Driver Cockpit.');
+      viewName = 'passenger';
+    } else if (state.userSession.role === 'driver' && viewName === 'passenger') {
+      alert('🔒 Access Restricted: You are logged in as a Driver / Captain. Switch your profile to Passenger to access the Passenger App.');
+      viewName = 'driver';
+    }
+  }
+
   state.currentView = viewName;
 
   document.querySelectorAll('.app-view').forEach(view => {
