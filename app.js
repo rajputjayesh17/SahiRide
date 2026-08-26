@@ -8,7 +8,7 @@
 
 // Global Application State
 const state = {
-  currentView: 'onboarding', // Starts with onboarding slides
+  currentView: 'passenger', // Direct entry to active customer view
   currentLang: 'en',
   currentTheme: 'dark',
   currentSlide: 1,
@@ -18,9 +18,9 @@ const state = {
   userSession: {
     isLoggedIn: true, // Active Customer Session by default
     role: 'passenger', // 'passenger' | 'driver'
-    isNewUser: true,
-    totalRidesTaken: 1, // Tracks completed rides to trigger every 5th ride 5% OFF
-    freeRidesRemaining: 3, // First 3 Rides 100% FREE
+    isNewUser: false, // Default: Existing user gets standard fares; ONLY new users get 3 free rides
+    totalRidesTaken: 4, // 4th ride (next ride is 5th -> gets 5% milestone discount)
+    freeRidesRemaining: 0,
     phone: '9876543210',
     name: 'Jayesh Sharma',
     email: 'jayesh@example.com',
@@ -33,12 +33,13 @@ const state = {
     vehicle: 'auto', // 'auto' | 'cab'
     mode: 'share',   // 'share' | 'private'
     seatCount: 1,    // 1 to 3 (Auto) or 1 to 4 (Cab)
-    freeRidesPromoActive: true, // First 3 Rides 100% Free
+    freeRidesPromoActive: false, // Inactive for existing users; ONLY new signups get 3 free rides
+    matchedC: false, // Flag for real-time co-passenger C match (A -> C -> B)
     womenOnly: false,
     rideActive: false,
     otp: '5839',
-    basePerSeatFare: 0,
-    totalFare: 0,
+    basePerSeatFare: 42,
+    totalFare: 42,
     distanceKm: 8.4
   },
   driver: {
@@ -108,6 +109,7 @@ let sandboxTileLayer = null;
 let passengerRouteLine = null;
 let passengerTraveledRouteLine = null;
 let passengerDriverMarker = null;
+let passengerPointCMarker = null;
 let driverRouteLine = null;
 let sandboxRouteLine = null;
 
@@ -576,21 +578,30 @@ function verifyLoginOtp() {
 
   if (state.authMode === 'signup') {
     state.userSession.isNewUser = true;
-    state.userSession.freeRidesRemaining = 3;
-    state.passenger.freeRidesPromoActive = true;
+    state.userSession.totalRidesTaken = 1;
     if (state.userSession.role === 'driver') {
-      const name = document.getElementById('signupDriverName').value.trim();
+      state.userSession.freeRidesRemaining = 0;
+      state.passenger.freeRidesPromoActive = false;
+      const name = document.getElementById('signupDriverName')?.value.trim();
       state.userSession.name = name || 'Ramesh Shinde';
       state.userSession.kycStatus = 'verified';
     } else {
-      const name = document.getElementById('signupPassName').value.trim();
+      state.userSession.freeRidesRemaining = 3;
+      state.passenger.freeRidesPromoActive = true;
+      const name = document.getElementById('signupPassName')?.value.trim();
       state.userSession.name = name || 'Jayesh Sharma';
     }
   } else {
+    // Existing user login: Standard rates (No 3 Free Rides promo)
+    state.userSession.isNewUser = false;
+    state.userSession.freeRidesRemaining = 0;
+    state.passenger.freeRidesPromoActive = false;
+    state.userSession.totalRidesTaken = 4;
     state.userSession.name = state.userSession.role === 'driver' ? 'Ramesh Shinde' : 'Jayesh Sharma';
   }
   
   updateAuthUI();
+  recalcPassengerFares();
 
   if (state.userSession.isNewUser && state.userSession.role === 'passenger') {
     alert(`🎉 Welcome to SahiRide, ${state.userSession.name}!\nYou have unlocked your FIRST 3 RIDES 100% FREE! Plus 5% OFF on every 5th ride!`);
@@ -746,10 +757,14 @@ function updateAuthUI() {
   const headerBadge = document.getElementById('headerNewUserBadge');
 
   if (state.userSession.isLoggedIn) {
+    const isDriver = state.userSession.role === 'driver';
     const shortName = state.userSession.name.split(' ')[0];
-    if (label) label.textContent = `${shortName} (${state.userSession.role === 'driver' ? 'Driver' : 'Passenger'})`;
+    if (label) label.textContent = `${shortName} (${isDriver ? 'Driver' : 'Passenger'})`;
     if (dot) dot.style.background = 'var(--brand-secondary)';
-    if (headerBadge) headerBadge.style.display = (state.passenger.freeRidesPromoActive && state.userSession.freeRidesRemaining > 0) ? 'inline-flex' : 'none';
+    if (headerBadge) {
+      // FREE RIDES PROMO BADGE ONLY FOR NEW PASSENGERS (NEVER FOR DRIVER OR EXISTING USERS)
+      headerBadge.style.display = (!isDriver && state.userSession.isNewUser && state.passenger.freeRidesPromoActive && state.userSession.freeRidesRemaining > 0) ? 'inline-flex' : 'none';
+    }
   } else {
     if (label) label.textContent = 'Login / Sign Up';
     if (dot) dot.style.background = 'var(--brand-primary)';
@@ -762,12 +777,14 @@ function updateAuthUI() {
 function updateRoleAccessUI() {
   const role = state.userSession.role; // 'passenger' | 'driver'
 
+  const tabLanding = document.getElementById('tabBtn-landing');
   const tabPassenger = document.getElementById('tabBtn-passenger');
   const tabDriver = document.getElementById('tabBtn-driver');
   const tabHistory = document.getElementById('tabBtn-history');
   const tabSettings = document.getElementById('tabBtn-settings');
   const tabLabelHistory = document.getElementById('tabLabelHistory');
 
+  const mTabLanding = document.getElementById('mTab-landing');
   const mTabPassenger = document.getElementById('mTab-passenger');
   const mTabDriver = document.getElementById('mTab-driver');
   const mTabHistory = document.getElementById('mTab-history');
@@ -778,11 +795,15 @@ function updateRoleAccessUI() {
   const heroBtnDriver = document.getElementById('heroBtnDriver');
   const heroBtnSandbox = document.getElementById('heroBtnSandbox');
 
+  // HOME / LANDING & SANDBOX TABS NEVER SHOWN IN REGULAR APP MODE
+  if (tabLanding) tabLanding.style.display = 'none';
+  if (mTabLanding) mTabLanding.style.display = 'none';
   if (heroBtnSandbox) heroBtnSandbox.style.display = 'none';
 
   if (role === 'passenger') {
     // ==========================================
     // 👤 CUSTOMER / PASSENGER MODE:
+    // Only sees: [ Book Ride ] [ My Rides ] [ Settings ]
     // ==========================================
     if (tabPassenger) tabPassenger.style.display = 'inline-flex';
     if (tabDriver) tabDriver.style.display = 'none';
@@ -806,6 +827,8 @@ function updateRoleAccessUI() {
   } else {
     // ==========================================
     // 🚖 DRIVER / CAPTAIN MODE:
+    // Only sees: [ Driver Cockpit ] [ Daily Income & History ] [ Settings ]
+    // (NO Free Rides, NO Customer views)
     // ==========================================
     if (tabPassenger) tabPassenger.style.display = 'none';
     if (tabDriver) tabDriver.style.display = 'inline-flex';
@@ -1787,9 +1810,53 @@ function startLiveMovingVehicleAnimation() {
       liveSpeedVal.innerHTML = `<i data-lucide="gauge" style="width:0.85rem; height:0.85rem;"></i> ${speed} km/h`;
     }
 
+    // 6. Real-Time Co-Passenger 'C' Match & Route Detour Notification (Passenger A -> C -> B)
+    if (progressPercent >= 28 && !state.passenger.matchedC && state.passenger.mode === 'share') {
+      state.passenger.matchedC = true;
+      playSoundAlert('incoming');
+
+      const alertCard = document.getElementById('passRouteUpdateAlert');
+      if (alertCard) alertCard.style.display = 'block';
+
+      const coCount = document.getElementById('coPassengersCountLabel');
+      if (coCount) coCount.textContent = 'Matched Co-Passengers (2/3 Seats)';
+
+      const listContainer = document.getElementById('coPassengersListContainer');
+      if (listContainer) {
+        listContainer.innerHTML = `
+          <div class="co-passenger-pill">
+            <div class="co-pass-name">
+              <i data-lucide="user-check" style="width:0.9rem; color:var(--brand-secondary);"></i>
+              <strong>Passenger A (You)</strong> <span class="badge-new-user" style="font-size:0.65rem;">ORIGIN</span>
+            </div>
+            <span style="font-size:0.75rem; color:var(--text-muted);">Boarded ✓</span>
+          </div>
+          <div class="co-passenger-pill" style="border:1px solid var(--brand-accent); background:rgba(99,102,241,0.08); animation:popIn 0.3s ease-out;">
+            <div class="co-pass-name">
+              <i data-lucide="user-plus" style="width:0.9rem; color:var(--brand-accent);"></i>
+              <strong>Passenger C (Sneha R.)</strong> <span class="badge-new-user" style="font-size:0.65rem; background:var(--brand-accent); color:#fff;">EN-ROUTE MATCH</span>
+            </div>
+            <span style="font-size:0.75rem; color:var(--brand-secondary); font-weight:700;">Boarding at Point C (Deccan)</span>
+          </div>
+        `;
+      }
+
+      if (passengerMap && !passengerPointCMarker) {
+        passengerPointCMarker = L.circleMarker([18.5150, 73.8350], {
+          radius: 9,
+          fillColor: '#F59E0B',
+          color: '#ffffff',
+          weight: 2.5,
+          fillOpacity: 1
+        }).addTo(passengerMap).bindPopup("<strong>Point C (Co-Passenger Sneha R.)</strong><br>Picking up en-route to Kothrud (Point B)").openPopup();
+      }
+    }
+
     const turnInstruction = document.getElementById('liveTurnInstruction');
     if (turnInstruction) {
-      if (progressPercent < 25) {
+      if (state.passenger.matchedC && progressPercent >= 28 && progressPercent < 60) {
+        turnInstruction.innerHTML = "Detour via Point C: Picking up Sneha R. (OTP: 7421)";
+      } else if (progressPercent < 25) {
         turnInstruction.textContent = "Boarded • En-route via FC Road";
       } else if (progressPercent < 60) {
         turnInstruction.textContent = "Corridor Flow • Karve Road Junction";
@@ -1838,7 +1905,29 @@ function requestPassengerRide() {
   document.getElementById('tripOtpCode').textContent = otp;
   state.passenger.otp = otp;
   state.passenger.rideActive = true;
+  state.passenger.matchedC = false;
   liveTripCurrentStepIndex = 0;
+
+  if (passengerPointCMarker && passengerMap) {
+    passengerMap.removeLayer(passengerPointCMarker);
+    passengerPointCMarker = null;
+  }
+
+  const alertCard = document.getElementById('passRouteUpdateAlert');
+  if (alertCard) alertCard.style.display = 'none';
+
+  const listContainer = document.getElementById('coPassengersListContainer');
+  if (listContainer) {
+    listContainer.innerHTML = `
+      <div class="co-passenger-pill">
+        <div class="co-pass-name">
+          <i data-lucide="user-check" style="width:0.9rem; color:var(--brand-secondary);"></i>
+          <strong>Passenger A (You)</strong> <span class="badge-new-user" style="font-size:0.65rem;">ORIGIN</span>
+        </div>
+        <span style="font-size:0.75rem; color:var(--text-muted);">Boarded ✓</span>
+      </div>
+    `;
+  }
 
   if (state.passenger.freeRidesPromoActive && state.userSession.freeRidesRemaining > 0) {
     const usedRideNum = 4 - state.userSession.freeRidesRemaining;
@@ -1867,6 +1956,15 @@ function cancelOrResetRide() {
   state.passenger.rideActive = false;
   clearInterval(liveTripAnimationTimer);
   liveTripCurrentStepIndex = 0;
+  state.passenger.matchedC = false;
+
+  if (passengerPointCMarker && passengerMap) {
+    passengerMap.removeLayer(passengerPointCMarker);
+    passengerPointCMarker = null;
+  }
+
+  const alertCard = document.getElementById('passRouteUpdateAlert');
+  if (alertCard) alertCard.style.display = 'none';
 
   document.getElementById('passBookingPanel').style.display = 'block';
   document.getElementById('passTrackingPanel').style.display = 'none';
@@ -2056,18 +2154,6 @@ function renderDriverCockpitRoute() {
   }
 
   const latlngs = stops.map(s => s.pos);
-
-  if (state.driver.mode === 'route') {
-    stops.forEach(s => {
-      L.circle(s.pos, {
-        radius: state.driver.detourRadiusKm * 800,
-        color: '#6366F1',
-        weight: 1.5,
-        fillColor: '#6366F1',
-        fillOpacity: 0.1
-      }).addTo(driverMap);
-    });
-  }
 
   driverRouteLine = L.polyline(latlngs, {
     color: state.driver.mode === 'route' ? '#6366F1' : '#10B981',
