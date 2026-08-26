@@ -1424,6 +1424,7 @@ function recalcPassengerFares() {
   let standardTotalShare = standardSharePerSeat * seats;
   let standardTotalPrivate = standardSoloFare;
 
+  // Customer payable calculation
   let totalFare = 0;
   let perSeatFare = 0;
   let milestoneDiscountAmount = 0;
@@ -1443,6 +1444,16 @@ function recalcPassengerFares() {
 
   state.passenger.basePerSeatFare = perSeatFare;
   state.passenger.totalFare = totalFare;
+
+  // =========================================================================
+  // DRIVER GUARANTEED PAYOUT CALCULATION:
+  // - SahiRide 100% funds & subsidizes customer free rides and 5% discounts.
+  // - Driver is paid based on standard gross fare, minus 15% platform fee.
+  // - Deduction is never exposed to driver; driver sees net guaranteed payout.
+  // =========================================================================
+  const grossTripValue = (state.passenger.mode === 'share' ? standardTotalShare : standardSoloFare);
+  const driverNetPayout = Math.round(grossTripValue * 0.85); // 15% platform fee deducted silently
+  state.passenger.driverNetPayout = driverNetPayout;
 
   // Update UI pricing elements
   const passPrivateFare = document.getElementById('passPrivateFare');
@@ -1921,7 +1932,7 @@ function setDriverMode(mode) {
           <div class="step-num drop">2</div>
           <div class="step-details">
             <strong>Drop Off: Rahul M.</strong>
-            <p>Kothrud Stand, Pune • Standard Solo Fare: ₹120.00</p>
+            <p>Kothrud Stand, Pune • Earnings: ₹102.00</p>
           </div>
         </div>
       `;
@@ -1934,7 +1945,7 @@ function setDriverMode(mode) {
           <div class="step-num pickup" style="background:var(--brand-accent); color:#fff; border-color:var(--brand-accent);">1</div>
           <div class="step-details">
             <strong>Pick Up: Pooja T. (OTP: 3184)</strong>
-            <p>Deccan Gymkhana • <span style="color:var(--brand-accent); font-weight:700;">Homebound Match (+₹95)</span></p>
+            <p>Deccan Gymkhana • <span style="color:var(--brand-accent); font-weight:700;">Homebound Match (+₹81.00)</span></p>
           </div>
         </div>
         <div class="manifest-step">
@@ -1948,7 +1959,7 @@ function setDriverMode(mode) {
           <div class="step-num" style="background:var(--brand-secondary); color:#fff;">3</div>
           <div class="step-details">
             <strong>Driver Final Stop: Home Destination</strong>
-            <p>${state.driver.homeDest.name} • <span style="color:var(--brand-secondary); font-weight:700;">Empty Trip Eliminated (₹190 Profit)</span></p>
+            <p>${state.driver.homeDest.name} • <span style="color:var(--brand-secondary); font-weight:700;">Empty Trip Eliminated (₹162 Net Profit)</span></p>
           </div>
         </div>
       `;
@@ -1975,14 +1986,14 @@ function setDriverMode(mode) {
           <div class="step-num drop">3</div>
           <div class="step-details">
             <strong>Drop Off: Rahul M.</strong>
-            <p>Aundh D-Mart • Shared Payout: ₹75.00</p>
+            <p>Aundh D-Mart • Trip Payout: ₹64.00</p>
           </div>
         </div>
         <div class="manifest-step">
           <div class="step-num drop">4</div>
           <div class="step-details">
             <strong>Drop Off: Priya S.</strong>
-            <p>Kothrud Stand • Shared Payout: ₹120.00</p>
+            <p>Kothrud Stand • Trip Payout: ₹102.00</p>
           </div>
         </div>
       `;
