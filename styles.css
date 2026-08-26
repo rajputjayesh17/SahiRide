@@ -708,11 +708,12 @@ textarea::placeholder {
    0. ONBOARDING CAROUSEL SLIDES (BEFORE LOGIN)
    ------------------------------------------------------------- */
 .onboarding-screen {
-  min-height: calc(100vh - 4.5rem);
+  min-height: 100vh;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 2rem 1.25rem;
+  padding: 2.5rem 1.25rem;
   position: relative;
   background: radial-gradient(circle at 50% 20%, rgba(245, 158, 11, 0.1), transparent 60%);
 }
@@ -974,11 +975,12 @@ textarea::placeholder {
    0. LOGIN & SIGNUP (NEW / EXISTING USER MODES)
    ------------------------------------------------------------- */
 .login-screen {
-  min-height: calc(100vh - 4.5rem);
+  min-height: 100vh;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 2rem 1.25rem;
+  padding: 2.5rem 1.25rem;
 }
 
 .login-card {

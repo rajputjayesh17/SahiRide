@@ -429,6 +429,7 @@ function setLanguage(lang) {
 document.addEventListener('DOMContentLoaded', () => {
   initIcons();
   initTheme();
+  setLanguage('en');
   updateDriverCalc();
   updatePassengerCalc();
   initAdminChart();
@@ -446,7 +447,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  setLanguage('en');
+  // Always initialize onboarding slide 1
+  goToSlide(1);
+
+  if (!state.userSession.isLoggedIn) {
+    switchView('onboarding');
+  } else {
+    switchView(state.userSession.role === 'driver' ? 'driver' : 'passenger');
+  }
 });
 
 function initIcons() {
@@ -2977,19 +2985,4 @@ function switchUserRoleMode(targetRole) {
     switchView('driver');
   }
 }
-
-// -------------------------------------------------------------
-// APP INITIALIZATION & ICON MOUNT
-// -------------------------------------------------------------
-document.addEventListener('DOMContentLoaded', () => {
-  initIcons();
-  updateAuthUI();
-  updateRoleAccessUI();
-
-  if (!state.userSession.isLoggedIn) {
-    switchView('onboarding');
-  } else {
-    switchView(state.userSession.role === 'driver' ? 'driver' : 'passenger');
-  }
-});
 
