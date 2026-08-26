@@ -782,11 +782,9 @@ function updateAuthUI() {
   const dot = document.getElementById('userStatusDot');
   const headerBadge = document.getElementById('headerNewUserBadge');
   const header = document.querySelector('.site-header');
-  const bottomBar = document.querySelector('.mobile-bottom-bar');
 
   const isPreLogin = !state.userSession.isLoggedIn || state.currentView === 'onboarding' || state.currentView === 'login';
   if (header) header.style.display = isPreLogin ? 'none' : 'block';
-  if (bottomBar) bottomBar.style.display = isPreLogin ? 'none' : 'flex';
 
   if (state.userSession.isLoggedIn) {
     const isDriver = state.userSession.role === 'driver';
@@ -815,20 +813,12 @@ function updateRoleAccessUI() {
   const tabHistory = document.getElementById('tabBtn-history');
   const tabLabelHistory = document.getElementById('tabLabelHistory');
 
-  const mTabLanding = document.getElementById('mTab-landing');
-  const mTabPassenger = document.getElementById('mTab-passenger');
-  const mTabDriver = document.getElementById('mTab-driver');
-  const mTabHistory = document.getElementById('mTab-history');
-  const mTabSettings = document.getElementById('mTab-settings');
-  const mTabLabelHistory = document.getElementById('mTabLabelHistory');
-
   const heroBtnPassenger = document.getElementById('heroBtnPassenger');
   const heroBtnDriver = document.getElementById('heroBtnDriver');
   const heroBtnSandbox = document.getElementById('heroBtnSandbox');
 
   // HOME / LANDING & SANDBOX TABS NEVER SHOWN IN REGULAR APP MODE
   if (tabLanding) tabLanding.style.display = 'none';
-  if (mTabLanding) mTabLanding.style.display = 'none';
   if (heroBtnSandbox) heroBtnSandbox.style.display = 'none';
 
   if (role === 'passenger') {
@@ -841,12 +831,6 @@ function updateRoleAccessUI() {
     if (tabDriver) tabDriver.style.display = 'none';
     if (tabHistory) tabHistory.style.display = 'inline-flex';
     if (tabLabelHistory) tabLabelHistory.textContent = 'My Rides & Receipts';
-
-    if (mTabPassenger) mTabPassenger.style.display = 'flex';
-    if (mTabDriver) mTabDriver.style.display = 'none';
-    if (mTabHistory) mTabHistory.style.display = 'flex';
-    if (mTabSettings) mTabSettings.style.display = 'flex';
-    if (mTabLabelHistory) mTabLabelHistory.textContent = 'My Rides';
 
     if (heroBtnPassenger) heroBtnPassenger.style.display = 'inline-flex';
     if (heroBtnDriver) heroBtnDriver.style.display = 'none';
@@ -865,12 +849,6 @@ function updateRoleAccessUI() {
     if (tabDriver) tabDriver.style.display = 'inline-flex';
     if (tabHistory) tabHistory.style.display = 'inline-flex';
     if (tabLabelHistory) tabLabelHistory.textContent = 'Daily Income & History';
-
-    if (mTabPassenger) mTabPassenger.style.display = 'none';
-    if (mTabDriver) mTabDriver.style.display = 'flex';
-    if (mTabHistory) mTabHistory.style.display = 'flex';
-    if (mTabSettings) mTabSettings.style.display = 'flex';
-    if (mTabLabelHistory) mTabLabelHistory.textContent = 'Earnings';
 
     if (heroBtnPassenger) heroBtnPassenger.style.display = 'none';
     if (heroBtnDriver) heroBtnDriver.style.display = 'inline-flex';
@@ -901,14 +879,12 @@ function switchView(viewName) {
 
   state.currentView = viewName;
 
-  // Header & Bottom Bar Visibility Enforcer:
+  // Header Visibility Enforcer:
   // (Hidden before login or during onboarding / login screens)
   const header = document.querySelector('.site-header');
-  const bottomBar = document.querySelector('.mobile-bottom-bar');
   const isPreLogin = !state.userSession.isLoggedIn || viewName === 'onboarding' || viewName === 'login';
 
   if (header) header.style.display = isPreLogin ? 'none' : 'block';
-  if (bottomBar) bottomBar.style.display = isPreLogin ? 'none' : 'flex';
 
   document.querySelectorAll('.app-view').forEach(view => {
     view.classList.remove('active');
@@ -925,10 +901,6 @@ function switchView(viewName) {
   if (userProfileBtn) {
     userProfileBtn.classList.toggle('active', viewName === 'settings');
   }
-
-  document.querySelectorAll('.mobile-nav-item').forEach(m => m.classList.remove('active'));
-  const targetMobileBtn = document.getElementById(`mTab-${viewName}`);
-  if (targetMobileBtn) targetMobileBtn.classList.add('active');
 
   setTimeout(() => {
     if (viewName === 'passenger') {

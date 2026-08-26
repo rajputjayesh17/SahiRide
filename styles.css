@@ -484,48 +484,6 @@ textarea::placeholder {
   height: 0.95rem;
 }
 
-/* Mobile Bottom Navigation Bar */
-.mobile-bottom-bar {
-  display: none;
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 4.1rem;
-  background: var(--bg-surface-glass);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-top: 1px solid var(--border-subtle);
-  z-index: 1000;
-  justify-content: space-around;
-  align-items: center;
-  padding: 0.25rem 0.5rem;
-}
-
-.mobile-nav-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  color: var(--text-muted);
-  font-size: 0.72rem;
-  font-weight: 600;
-  gap: 0.2rem;
-  flex: 1;
-  padding: 0.3rem 0;
-  border-radius: var(--radius-sm);
-  transition: all var(--transition-fast);
-}
-
-.mobile-nav-item i {
-  width: 1.3rem;
-  height: 1.3rem;
-}
-
-.mobile-nav-item.active {
-  color: var(--brand-primary);
-}
-
 /* -------------------------------------------------------------
    VIEW SECTIONS WRAPPER
    ------------------------------------------------------------- */
