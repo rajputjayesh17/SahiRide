@@ -1823,10 +1823,98 @@ function setDriverMode(mode) {
 
   const routeConfig = document.getElementById('driverRouteMatchConfig');
   if (routeConfig) {
-    routeConfig.style.display = (mode === 'route' || mode === 'pool') ? 'block' : 'none';
+    routeConfig.style.display = (mode === 'route') ? 'block' : 'none';
+  }
+
+  // Update manifest and seat capacity based on selected mode
+  const seatCount = document.getElementById('driverSeatCount');
+  const manifest = document.getElementById('driverManifestList');
+
+  if (mode === 'normal') {
+    if (seatCount) seatCount.textContent = 'Seats: 1/3 (Solo Ride)';
+    if (manifest) {
+      manifest.innerHTML = `
+        <div class="manifest-step">
+          <div class="step-num pickup">1</div>
+          <div class="step-details">
+            <strong>Pick Up: Rahul M. (OTP: 5839)</strong>
+            <p>FC Road, Shivajinagar • <span style="color:var(--brand-secondary);">Boarded ✓</span></p>
+          </div>
+        </div>
+        <div class="manifest-step">
+          <div class="step-num drop">2</div>
+          <div class="step-details">
+            <strong>Drop Off: Rahul M.</strong>
+            <p>Kothrud Stand, Pune • Standard Solo Fare: ₹120.00</p>
+          </div>
+        </div>
+      `;
+    }
+  } else if (mode === 'route') {
+    if (seatCount) seatCount.textContent = 'Seats: 2/3 (Home Corridor)';
+    if (manifest) {
+      manifest.innerHTML = `
+        <div class="manifest-step" style="background:rgba(99,102,241,0.08); border-radius:var(--radius-sm); padding:0.5rem;">
+          <div class="step-num pickup" style="background:var(--brand-accent); color:#fff; border-color:var(--brand-accent);">1</div>
+          <div class="step-details">
+            <strong>Pick Up: Pooja T. (OTP: 3184)</strong>
+            <p>Deccan Gymkhana • <span style="color:var(--brand-accent); font-weight:700;">Homebound Match (+₹95)</span></p>
+          </div>
+        </div>
+        <div class="manifest-step">
+          <div class="step-num drop">2</div>
+          <div class="step-details">
+            <strong>Drop Off: Pooja T.</strong>
+            <p>Karve Road (Near Kothrud) • Detour: +1.2 km</p>
+          </div>
+        </div>
+        <div class="manifest-step">
+          <div class="step-num" style="background:var(--brand-secondary); color:#fff;">3</div>
+          <div class="step-details">
+            <strong>Driver Final Stop: Home Destination</strong>
+            <p>${state.driver.homeDest.name} • <span style="color:var(--brand-secondary); font-weight:700;">Empty Trip Eliminated (₹190 Profit)</span></p>
+          </div>
+        </div>
+      `;
+    }
+  } else if (mode === 'pool') {
+    if (seatCount) seatCount.textContent = 'Seats: 3/3 (Full Pool Capacity)';
+    if (manifest) {
+      manifest.innerHTML = `
+        <div class="manifest-step">
+          <div class="step-num pickup">1</div>
+          <div class="step-details">
+            <strong>Pick Up: Rahul M. (OTP: 5839)</strong>
+            <p>FC Road, Shivajinagar • <span style="color:var(--brand-secondary);">Boarded ✓</span></p>
+          </div>
+        </div>
+        <div class="manifest-step">
+          <div class="step-num pickup">2</div>
+          <div class="step-details">
+            <strong>Pick Up: Priya S. (OTP: 9142)</strong>
+            <p>Deccan Corridor Stop • <span style="color:var(--brand-primary);">Next Pickup (300m)</span></p>
+          </div>
+        </div>
+        <div class="manifest-step">
+          <div class="step-num drop">3</div>
+          <div class="step-details">
+            <strong>Drop Off: Rahul M.</strong>
+            <p>Aundh D-Mart • Shared Payout: ₹75.00</p>
+          </div>
+        </div>
+        <div class="manifest-step">
+          <div class="step-num drop">4</div>
+          <div class="step-details">
+            <strong>Drop Off: Priya S.</strong>
+            <p>Kothrud Stand • Shared Payout: ₹120.00</p>
+          </div>
+        </div>
+      `;
+    }
   }
 
   renderDriverCockpitRoute();
+  initIcons();
 }
 
 function updateDriverDetourRadius() {
@@ -1845,38 +1933,58 @@ function renderDriverCockpitRoute() {
     }
   });
 
-  const stops = [
-    { pos: [18.5204, 73.8567], label: "1. Rahul M. (Pickup FC Road)", type: 'pick' },
-    { pos: [18.5150, 73.8350], label: "2. Priya S. (Pickup Deccan)", type: 'pick' },
-    { pos: [18.5529, 73.8050], label: "3. Rahul M. (Dropoff Aundh)", type: 'drop' },
-    { pos: [state.driver.homeDest.lat, state.driver.homeDest.lng], label: `4. Final Destination (${state.driver.homeDest.name})`, type: 'home' }
-  ];
+  let stops = [];
+
+  if (state.driver.mode === 'normal') {
+    stops = [
+      { pos: [18.5204, 73.8567], label: "1. Rahul M. (Pickup FC Road)", type: 'pick' },
+      { pos: [18.5074, 73.8077], label: "2. Rahul M. (Dropoff Kothrud)", type: 'drop' }
+    ];
+  } else if (state.driver.mode === 'route') {
+    stops = [
+      { pos: [18.5204, 73.8567], label: "1. Rahul M. (Pickup FC Road)", type: 'pick' },
+      { pos: [18.5150, 73.8350], label: "2. Pooja T. (Pickup Deccan Corridor)", type: 'pick' },
+      { pos: [18.5090, 73.8180], label: "3. Pooja T. (Dropoff Karve Road)", type: 'drop' },
+      { pos: [state.driver.homeDest.lat, state.driver.homeDest.lng], label: `4. Driver Home (${state.driver.homeDest.name})`, type: 'home' }
+    ];
+  } else {
+    // pool mode
+    stops = [
+      { pos: [18.5204, 73.8567], label: "1. Rahul M. (Pickup FC Road)", type: 'pick' },
+      { pos: [18.5150, 73.8350], label: "2. Priya S. (Pickup Deccan)", type: 'pick' },
+      { pos: [18.5529, 73.8050], label: "3. Rahul M. (Dropoff Aundh)", type: 'drop' },
+      { pos: [state.driver.homeDest.lat, state.driver.homeDest.lng], label: `4. Priya S. (${state.driver.homeDest.name})`, type: 'home' }
+    ];
+  }
 
   const latlngs = stops.map(s => s.pos);
 
-  if (state.driver.mode === 'route' || state.driver.mode === 'pool') {
+  if (state.driver.mode === 'route') {
     stops.forEach(s => {
       L.circle(s.pos, {
         radius: state.driver.detourRadiusKm * 800,
         color: '#6366F1',
-        weight: 1,
+        weight: 1.5,
         fillColor: '#6366F1',
-        fillOpacity: 0.08
+        fillOpacity: 0.1
       }).addTo(driverMap);
     });
   }
 
   driverRouteLine = L.polyline(latlngs, {
-    color: '#10B981',
+    color: state.driver.mode === 'route' ? '#6366F1' : '#10B981',
     weight: 5,
     opacity: 0.9
   }).addTo(driverMap);
 
   stops.forEach((s, idx) => {
     const isPick = s.type === 'pick';
+    const isHome = s.type === 'home';
+    const fillColor = isHome ? '#6366F1' : (isPick ? '#F59E0B' : '#EF4444');
+    
     const marker = L.circleMarker(s.pos, {
       radius: 10,
-      fillColor: isPick ? '#F59E0B' : '#EF4444',
+      fillColor: fillColor,
       color: '#fff',
       weight: 2,
       fillOpacity: 1
@@ -1890,7 +1998,7 @@ function renderDriverCockpitRoute() {
 
 function triggerSimulatedDriverStep() {
   state.driver.currentStep = (state.driver.currentStep % 4) + 1;
-  alert(`Driver navigation advanced to Step ${state.driver.currentStep}.`);
+  alert(`Driver navigation advanced to Step ${state.driver.currentStep}. Navigation GPS synced.`);
 }
 
 // -------------------------------------------------------------
