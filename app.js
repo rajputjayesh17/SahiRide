@@ -492,7 +492,7 @@ function goToSlide(slideNum) {
 
   const nextBtn = document.getElementById('onboardingNextBtn');
   if (nextBtn) {
-    nextBtn.innerHTML = slideNum === state.totalSlides ? '<span>First Feature &olarr;</span>' : '<span>Next Feature &rarr;</span>';
+    nextBtn.innerHTML = slideNum === state.totalSlides ? '<span>Get Started &rarr; Login</span>' : '<span>Next Feature &rarr;</span>';
   }
 
   initIcons();
@@ -502,7 +502,7 @@ function nextSlide() {
   if (state.currentSlide < state.totalSlides) {
     goToSlide(state.currentSlide + 1);
   } else {
-    goToSlide(1);
+    skipOnboarding();
   }
 }
 
@@ -515,8 +515,7 @@ function prevSlide() {
 }
 
 function skipOnboarding() {
-  const phoneInput = document.getElementById('loginPhoneInput');
-  if (phoneInput) phoneInput.focus();
+  switchView('login');
 }
 
 // -------------------------------------------------------------

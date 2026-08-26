@@ -103,12 +103,11 @@
 
   <main>
     <!-- =======================================================================
-         VIEW 0: UNIFIED PRE-LOGIN EXPERIENCE
-         (4-Slide Feature Carousel Showcase + Interactive Login & Sign Up Screen)
+         VIEW 0: INTRODUCTORY ONBOARDING SLIDES (STEP 1: 4-FEATURE SHOWCASE)
          ======================================================================= -->
     <section id="view-onboarding" class="app-view active">
-      <div class="prelogin-unified-container">
-        <!-- Centered Pre-login Brand Header & Quote -->
+      <div class="onboarding-screen">
+        <!-- Pre-login Brand Header & Quote -->
         <div class="prelogin-brand-header">
           <div class="prelogin-logo-badge">
             <i data-lucide="navigation"></i>
@@ -117,289 +116,303 @@
           <p class="prelogin-brand-quote">“Sahi Ride, Sahi Price • Har Safar Sahi Dam Par &amp; Zero Deadhead”</p>
         </div>
 
-        <!-- Dual Column Grid: Features Carousel (Left) + Login/Signup Form (Right) -->
-        <div class="prelogin-grid-layout">
-          <!-- LEFT: 4-Slide Interactive Feature Carousel Showcase -->
-          <div class="onboarding-card">
-            <div class="onboarding-top-bar">
-              <span class="onboarding-badge" id="slideBadgeText">Feature 1 of 4</span>
-              <span style="font-size:0.78rem; color:var(--brand-secondary); font-weight:700;">✨ Live Feature Showcase</span>
+        <div class="onboarding-card">
+          <div class="onboarding-top-bar">
+            <span class="onboarding-badge" id="slideBadgeText">Feature 1 of 4</span>
+            <button class="onboarding-skip-btn" onclick="skipOnboarding()">Skip &rarr; Login</button>
+          </div>
+
+          <!-- Carousel Slide 1: 3 Free Rides -->
+          <div class="onboarding-slide-content" id="slide-1">
+            <div class="slide-graphic-box">
+              <i data-lucide="gift" style="color:var(--brand-secondary);"></i>
+            </div>
+            <h2 class="slide-title">First 3 Rides 100% FREE!</h2>
+            <div class="slide-subtitle">Doorstep Pickup &amp; Drop • ₹0 for Your First 3 Rides</div>
+            <p class="slide-description">
+              Experience the power of dynamic pooling. Set your exact doorstep pickup and drop location freely — <strong>no fixed bus stops</strong>. Enjoy your <strong>first 3 rides completely free</strong>!
+            </p>
+          </div>
+
+          <!-- Carousel Slide 2: Every 5th Ride 5% OFF Milestone Showcase -->
+          <div class="onboarding-slide-content" id="slide-2" style="display:none;">
+            <div class="onboarding-ad-badge">
+              <i data-lucide="sparkles"></i> <span>COMMUTER LOYALTY REWARD • 5% OFF EVERY 5TH RIDE</span>
             </div>
 
-            <!-- Carousel Slide 1: 3 Free Rides -->
-            <div class="onboarding-slide-content" id="slide-1">
-              <div class="slide-graphic-box">
-                <i data-lucide="gift" style="color:var(--brand-secondary);"></i>
-              </div>
-              <h2 class="slide-title">First 3 Rides 100% FREE!</h2>
-              <div class="slide-subtitle">Doorstep Pickup &amp; Drop • ₹0 for Your First 3 Rides</div>
-              <p class="slide-description">
-                Experience the power of dynamic pooling. Set your exact doorstep pickup and drop location freely — <strong>no fixed bus stops</strong>. Enjoy your <strong>first 3 rides completely free</strong>!
-              </p>
+            <div class="slide-graphic-box" style="color:var(--brand-accent); width:5rem; height:5rem; margin-bottom:0.75rem;">
+              <i data-lucide="award" style="width:2.5rem; height:2.5rem;"></i>
             </div>
+            <h2 class="slide-title" style="font-size:1.45rem;">Every 5th Ride: Flat 5% OFF!</h2>
+            <div class="slide-subtitle" style="color:var(--brand-accent); margin-bottom:0.3rem;">Daily Commute Loyalty Milestone Rewards</div>
+            <p class="slide-description" style="font-size:0.85rem; margin-bottom:0.6rem;">
+              Commute regularly for college or office? Every 5th trip on SahiRide automatically unlocks a <strong>flat 5% loyalty discount</strong> forever — no promo codes needed!
+            </p>
 
-            <!-- Carousel Slide 2: Every 5th Ride 5% OFF Milestone Showcase -->
-            <div class="onboarding-slide-content" id="slide-2" style="display:none;">
-              <div class="onboarding-ad-badge">
-                <i data-lucide="sparkles"></i> <span>COMMUTER LOYALTY REWARD • 5% OFF EVERY 5TH RIDE</span>
-              </div>
-
-              <div class="slide-graphic-box" style="color:var(--brand-accent); width:5rem; height:5rem; margin-bottom:0.75rem;">
-                <i data-lucide="award" style="width:2.5rem; height:2.5rem;"></i>
-              </div>
-              <h2 class="slide-title" style="font-size:1.45rem;">Every 5th Ride: Flat 5% OFF!</h2>
-              <div class="slide-subtitle" style="color:var(--brand-accent); margin-bottom:0.3rem;">Daily Commute Loyalty Milestone Rewards</div>
-              <p class="slide-description" style="font-size:0.85rem; margin-bottom:0.6rem;">
-                Commute regularly for college or office? Every 5th trip on SahiRide automatically unlocks a <strong>flat 5% loyalty discount</strong> forever — no promo codes needed!
-              </p>
-
-              <!-- Visual Milestone Roadmap Graphic -->
-              <div class="onboarding-ad-graphic">
-                <div class="ad-milestone-track-row">
-                  <div class="ad-step-pill completed">
-                    <div class="ad-step-circle">1</div>
-                    <span class="ad-step-label">Ride 1</span>
-                  </div>
-                  <div class="ad-step-pill completed">
-                    <div class="ad-step-circle">2</div>
-                    <span class="ad-step-label">Ride 2</span>
-                  </div>
-                  <div class="ad-step-pill completed">
-                    <div class="ad-step-circle">3</div>
-                    <span class="ad-step-label">Ride 3</span>
-                  </div>
-                  <div class="ad-step-pill completed">
-                    <div class="ad-step-circle">4</div>
-                    <span class="ad-step-label">Ride 4</span>
-                  </div>
-                  <div class="ad-step-pill milestone-highlight">
-                    <div class="ad-step-circle">5★</div>
-                    <span class="ad-step-label">5% OFF!</span>
-                  </div>
+            <!-- Visual Milestone Roadmap Graphic -->
+            <div class="onboarding-ad-graphic">
+              <div class="ad-milestone-track-row">
+                <div class="ad-step-pill completed">
+                  <div class="ad-step-circle">1</div>
+                  <span class="ad-step-label">Ride 1</span>
                 </div>
-
-                <div class="onboarding-perk-grid">
-                  <div class="onboarding-perk-card">
-                    <i data-lucide="zap"></i>
-                    <strong>Instant</strong>
-                    <span>At checkout</span>
-                  </div>
-                  <div class="onboarding-perk-card">
-                    <i data-lucide="repeat"></i>
-                    <strong>Every 5th</strong>
-                    <span>5th, 10th...</span>
-                  </div>
-                  <div class="onboarding-perk-card">
-                    <i data-lucide="trending-down"></i>
-                    <strong>Savings</strong>
-                    <span>₹1,500+/yr</span>
-                  </div>
+                <div class="ad-step-pill completed">
+                  <div class="ad-step-circle">2</div>
+                  <span class="ad-step-label">Ride 2</span>
+                </div>
+                <div class="ad-step-pill completed">
+                  <div class="ad-step-circle">3</div>
+                  <span class="ad-step-label">Ride 3</span>
+                </div>
+                <div class="ad-step-pill completed">
+                  <div class="ad-step-circle">4</div>
+                  <span class="ad-step-label">Ride 4</span>
+                </div>
+                <div class="ad-step-pill milestone-highlight">
+                  <div class="ad-step-circle">5★</div>
+                  <span class="ad-step-label">5% OFF!</span>
                 </div>
               </div>
-            </div>
 
-            <!-- Carousel Slide 3: Set My Route for Drivers -->
-            <div class="onboarding-slide-content" id="slide-3" style="display:none;">
-              <div class="slide-graphic-box" style="color:var(--brand-primary);">
-                <i data-lucide="compass"></i>
+              <div class="onboarding-perk-grid">
+                <div class="onboarding-perk-card">
+                  <i data-lucide="zap"></i>
+                  <strong>Instant</strong>
+                  <span>At checkout</span>
+                </div>
+                <div class="onboarding-perk-card">
+                  <i data-lucide="repeat"></i>
+                  <strong>Every 5th</strong>
+                  <span>5th, 10th...</span>
+                </div>
+                <div class="onboarding-perk-card">
+                  <i data-lucide="trending-down"></i>
+                  <strong>Savings</strong>
+                  <span>₹1,500+/yr</span>
+                </div>
               </div>
-              <h2 class="slide-title">"Set My Route" for Drivers</h2>
-              <div class="slide-subtitle">Monetize Empty Return Trips</div>
-              <p class="slide-description">
-                Heading home after a drop? Set your destination corridor. You'll only get matched with passengers along your return path — <strong>turn ₹0 deadhead returns into ₹180+ profit</strong>.
-              </p>
-            </div>
-
-            <!-- Carousel Slide 4: Safety & Fair Pricing -->
-            <div class="onboarding-slide-content" id="slide-4" style="display:none;">
-              <div class="slide-graphic-box" style="color:var(--brand-secondary);">
-                <i data-lucide="shield-check"></i>
-              </div>
-              <h2 class="slide-title">Safety &amp; Fair Pricing</h2>
-              <div class="slide-subtitle">Verified Drivers • OTP Security • UPI Splits</div>
-              <p class="slide-description">
-                Optional <strong>Women-Only pool</strong> filter, KYC-verified drivers, real-time OTP handshakes, masked rider contact info, and transparent distance-based fare splitting.
-              </p>
-            </div>
-
-            <!-- Slide Dots Indicator (4 Dots) -->
-            <div class="onboarding-dots">
-              <span class="dot active" onclick="goToSlide(1)"></span>
-              <span class="dot" onclick="goToSlide(2)"></span>
-              <span class="dot" onclick="goToSlide(3)"></span>
-              <span class="dot" onclick="goToSlide(4)"></span>
-            </div>
-
-            <!-- Carousel Navigation Buttons -->
-            <div style="display:flex; gap:0.75rem; width:100%;">
-              <button class="btn-secondary" style="flex:1;" onclick="prevSlide()">
-                <span>&larr; Prev</span>
-              </button>
-              <button class="btn-primary" style="flex:1;" id="onboardingNextBtn" onclick="nextSlide()">
-                <span>Next Feature &rarr;</span>
-              </button>
             </div>
           </div>
 
-          <!-- RIGHT: Login / Sign Up Card -->
-          <div class="login-card">
-            <div style="text-align:center; margin-bottom:1.25rem;">
-              <h2 style="font-size:1.45rem;" id="authHeaderTitle">Welcome to SahiRide</h2>
-              <p style="font-size:0.85rem; color:var(--text-muted);" id="authHeaderSubtitle">Sign in or create a new account with mandatory KYC</p>
+          <!-- Carousel Slide 3: Set My Route for Drivers -->
+          <div class="onboarding-slide-content" id="slide-3" style="display:none;">
+            <div class="slide-graphic-box" style="color:var(--brand-primary);">
+              <i data-lucide="compass"></i>
             </div>
+            <h2 class="slide-title">"Set My Route" for Drivers</h2>
+            <div class="slide-subtitle">Monetize Empty Return Trips</div>
+            <p class="slide-description">
+              Heading home after a drop? Set your destination corridor. You'll only get matched with passengers along your return path — <strong>turn ₹0 deadhead returns into ₹180+ profit</strong>.
+            </p>
+          </div>
 
-            <!-- Auth Mode Toggle: Existing User (Sign In) vs New User (Sign Up) -->
-            <div class="auth-nav-toggle">
-              <button class="auth-tab-btn active" id="btnAuthModeLogin" onclick="setAuthMode('login')">
-                <i data-lucide="log-in"></i> <span>Existing User (Sign In)</span>
-              </button>
-              <button class="auth-tab-btn" id="btnAuthModeSignup" onclick="setAuthMode('signup')">
-                <i data-lucide="user-plus"></i> <span>New User? (Sign Up)</span>
-              </button>
+          <!-- Carousel Slide 4: Safety & Fair Pricing -->
+          <div class="onboarding-slide-content" id="slide-4" style="display:none;">
+            <div class="slide-graphic-box" style="color:var(--brand-secondary);">
+              <i data-lucide="shield-check"></i>
             </div>
+            <h2 class="slide-title">Safety &amp; Fair Pricing</h2>
+            <div class="slide-subtitle">Verified Drivers • OTP Security • UPI Splits</div>
+            <p class="slide-description">
+              Optional <strong>Women-Only pool</strong> filter, KYC-verified drivers, real-time OTP handshakes, masked rider contact info, and transparent distance-based fare splitting.
+            </p>
+          </div>
 
-            <!-- Role Toggle Selector: Passenger vs Driver -->
-            <div class="role-toggle-group">
-              <button class="role-chip-btn active" id="loginRolePassenger" onclick="selectLoginRole('passenger')">
-                <i data-lucide="user"></i> <span>Passenger</span>
-              </button>
-              <button class="role-chip-btn" id="loginRoleDriver" onclick="selectLoginRole('driver')">
-                <i data-lucide="car"></i> <span>Driver / Captain</span>
-              </button>
-            </div>
+          <!-- Slide Dots Indicator (4 Dots) -->
+          <div class="onboarding-dots">
+            <span class="dot active" onclick="goToSlide(1)"></span>
+            <span class="dot" onclick="goToSlide(2)"></span>
+            <span class="dot" onclick="goToSlide(3)"></span>
+            <span class="dot" onclick="goToSlide(4)"></span>
+          </div>
 
-            <!-- FORM CONTAINER -->
-            <div id="authFormContainer">
-              <!-- NEW PASSENGER EXTRA DETAILS -->
-              <div id="signupPassengerFields" style="display:none; margin-bottom:1rem;">
-                <div style="background:rgba(16,185,129,0.18); border:1px solid var(--brand-secondary); border-radius:var(--radius-md); padding:0.75rem 0.85rem; margin-bottom:0.85rem; display:flex; align-items:center; gap:0.6rem;">
-                  <i data-lucide="gift" style="color:var(--brand-secondary); width:1.5rem; height:1.5rem; flex-shrink:0;"></i>
-                  <div style="font-size:0.82rem;">
-                    <strong style="color:var(--brand-secondary);">🎉 Welcome Offer: First 3 Rides 100% FREE!</strong>
-                    <div style="color:var(--text-muted);">Plus 5% OFF on every 5th ride automatically enabled!</div>
-                  </div>
-                </div>
+          <!-- Carousel Navigation Buttons -->
+          <div style="display:flex; gap:0.75rem; width:100%;">
+            <button class="btn-secondary" style="flex:1;" onclick="prevSlide()">
+              <span>&larr; Prev</span>
+            </button>
+            <button class="btn-primary" style="flex:1;" id="onboardingNextBtn" onclick="nextSlide()">
+              <span>Next Feature &rarr;</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
 
-                <div class="input-group" style="margin-bottom:0.75rem;">
-                  <label style="font-size:0.825rem; font-weight:600;">Your Full Name</label>
-                  <div class="loc-field">
-                    <i data-lucide="user"></i>
-                    <input type="text" id="signupPassName" placeholder="e.g. Jayesh Sharma" value="Jayesh Sharma">
-                  </div>
-                </div>
+    <!-- =======================================================================
+         VIEW 0.5: LOGIN & SIGNUP (STEP 2: AUTHENTICATION & DRIVER KYC)
+         ======================================================================= -->
+    <section id="view-login" class="app-view">
+      <div class="login-screen">
+        <!-- Pre-login Brand Header & Quote -->
+        <div class="prelogin-brand-header">
+          <div class="prelogin-logo-badge">
+            <i data-lucide="navigation"></i>
+          </div>
+          <h1 class="prelogin-brand-title">Sahi<span class="accent">Ride</span> <span class="prelogin-pool-tag">AUTO &amp; CAB POOL</span></h1>
+          <p class="prelogin-brand-quote">“Sahi Ride, Sahi Price • Har Safar Sahi Dam Par &amp; Zero Deadhead”</p>
+        </div>
 
-                <div class="input-group" style="margin-bottom:0.75rem;">
-                  <label style="font-size:0.825rem; font-weight:600;">Email Address</label>
-                  <div class="loc-field">
-                    <i data-lucide="mail"></i>
-                    <input type="email" id="signupPassEmail" placeholder="e.g. jayesh@example.com" value="jayesh@example.com">
-                  </div>
+        <div class="login-card">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+            <button class="pin-select-btn" style="background:transparent; border:none; color:var(--text-muted); font-size:0.8rem; cursor:pointer;" onclick="switchView('onboarding')">
+              &larr; View Features Showcase
+            </button>
+          </div>
+
+          <div style="text-align:center; margin-bottom:1.25rem;">
+            <h2 style="font-size:1.45rem;" id="authHeaderTitle">Welcome to SahiRide</h2>
+            <p style="font-size:0.85rem; color:var(--text-muted);" id="authHeaderSubtitle">Sign in or create a new account with mandatory KYC</p>
+          </div>
+
+          <!-- Auth Mode Toggle: Existing User (Sign In) vs New User (Sign Up) -->
+          <div class="auth-nav-toggle">
+            <button class="auth-tab-btn active" id="btnAuthModeLogin" onclick="setAuthMode('login')">
+              <i data-lucide="log-in"></i> <span>Existing User (Sign In)</span>
+            </button>
+            <button class="auth-tab-btn" id="btnAuthModeSignup" onclick="setAuthMode('signup')">
+              <i data-lucide="user-plus"></i> <span>New User? (Sign Up)</span>
+            </button>
+          </div>
+
+          <!-- Role Toggle Selector: Passenger vs Driver -->
+          <div class="role-toggle-group">
+            <button class="role-chip-btn active" id="loginRolePassenger" onclick="selectLoginRole('passenger')">
+              <i data-lucide="user"></i> <span>Passenger</span>
+            </button>
+            <button class="role-chip-btn" id="loginRoleDriver" onclick="selectLoginRole('driver')">
+              <i data-lucide="car"></i> <span>Driver / Captain</span>
+            </button>
+          </div>
+
+          <!-- FORM CONTAINER -->
+          <div id="authFormContainer">
+            <!-- NEW PASSENGER EXTRA DETAILS -->
+            <div id="signupPassengerFields" style="display:none; margin-bottom:1rem;">
+              <div style="background:rgba(16,185,129,0.18); border:1px solid var(--brand-secondary); border-radius:var(--radius-md); padding:0.75rem 0.85rem; margin-bottom:0.85rem; display:flex; align-items:center; gap:0.6rem;">
+                <i data-lucide="gift" style="color:var(--brand-secondary); width:1.5rem; height:1.5rem; flex-shrink:0;"></i>
+                <div style="font-size:0.82rem;">
+                  <strong style="color:var(--brand-secondary);">🎉 Welcome Offer: First 3 Rides 100% FREE!</strong>
+                  <div style="color:var(--text-muted);">Plus 5% OFF on every 5th ride automatically enabled!</div>
                 </div>
               </div>
 
-              <!-- NEW DRIVER MANDATORY KYC FORM -->
-              <div id="signupDriverKYCFields" style="display:none; margin-bottom:1rem;">
-                <div style="background:rgba(245,158,11,0.15); border:1px solid var(--brand-primary); border-radius:var(--radius-md); padding:0.65rem 0.85rem; margin-bottom:0.85rem; display:flex; align-items:center; gap:0.5rem;">
-                  <i data-lucide="shield-check" style="color:var(--brand-primary);"></i>
-                  <div style="font-size:0.8rem;">
-                    <strong>Mandatory Driver KYC Verification</strong>
-                    <div style="color:var(--text-muted);">Government ID &amp; Commercial Permit required before accepting rides.</div>
-                  </div>
-                </div>
-
-                <div class="input-group" style="margin-bottom:0.75rem;">
-                  <label style="font-size:0.825rem; font-weight:600;">Full Name (As per Driving License)</label>
-                  <div class="loc-field">
-                    <i data-lucide="user"></i>
-                    <input type="text" id="signupDriverName" placeholder="e.g. Ramesh Baburao Shinde" value="Ramesh Baburao Shinde">
-                  </div>
-                </div>
-
-                <div class="input-group" style="margin-bottom:0.75rem;">
-                  <label style="font-size:0.825rem; font-weight:600;">Commercial Driving License (DL) Number</label>
-                  <div class="loc-field">
-                    <i data-lucide="file-badge"></i>
-                    <input type="text" id="signupDriverDL" placeholder="e.g. MH12 2019 0088921" value="MH12 2019 0088921">
-                  </div>
-                </div>
-
-                <div class="input-group" style="margin-bottom:0.75rem;">
-                  <label style="font-size:0.825rem; font-weight:600;">Aadhaar Card Number (Govt ID)</label>
-                  <div class="loc-field">
-                    <i data-lucide="credit-card"></i>
-                    <input type="text" id="signupDriverAadhaar" placeholder="e.g. 5839 2910 4412" value="5839 2910 4412" maxlength="14">
-                  </div>
-                </div>
-
-                <div class="input-group" style="margin-bottom:0.75rem;">
-                  <label style="font-size:0.825rem; font-weight:600;">Vehicle Registration (RC Number)</label>
-                  <div class="loc-field">
-                    <i data-lucide="car"></i>
-                    <input type="text" id="signupDriverRC" placeholder="e.g. MH 12 AB 4321" value="MH 12 AB 4321">
-                  </div>
-                </div>
-
-                <div class="input-group" style="margin-bottom:0.75rem;">
-                  <label style="font-size:0.825rem; font-weight:600;">Vehicle Category &amp; Seating Capacity</label>
-                  <select id="signupDriverVehType" style="background:var(--bg-surface); color:var(--text-main); border:1px solid var(--border-medium); padding:0.65rem; border-radius:var(--radius-md); font-size:0.9rem; width:100%;">
-                    <option value="auto">Auto-Rickshaw (3 Passenger Seats Capacity)</option>
-                    <option value="cab">Mini Cab / Sedan (4 Passenger Seats Capacity)</option>
-                  </select>
-                </div>
-
-                <!-- Document Upload Box -->
-                <div class="kyc-doc-upload-box" onclick="alert('Document upload simulated: Driving License & RC Book scanned via Digilocker OCR ✓')">
-                  <i data-lucide="upload-cloud" style="width:1.8rem; height:1.8rem; color:var(--brand-primary); margin:0 auto 0.35rem;"></i>
-                  <strong style="font-size:0.85rem; display:block;">Upload DL &amp; RC Book Photos / Digilocker</strong>
-                  <span style="font-size:0.75rem; color:var(--text-muted);">PDF, JPG, PNG up to 10MB (Instant Automated Verification)</span>
+              <div class="input-group" style="margin-bottom:0.75rem;">
+                <label style="font-size:0.825rem; font-weight:600;">Your Full Name</label>
+                <div class="loc-field">
+                  <i data-lucide="user"></i>
+                  <input type="text" id="signupPassName" placeholder="e.g. Jayesh Sharma" value="Jayesh Sharma">
                 </div>
               </div>
 
-              <!-- Step 1: Phone Input -->
-              <div id="loginStepPhone">
-                <div class="input-group" style="margin-bottom:0.75rem;">
-                  <label style="font-size:0.825rem; font-weight:600;">Mobile Phone Number</label>
-                  <div class="phone-input-row">
-                    <span class="phone-prefix">🇮🇳 +91</span>
-                    <input type="tel" id="loginPhoneInput" placeholder="Enter 10-digit mobile number" value="9876543210" maxlength="10">
-                  </div>
+              <div class="input-group" style="margin-bottom:0.75rem;">
+                <label style="font-size:0.825rem; font-weight:600;">Email Address</label>
+                <div class="loc-field">
+                  <i data-lucide="mail"></i>
+                  <input type="email" id="signupPassEmail" placeholder="e.g. jayesh@example.com" value="jayesh@example.com">
                 </div>
-                <button class="btn-primary" style="width:100%; margin-top:0.5rem;" onclick="requestLoginOtp()">
-                  <i data-lucide="arrow-right"></i> <span id="btnGetOtpText">Get Verification Code (OTP)</span>
-                </button>
+              </div>
+            </div>
+
+            <!-- NEW DRIVER MANDATORY KYC FORM -->
+            <div id="signupDriverKYCFields" style="display:none; margin-bottom:1rem;">
+              <div style="background:rgba(245,158,11,0.15); border:1px solid var(--brand-primary); border-radius:var(--radius-md); padding:0.65rem 0.85rem; margin-bottom:0.85rem; display:flex; align-items:center; gap:0.5rem;">
+                <i data-lucide="shield-check" style="color:var(--brand-primary);"></i>
+                <div style="font-size:0.8rem;">
+                  <strong>Mandatory Driver KYC Verification</strong>
+                  <div style="color:var(--text-muted);">Government ID &amp; Commercial Permit required before accepting rides.</div>
+                </div>
               </div>
 
-              <!-- Step 2: OTP Input (Visible after OTP requested) -->
-              <div id="loginStepOtp" style="display:none;">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
-                  <span style="font-size:0.8rem; color:var(--text-muted);">Enter 6-digit OTP sent to phone</span>
-                  <button class="pin-select-btn" onclick="autoFillDemoOtp()">Autofill Demo OTP (5839)</button>
+              <div class="input-group" style="margin-bottom:0.75rem;">
+                <label style="font-size:0.825rem; font-weight:600;">Full Name (As per Driving License)</label>
+                <div class="loc-field">
+                  <i data-lucide="user"></i>
+                  <input type="text" id="signupDriverName" placeholder="e.g. Ramesh Baburao Shinde" value="Ramesh Baburao Shinde">
                 </div>
+              </div>
 
-                <div class="otp-boxes-row">
-                  <input type="text" class="otp-box" id="otp-1" maxlength="1" value="5">
-                  <input type="text" class="otp-box" id="otp-2" maxlength="1" value="8">
-                  <input type="text" class="otp-box" id="otp-3" maxlength="1" value="3">
-                  <input type="text" class="otp-box" id="otp-4" maxlength="1" value="9">
-                  <input type="text" class="otp-box" id="otp-5" maxlength="1" value="2">
-                  <input type="text" class="otp-box" id="otp-6" maxlength="1" value="1">
+              <div class="input-group" style="margin-bottom:0.75rem;">
+                <label style="font-size:0.825rem; font-weight:600;">Commercial Driving License (DL) Number</label>
+                <div class="loc-field">
+                  <i data-lucide="file-badge"></i>
+                  <input type="text" id="signupDriverDL" placeholder="e.g. MH12 2019 0088921" value="MH12 2019 0088921">
                 </div>
+              </div>
 
-                <button class="btn-primary" style="width:100%; margin-top:0.75rem;" onclick="verifyLoginOtp()">
-                  <i data-lucide="check-circle"></i> <span id="btnVerifyAuthText">Verify OTP &amp; Claim 3 Free Rides</span>
-                </button>
-                <div style="text-align:center; margin-top:0.75rem;">
-                  <button class="pin-select-btn" style="background:transparent; border:none; color:var(--text-muted);" onclick="backToPhoneStep()">Change phone number</button>
+              <div class="input-group" style="margin-bottom:0.75rem;">
+                <label style="font-size:0.825rem; font-weight:600;">Aadhaar Card Number (Govt ID)</label>
+                <div class="loc-field">
+                  <i data-lucide="credit-card"></i>
+                  <input type="text" id="signupDriverAadhaar" placeholder="e.g. 5839 2910 4412" value="5839 2910 4412" maxlength="14">
                 </div>
+              </div>
+
+              <div class="input-group" style="margin-bottom:0.75rem;">
+                <label style="font-size:0.825rem; font-weight:600;">Vehicle Registration (RC Number)</label>
+                <div class="loc-field">
+                  <i data-lucide="car"></i>
+                  <input type="text" id="signupDriverRC" placeholder="e.g. MH 12 AB 4321" value="MH 12 AB 4321">
+                </div>
+              </div>
+
+              <div class="input-group" style="margin-bottom:0.75rem;">
+                <label style="font-size:0.825rem; font-weight:600;">Vehicle Category &amp; Seating Capacity</label>
+                <select id="signupDriverVehType" style="background:var(--bg-surface); color:var(--text-main); border:1px solid var(--border-medium); padding:0.65rem; border-radius:var(--radius-md); font-size:0.9rem; width:100%;">
+                  <option value="auto">Auto-Rickshaw (3 Passenger Seats Capacity)</option>
+                  <option value="cab">Mini Cab / Sedan (4 Passenger Seats Capacity)</option>
+                </select>
+              </div>
+
+              <!-- Document Upload Box -->
+              <div class="kyc-doc-upload-box" onclick="alert('Document upload simulated: Driving License & RC Book scanned via Digilocker OCR ✓')">
+                <i data-lucide="upload-cloud" style="width:1.8rem; height:1.8rem; color:var(--brand-primary); margin:0 auto 0.35rem;"></i>
+                <strong style="font-size:0.85rem; display:block;">Upload DL &amp; RC Book Photos / Digilocker</strong>
+                <span style="font-size:0.75rem; color:var(--text-muted);">PDF, JPG, PNG up to 10MB (Instant Automated Verification)</span>
+              </div>
+            </div>
+
+            <!-- Step 1: Phone Input -->
+            <div id="loginStepPhone">
+              <div class="input-group" style="margin-bottom:0.75rem;">
+                <label style="font-size:0.825rem; font-weight:600;">Mobile Phone Number</label>
+                <div class="phone-input-row">
+                  <span class="phone-prefix">🇮🇳 +91</span>
+                  <input type="tel" id="loginPhoneInput" placeholder="Enter 10-digit mobile number" value="9876543210" maxlength="10">
+                </div>
+              </div>
+              <button class="btn-primary" style="width:100%; margin-top:0.5rem;" onclick="requestLoginOtp()">
+                <i data-lucide="arrow-right"></i> <span id="btnGetOtpText">Get Verification Code (OTP)</span>
+              </button>
+            </div>
+
+            <!-- Step 2: OTP Input (Visible after OTP requested) -->
+            <div id="loginStepOtp" style="display:none;">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
+                <span style="font-size:0.8rem; color:var(--text-muted);">Enter 6-digit OTP sent to phone</span>
+                <button class="pin-select-btn" onclick="autoFillDemoOtp()">Autofill Demo OTP (5839)</button>
+              </div>
+
+              <div class="otp-boxes-row">
+                <input type="text" class="otp-box" id="otp-1" maxlength="1" value="5">
+                <input type="text" class="otp-box" id="otp-2" maxlength="1" value="8">
+                <input type="text" class="otp-box" id="otp-3" maxlength="1" value="3">
+                <input type="text" class="otp-box" id="otp-4" maxlength="1" value="9">
+                <input type="text" class="otp-box" id="otp-5" maxlength="1" value="2">
+                <input type="text" class="otp-box" id="otp-6" maxlength="1" value="1">
+              </div>
+
+              <button class="btn-primary" style="width:100%; margin-top:0.75rem;" onclick="verifyLoginOtp()">
+                <i data-lucide="check-circle"></i> <span id="btnVerifyAuthText">Verify OTP &amp; Claim 3 Free Rides</span>
+              </button>
+              <div style="text-align:center; margin-top:0.75rem;">
+                <button class="pin-select-btn" style="background:transparent; border:none; color:var(--text-muted);" onclick="backToPhoneStep()">Change phone number</button>
               </div>
             </div>
           </div>
         </div>
       </div>
     </section>
-
-    <!-- Invisible Alias for backwards-compatibility -->
-    <section id="view-login" style="display:none;"></section>
 
     <!-- =======================================================================
          VIEW 1: LANDING PAGE & VALUE PROPOSITION (HERO, COMPARISONS, CALCULATORS)
