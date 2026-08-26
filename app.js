@@ -449,13 +449,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Always initialize onboarding slide 1
   goToSlide(1);
-
-  // Auto-advance features showcase every 6 seconds
-  setInterval(() => {
-    if (!state.userSession.isLoggedIn && state.currentView === 'onboarding') {
-      nextSlide();
-    }
-  }, 6000);
+  startCarouselAutoPlay();
 
   if (!state.userSession.isLoggedIn) {
     switchView('onboarding');
@@ -471,9 +465,31 @@ function initIcons() {
 }
 
 // -------------------------------------------------------------
-// 5. ONBOARDING CAROUSEL ENGINE (4 SLIDES INCLUDING 5% 5TH RIDE)
+// 5. ONBOARDING CAROUSEL ENGINE (4 SLIDES -> THEN MOVE TO LOGIN)
 // -------------------------------------------------------------
 let carouselAutoPlayTimer = null;
+
+function startCarouselAutoPlay() {
+  stopCarouselAutoPlay();
+  carouselAutoPlayTimer = setInterval(() => {
+    if (!state.userSession.isLoggedIn && state.currentView === 'onboarding') {
+      if (state.currentSlide < state.totalSlides) {
+        goToSlide(state.currentSlide + 1);
+      } else {
+        // Once all 4 features are seen, move directly to login page (no loop!)
+        stopCarouselAutoPlay();
+        skipOnboarding();
+      }
+    }
+  }, 5000);
+}
+
+function stopCarouselAutoPlay() {
+  if (carouselAutoPlayTimer) {
+    clearInterval(carouselAutoPlayTimer);
+    carouselAutoPlayTimer = null;
+  }
+}
 
 function goToSlide(slideNum) {
   state.currentSlide = slideNum;
@@ -502,6 +518,8 @@ function nextSlide() {
   if (state.currentSlide < state.totalSlides) {
     goToSlide(state.currentSlide + 1);
   } else {
+    // Finished all 4 features -> move directly to login
+    stopCarouselAutoPlay();
     skipOnboarding();
   }
 }
@@ -509,12 +527,11 @@ function nextSlide() {
 function prevSlide() {
   if (state.currentSlide > 1) {
     goToSlide(state.currentSlide - 1);
-  } else {
-    goToSlide(state.totalSlides);
   }
 }
 
 function skipOnboarding() {
+  stopCarouselAutoPlay();
   switchView('login');
 }
 
