@@ -854,15 +854,15 @@
             </button>
           </div>
 
-          <!-- Step 2: Live Tracking HUD (Visible after booking) -->
+          <!-- Step 2: Live Tracking HUD (Visible after booking with Real-Time Moving Auto) -->
           <div id="passTrackingPanel" class="booking-card" style="display:none;">
             <div class="card-title-row">
               <h3><i data-lucide="navigation" style="color:var(--brand-secondary);"></i> <span>Live Trip in Progress</span></h3>
-              <span class="online-pill online"><span class="badge-dot"></span> On Route</span>
+              <span class="online-pill online" id="liveMovingStatusPill"><span class="badge-dot"></span> Auto Moving (Live GPS)</span>
             </div>
 
             <!-- OTP Verification Banner -->
-            <div style="background:var(--brand-primary-light); border:1px solid var(--brand-primary); padding:0.75rem; border-radius:var(--radius-md); display:flex; align-items:center; justify-content:space-between; margin-bottom:1rem;">
+            <div style="background:var(--brand-primary-light); border:1px solid var(--brand-primary); padding:0.75rem; border-radius:var(--radius-md); display:flex; align-items:center; justify-content:space-between; margin-bottom:0.75rem;">
               <div>
                 <span style="font-size:0.75rem; color:var(--text-muted); display:block;">Start Ride OTP</span>
                 <strong style="font-size:1.25rem; font-family:var(--font-heading); color:var(--brand-primary);" id="tripOtpCode">5839</strong>
@@ -870,8 +870,19 @@
               <span style="font-size:0.75rem; color:var(--text-muted); text-align:right;">Share with driver<br>upon pickup</span>
             </div>
 
+            <!-- Live Moving Telemetry HUD (Ola/Uber Style) -->
+            <div style="background:var(--bg-surface); padding:0.75rem; border-radius:var(--radius-md); border:1px solid var(--border-medium); margin-bottom:0.75rem; display:flex; align-items:center; justify-content:space-between;">
+              <div style="display:flex; align-items:center; gap:0.5rem;">
+                <span class="live-speed-badge" id="liveSpeedVal"><i data-lucide="gauge" style="width:0.85rem; height:0.85rem;"></i> 34 km/h</span>
+                <span style="font-size:0.78rem; color:var(--text-muted);" id="liveTurnInstruction">En-route via corridor</span>
+              </div>
+              <span class="live-trip-telemetry-badge" id="liveGpsSatelliteBadge">
+                <i data-lucide="satellite" style="width:0.8rem; height:0.8rem;"></i> GPS Synced
+              </span>
+            </div>
+
             <!-- Driver Profile Box -->
-            <div class="driver-info-box">
+            <div class="driver-info-box" style="margin-bottom:0.75rem;">
               <div class="driver-avatar">RS</div>
               <div class="driver-meta">
                 <h4>Ramesh Shinde <span class="badge-kyc-verified"><i data-lucide="shield-check" style="width:0.75rem; height:0.75rem;"></i> KYC VERIFIED</span></h4>
@@ -880,7 +891,7 @@
             </div>
 
             <!-- Co-Passengers Box (Masked Privacy) -->
-            <div class="co-passengers-box" id="coPassengersWrap">
+            <div class="co-passengers-box" id="coPassengersWrap" style="margin-bottom:0.75rem;">
               <div class="co-passengers-title">
                 <span id="coPassengersCountLabel">Matched Co-Passengers (1/3 Seats)</span>
                 <span style="color:var(--brand-secondary); font-size:0.7rem;">Verified Riders</span>
@@ -895,14 +906,24 @@
               </div>
             </div>
 
-            <!-- Dynamic ETA Progress -->
-            <div style="background:var(--bg-surface); padding:0.85rem; border-radius:var(--radius-md); border:1px solid var(--border-subtle); margin:0.75rem 0;">
+            <!-- Dynamic ETA Progress & Distance Remaining -->
+            <div style="background:var(--bg-surface); padding:0.85rem; border-radius:var(--radius-md); border:1px solid var(--border-subtle); margin-bottom:0.75rem;">
               <div style="display:flex; justify-content:space-between; margin-bottom:0.35rem; font-size:0.85rem;">
-                <span>Estimated Arrival</span>
-                <strong id="liveEtaCountdown" style="color:var(--brand-secondary);">14 mins (3.8 km)</strong>
+                <span id="liveProgressStatusLabel">Trip Progress</span>
+                <strong id="liveEtaCountdown" style="color:var(--brand-secondary);">14 mins (8.4 km)</strong>
               </div>
-              <div style="width:100%; height:6px; background:var(--bg-surface-raised); border-radius:3px; overflow:hidden;">
-                <div id="liveTripProgressBar" style="width:45%; height:100%; background:var(--brand-secondary); transition:width 1s linear;"></div>
+              <div style="width:100%; height:8px; background:var(--bg-surface-raised); border-radius:4px; overflow:hidden;">
+                <div id="liveTripProgressBar" style="width:0%; height:100%; background:linear-gradient(90deg, var(--brand-primary), var(--brand-secondary)); transition:width 0.4s ease;"></div>
+              </div>
+            </div>
+
+            <!-- Speed multiplier simulation controls -->
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem; padding:0.4rem 0.6rem; background:var(--bg-surface-raised); border-radius:var(--radius-md); font-size:0.75rem;">
+              <span style="color:var(--text-muted);">Simulate Auto Speed:</span>
+              <div style="display:flex; gap:0.3rem;">
+                <button class="pin-select-btn active" id="btnSimSpeed1x" onclick="setSimulationSpeed(1)">1x</button>
+                <button class="pin-select-btn" id="btnSimSpeed3x" onclick="setSimulationSpeed(3)">3x Fast</button>
+                <button class="pin-select-btn" id="btnSimSpeed10x" onclick="setSimulationSpeed(10)">10x Warp</button>
               </div>
             </div>
 

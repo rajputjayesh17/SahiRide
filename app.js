@@ -3,6 +3,7 @@
  * Sahi Ride, Sahi Price • 100% Free Doorstep Pickup & Drop
  * Google Maps-Style Live Geocoding, Driver Incoming Ride Popups, Driver KYC,
  * First 3 Rides 100% FREE & Every 5th Ride 5% OFF Loyalty Milestone
+ * Real-Time Animated Moving Vehicle (Ola/Uber Style) & Complete Theme Management
  */
 
 // Global Application State
@@ -13,6 +14,7 @@ const state = {
   currentSlide: 1,
   totalSlides: 4, // 4 Onboarding Slides
   authMode: 'login', // 'login' (existing) | 'signup' (new user)
+  simSpeed: 1, // Speed multiplier for real-time live auto simulation (1x, 3x, 10x)
   userSession: {
     isLoggedIn: false,
     role: 'passenger', // 'passenger' | 'driver'
@@ -94,12 +96,17 @@ const PLACES_DATABASE = [
   { name: "Indiranagar 100ft Road, Bengaluru", lat: 12.9719, lng: 77.6412, desc: "Indiranagar, East Bengaluru", type: "place", keywords: ["indiranagar", "bengaluru", "bangalore"] }
 ];
 
-// Leaflet Map Handles
+// Leaflet Map Handles & Layers
 let passengerMap = null;
 let driverMap = null;
 let sandboxMap = null;
 
+let passengerTileLayer = null;
+let driverTileLayer = null;
+let sandboxTileLayer = null;
+
 let passengerRouteLine = null;
+let passengerTraveledRouteLine = null;
 let passengerDriverMarker = null;
 let driverRouteLine = null;
 let sandboxRouteLine = null;
@@ -108,6 +115,11 @@ let sandboxRouteLine = null;
 let currentMapPinMode = null;
 let adminChartInstance = null;
 let autocompleteDebounceTimer = null;
+
+// Real-Time Live Moving Vehicle Animation Timer & State
+let liveTripAnimationTimer = null;
+let liveTripCurrentStepIndex = 0;
+let liveTripWaypoints = [];
 
 // Driver Popup Timer handle
 let driverPopupCountdownInterval = null;
@@ -345,7 +357,72 @@ function playSoundAlert(type) {
 }
 
 // -------------------------------------------------------------
-// 3. DOM INITIALIZATION
+// 3. THEME & LANGUAGE MANAGEMENT
+// -------------------------------------------------------------
+function initTheme() {
+  const saved = localStorage.getItem('sahiride_theme') || 'dark';
+  setTheme(saved);
+}
+
+function toggleTheme() {
+  const current = document.documentElement.getAttribute('data-theme') || 'dark';
+  const target = (current === 'dark') ? 'light' : 'dark';
+  setTheme(target);
+}
+
+function setTheme(theme) {
+  state.currentTheme = theme;
+  document.documentElement.setAttribute('data-theme', theme);
+  localStorage.setItem('sahiride_theme', theme);
+
+  const icon = document.getElementById('themeIcon');
+  if (icon) {
+    icon.setAttribute('data-lucide', theme === 'dark' ? 'sun' : 'moon');
+  }
+
+  updateMapTilesTheme(theme);
+  initIcons();
+}
+
+function updateMapTilesTheme(theme) {
+  const tileUrl = theme === 'dark'
+    ? 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png'
+    : 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png';
+
+  [passengerMap, driverMap, sandboxMap].forEach(m => {
+    if (m) m.invalidateSize();
+  });
+}
+
+function toggleLanguageMenu() {
+  const menu = document.getElementById('langMenu');
+  if (menu) menu.classList.toggle('open');
+}
+
+function setLanguage(lang) {
+  state.currentLang = lang;
+  const label = document.getElementById('currentLangLabel');
+  if (label) {
+    if (lang === 'hi') label.textContent = 'हिन्दी';
+    else if (lang === 'mr') label.textContent = 'मराठी';
+    else label.textContent = 'English';
+  }
+
+  const dict = I18N[lang] || I18N['en'];
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    if (dict[key]) {
+      el.textContent = dict[key];
+    }
+  });
+
+  const menu = document.getElementById('langMenu');
+  if (menu) menu.classList.remove('open');
+  initIcons();
+}
+
+// -------------------------------------------------------------
+// 4. DOM INITIALIZATION
 // -------------------------------------------------------------
 document.addEventListener('DOMContentLoaded', () => {
   initIcons();
@@ -377,7 +454,7 @@ function initIcons() {
 }
 
 // -------------------------------------------------------------
-// 4. ONBOARDING CAROUSEL ENGINE (4 SLIDES INCLUDING 5% 5TH RIDE)
+// 5. ONBOARDING CAROUSEL ENGINE (4 SLIDES INCLUDING 5% 5TH RIDE)
 // -------------------------------------------------------------
 function goToSlide(slideNum) {
   state.currentSlide = slideNum;
@@ -415,7 +492,7 @@ function skipOnboarding() {
 }
 
 // -------------------------------------------------------------
-// 5. AUTHENTICATION & DRIVER KYC
+// 6. AUTHENTICATION & DRIVER KYC
 // -------------------------------------------------------------
 function setAuthMode(mode) {
   state.authMode = mode;
@@ -681,7 +758,7 @@ function updateAuthUI() {
 }
 
 // -------------------------------------------------------------
-// 6. VIEW NAVIGATION & MANAGEMENT
+// 7. VIEW NAVIGATION & MANAGEMENT
 // -------------------------------------------------------------
 function switchView(viewName) {
   state.currentView = viewName;
@@ -716,7 +793,7 @@ function switchView(viewName) {
 }
 
 // -------------------------------------------------------------
-// 7. DRIVER INCOMING RIDE REQUEST POPUP ENGINE
+// 8. DRIVER INCOMING RIDE REQUEST POPUP ENGINE
 // -------------------------------------------------------------
 function triggerDriverRidePopup(rideData) {
   if (!state.driver.online) {
@@ -846,7 +923,7 @@ function declineIncomingRidePopup() {
 }
 
 // -------------------------------------------------------------
-// 8. FIRST 3 RIDES 100% FREE & EVERY 5TH RIDE 5% OFF CONTROLLER
+// 9. FIRST 3 RIDES 100% FREE & EVERY 5TH RIDE 5% OFF CONTROLLER
 // -------------------------------------------------------------
 function toggleFreeRidesPromo() {
   state.passenger.freeRidesPromoActive = !state.passenger.freeRidesPromoActive;
@@ -942,7 +1019,7 @@ function simulateFifthRideMilestone() {
 }
 
 // -------------------------------------------------------------
-// 9. PASSENGER COUNT / SEATS CONTROLLER
+// 10. PASSENGER COUNT / SEATS CONTROLLER
 // -------------------------------------------------------------
 function adjustPassengerCount(delta) {
   const maxSeats = state.passenger.vehicle === 'auto' ? 3 : 4;
@@ -966,7 +1043,7 @@ function adjustPassengerCount(delta) {
 }
 
 // -------------------------------------------------------------
-// 10. GOOGLE MAPS-STYLE REAL-TIME LIVE GEOCODING & AUTOCOMPLETE
+// 11. GOOGLE MAPS-STYLE REAL-TIME LIVE GEOCODING & AUTOCOMPLETE
 // -------------------------------------------------------------
 function handleLocationInput(type, query) {
   clearTimeout(autocompleteDebounceTimer);
@@ -1130,7 +1207,7 @@ function closeAllAutocomplete() {
 }
 
 // -------------------------------------------------------------
-// 11. GPS CURRENT LOCATION INTEGRATION
+// 12. GPS CURRENT LOCATION INTEGRATION
 // -------------------------------------------------------------
 async function useCurrentGpsLocation() {
   const pickupInput = document.getElementById('passPickupInput');
@@ -1179,7 +1256,7 @@ async function useCurrentGpsLocation() {
 }
 
 // -------------------------------------------------------------
-// 12. PASSENGER MAP & FARE CALCULATION (FIRST 3 FREE + 5TH RIDE 5% OFF)
+// 13. PASSENGER MAP & FARE CALCULATION
 // -------------------------------------------------------------
 function initPassengerMap() {
   if (passengerMap) {
@@ -1193,7 +1270,7 @@ function initPassengerMap() {
   passengerMap = L.map('passengerMap', { zoomControl: false }).setView([18.5200, 73.8300], 13);
   L.control.zoom({ position: 'topright' }).addTo(passengerMap);
 
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+  passengerTileLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
     attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
     maxZoom: 19
   }).addTo(passengerMap);
@@ -1437,7 +1514,7 @@ function renderPassengerRoute() {
     color: '#ffffff',
     weight: 2,
     fillOpacity: 1
-  }).addTo(passengerMap).bindPopup(`<strong>Pickup:</strong><br>${pPick.name}`).openPopup();
+  }).addTo(passengerMap).bindPopup(`<strong>Pickup Point:</strong><br>${pPick.name}`).openPopup();
 
   L.circleMarker([pDrop.lat, pDrop.lng], {
     radius: 9,
@@ -1445,30 +1522,214 @@ function renderPassengerRoute() {
     color: '#ffffff',
     weight: 2,
     fillOpacity: 1
-  }).addTo(passengerMap).bindPopup(`<strong>Dropoff:</strong><br>${pDrop.name}`);
+  }).addTo(passengerMap).bindPopup(`<strong>Dropoff Point:</strong><br>${pDrop.name}`);
 
-  const midLat = (pPick.lat + pDrop.lat) / 2 + 0.004;
-  const midLng = (pPick.lng + pDrop.lng) / 2 - 0.003;
-  const routePoints = [[pPick.lat, pPick.lng], [midLat, midLng], [pDrop.lat, pDrop.lng]];
+  // Build realistic multi-segment road coordinates
+  generateSmoothRouteWaypoints(pPick, pDrop);
 
-  passengerRouteLine = L.polyline(routePoints, {
+  passengerRouteLine = L.polyline(liveTripWaypoints, {
     color: '#F59E0B',
-    weight: 5,
+    weight: 6,
     opacity: 0.85,
     dashArray: '8, 8'
   }).addTo(passengerMap);
 
+  // Traveled portion layer (solid emerald green)
+  passengerTraveledRouteLine = L.polyline([], {
+    color: '#10B981',
+    weight: 6,
+    opacity: 0.95
+  }).addTo(passengerMap);
+
+  // Custom Real-Time Live Moving Vehicle Marker (Ola/Uber style)
+  const vehicleHtml = `
+    <div class="live-moving-vehicle-marker" id="liveMovingAutoMarker">
+      <div class="vehicle-radar-pulse"></div>
+      <div class="moving-vehicle-icon-box" id="movingVehicleIconBox">
+        <i data-lucide="${state.passenger.vehicle === 'auto' ? 'zap' : 'car'}"></i>
+      </div>
+    </div>
+  `;
+
   const driverIcon = L.divIcon({
-    className: 'custom-map-pin pin-driver-auto',
-    html: '<i data-lucide="navigation" style="width:14px; height:14px; transform:rotate(45deg);"></i>',
-    iconSize: [28, 28]
+    className: 'custom-moving-icon-wrapper',
+    html: vehicleHtml,
+    iconSize: [48, 48],
+    iconAnchor: [24, 24]
   });
 
-  passengerDriverMarker = L.marker([midLat, midLng], { icon: driverIcon }).addTo(passengerMap)
-    .bindPopup("<strong>Ramesh Shinde (Bajaj RE Auto)</strong><br><span style='color:#10B981;'>KYC Verified ✓</span> • Picking up along corridor");
+  passengerDriverMarker = L.marker([pPick.lat, pPick.lng], { icon: driverIcon }).addTo(passengerMap)
+    .bindPopup("<strong>Ramesh Shinde (Bajaj RE Auto)</strong><br><span style='color:#10B981;'>Live Real-Time GPS Tracking ✓</span> • Moving along corridor");
 
   passengerMap.fitBounds(passengerRouteLine.getBounds(), { padding: [40, 40] });
   initIcons();
+}
+
+// -------------------------------------------------------------
+// 14. REAL-TIME MOVING VEHICLE GPS SIMULATION ENGINE (OLA/UBER STYLE)
+// -------------------------------------------------------------
+function generateSmoothRouteWaypoints(start, end) {
+  const points = [];
+  const steps = 30; // 30 high-resolution GPS steps
+
+  const midLat1 = start.lat + (end.lat - start.lat) * 0.35 + 0.003;
+  const midLng1 = start.lng + (end.lng - start.lng) * 0.35 - 0.002;
+
+  const midLat2 = start.lat + (end.lat - start.lat) * 0.70 - 0.002;
+  const midLng2 = start.lng + (end.lng - start.lng) * 0.70 + 0.001;
+
+  for (let i = 0; i <= steps; i++) {
+    const t = i / steps;
+    // Cubic bezier interpolation
+    const lat = Math.pow(1 - t, 3) * start.lat +
+                3 * Math.pow(1 - t, 2) * t * midLat1 +
+                3 * (1 - t) * Math.pow(t, 2) * midLat2 +
+                Math.pow(t, 3) * end.lat;
+
+    const lng = Math.pow(1 - t, 3) * start.lng +
+                3 * Math.pow(1 - t, 2) * t * midLng1 +
+                3 * (1 - t) * Math.pow(t, 2) * midLng2 +
+                Math.pow(t, 3) * end.lng;
+
+    points.push([lat, lng]);
+  }
+
+  liveTripWaypoints = points;
+  return points;
+}
+
+function calculateBearing(lat1, lng1, lat2, lng2) {
+  const dLng = (lng2 - lng1) * Math.PI / 180;
+  const y = Math.sin(dLng) * Math.cos(lat2 * Math.PI / 180);
+  const x = Math.cos(lat1 * Math.PI / 180) * Math.sin(lat2 * Math.PI / 180) -
+            Math.sin(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.cos(dLng);
+  const brng = Math.atan2(y, x) * 180 / Math.PI;
+  return (brng + 360) % 360;
+}
+
+function setSimulationSpeed(mult) {
+  state.simSpeed = mult;
+  document.getElementById('btnSimSpeed1x')?.classList.toggle('active', mult === 1);
+  document.getElementById('btnSimSpeed3x')?.classList.toggle('active', mult === 3);
+  document.getElementById('btnSimSpeed10x')?.classList.toggle('active', mult === 10);
+  
+  if (state.passenger.rideActive) {
+    startLiveMovingVehicleAnimation();
+  }
+}
+
+function startLiveMovingVehicleAnimation() {
+  clearInterval(liveTripAnimationTimer);
+  if (!liveTripWaypoints || liveTripWaypoints.length === 0) {
+    generateSmoothRouteWaypoints(state.passenger.pickup, state.passenger.drop);
+  }
+
+  const totalSteps = liveTripWaypoints.length;
+  const totalDist = state.passenger.distanceKm;
+  const totalDurationMins = Math.max(8, Math.round(totalDist * 2.2));
+
+  // Interval speed adjusted by multiplier
+  const tickInterval = Math.max(80, Math.round(450 / state.simSpeed));
+
+  liveTripAnimationTimer = setInterval(() => {
+    if (!state.passenger.rideActive) {
+      clearInterval(liveTripAnimationTimer);
+      return;
+    }
+
+    liveTripCurrentStepIndex++;
+    if (liveTripCurrentStepIndex >= totalSteps) {
+      liveTripCurrentStepIndex = totalSteps - 1;
+      clearInterval(liveTripAnimationTimer);
+      onLiveTripCompleted();
+      return;
+    }
+
+    const currentCoord = liveTripWaypoints[liveTripCurrentStepIndex];
+    const nextCoord = liveTripWaypoints[Math.min(liveTripCurrentStepIndex + 1, totalSteps - 1)];
+
+    // 1. Move vehicle marker smoothly on map
+    if (passengerDriverMarker) {
+      passengerDriverMarker.setLatLng(currentCoord);
+    }
+
+    // 2. Rotate auto icon to face direction of travel (Bearing angle)
+    const bearing = calculateBearing(currentCoord[0], currentCoord[1], nextCoord[0], nextCoord[1]);
+    const iconBox = document.getElementById('movingVehicleIconBox');
+    if (iconBox) {
+      iconBox.style.transform = `rotate(${Math.round(bearing)}deg)`;
+    }
+
+    // 3. Update Traveled Path line
+    const traveledPoints = liveTripWaypoints.slice(0, liveTripCurrentStepIndex + 1);
+    if (passengerTraveledRouteLine) {
+      passengerTraveledRouteLine.setLatLngs(traveledPoints);
+    }
+
+    // 4. Update Remaining Distance & ETA
+    const progressFrac = liveTripCurrentStepIndex / (totalSteps - 1);
+    const progressPercent = Math.round(progressFrac * 100);
+    const remainingKm = Math.max(0, (totalDist * (1 - progressFrac))).toFixed(1);
+    const remainingMins = Math.max(1, Math.ceil(totalDurationMins * (1 - progressFrac)));
+
+    const liveEtaCountdown = document.getElementById('liveEtaCountdown');
+    if (liveEtaCountdown) {
+      liveEtaCountdown.textContent = `${remainingMins} mins (${remainingKm} km)`;
+    }
+
+    const progressBar = document.getElementById('liveTripProgressBar');
+    if (progressBar) {
+      progressBar.style.width = `${progressPercent}%`;
+    }
+
+    // 5. Update Speed & Turn-by-Turn Telemetry HUD
+    const speed = Math.round(28 + Math.sin(liveTripCurrentStepIndex * 0.5) * 8 + Math.random() * 4);
+    const liveSpeedVal = document.getElementById('liveSpeedVal');
+    if (liveSpeedVal) {
+      liveSpeedVal.innerHTML = `<i data-lucide="gauge" style="width:0.85rem; height:0.85rem;"></i> ${speed} km/h`;
+    }
+
+    const turnInstruction = document.getElementById('liveTurnInstruction');
+    if (turnInstruction) {
+      if (progressPercent < 25) {
+        turnInstruction.textContent = "Boarded • En-route via FC Road";
+      } else if (progressPercent < 60) {
+        turnInstruction.textContent = "Corridor Flow • Karve Road Junction";
+      } else if (progressPercent < 85) {
+        turnInstruction.textContent = "Approaching Kothrud Depot Corridor";
+      } else {
+        turnInstruction.textContent = "Arriving at Destination in 200m";
+      }
+    }
+
+    // Keep map centered on vehicle smoothly
+    if (passengerMap && liveTripCurrentStepIndex % 4 === 0) {
+      passengerMap.panTo(currentCoord, { animate: true, duration: 0.4 });
+    }
+
+    initIcons();
+  }, tickInterval);
+}
+
+function onLiveTripCompleted() {
+  playSoundAlert('accept');
+  const statusPill = document.getElementById('liveMovingStatusPill');
+  if (statusPill) {
+    statusPill.innerHTML = '<span class="badge-dot" style="background:var(--brand-secondary);"></span> Arrived at Destination';
+  }
+
+  const liveEtaCountdown = document.getElementById('liveEtaCountdown');
+  if (liveEtaCountdown) {
+    liveEtaCountdown.textContent = 'Arrived (0 km)';
+  }
+
+  const turnInstruction = document.getElementById('liveTurnInstruction');
+  if (turnInstruction) {
+    turnInstruction.textContent = '🏁 Reached Destination!';
+  }
+
+  alert(`🏁 You have arrived at your destination!\nThank you for choosing SahiRide.\nTotal Fare: ₹${state.passenger.totalFare}.00.`);
+  openPaymentModal();
 }
 
 function requestPassengerRide() {
@@ -1479,13 +1740,14 @@ function requestPassengerRide() {
   document.getElementById('tripOtpCode').textContent = otp;
   state.passenger.otp = otp;
   state.passenger.rideActive = true;
+  liveTripCurrentStepIndex = 0;
 
   if (state.passenger.freeRidesPromoActive && state.userSession.freeRidesRemaining > 0) {
     const usedRideNum = 4 - state.userSession.freeRidesRemaining;
     state.userSession.freeRidesRemaining--;
     alert(`🎉 Free Ride ${usedRideNum} of 3 Confirmed!\nYou have ${state.userSession.freeRidesRemaining} Free Rides remaining.`);
   } else if (state.userSession.totalRidesTaken % 5 === 0) {
-    alert(`🎖️ Congratulations! This was your 5th Ride Milestone! A flat 5% discount was applied to your trip.`);
+    alert(`🎖️ Congratulations! This is your 5th Ride Milestone! A flat 5% discount was applied to your trip.`);
   }
 
   state.userSession.totalRidesTaken++;
@@ -1496,30 +1758,27 @@ function requestPassengerRide() {
     coLabel.textContent = `Matched Co-Passengers (${state.passenger.seatCount}/3 Seats)`;
   }
 
-  let progress = 25;
-  const bar = document.getElementById('liveTripProgressBar');
-  const timer = setInterval(() => {
-    if (!state.passenger.rideActive) {
-      clearInterval(timer);
-      return;
-    }
-    progress = (progress + 10) % 100;
-    if (bar) bar.style.width = `${progress}%`;
-  }, 2000);
+  // Render fresh route and launch real-time moving auto animation
+  renderPassengerRoute();
+  startLiveMovingVehicleAnimation();
 
   initIcons();
 }
 
 function cancelOrResetRide() {
   state.passenger.rideActive = false;
+  clearInterval(liveTripAnimationTimer);
+  liveTripCurrentStepIndex = 0;
+
   document.getElementById('passBookingPanel').style.display = 'block';
   document.getElementById('passTrackingPanel').style.display = 'none';
+
   recalcPassengerFares();
   renderPassengerRoute();
 }
 
 // -------------------------------------------------------------
-// 13. DRIVER COCKPIT & HOMEBOUND ROUTE MATCH
+// 15. DRIVER COCKPIT & HOMEBOUND ROUTE MATCH
 // -------------------------------------------------------------
 function initDriverMap() {
   if (driverMap) {
@@ -1533,7 +1792,7 @@ function initDriverMap() {
   driverMap = L.map('driverMap', { zoomControl: false }).setView([18.5200, 73.8300], 13);
   L.control.zoom({ position: 'topright' }).addTo(driverMap);
 
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+  driverTileLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
     attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
     maxZoom: 19
   }).addTo(driverMap);
@@ -1635,7 +1894,7 @@ function triggerSimulatedDriverStep() {
 }
 
 // -------------------------------------------------------------
-// 14. MATCHING ENGINE SANDBOX
+// 16. MATCHING ENGINE SANDBOX
 // -------------------------------------------------------------
 function initSandboxMap() {
   if (sandboxMap) {
@@ -1649,7 +1908,7 @@ function initSandboxMap() {
   sandboxMap = L.map('sandboxMap', { zoomControl: false }).setView([18.5300, 73.8300], 13);
   L.control.zoom({ position: 'topright' }).addTo(sandboxMap);
 
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+  sandboxTileLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
     attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
     maxZoom: 19
   }).addTo(sandboxMap);
@@ -1730,7 +1989,7 @@ function resetSandboxSimulation() {
 }
 
 // -------------------------------------------------------------
-// 15. CALCULATORS & ADMIN ENGINE
+// 17. CALCULATORS & ADMIN ENGINE
 // -------------------------------------------------------------
 let driverCalcVehType = 'auto';
 let passCalcVehType = 'auto';
@@ -1866,7 +2125,7 @@ function approveKYC(btn) {
 }
 
 // -------------------------------------------------------------
-// 16. MODALS & UTILITIES
+// 18. MODALS & UTILITIES
 // -------------------------------------------------------------
 function openModal(modalId) {
   const m = document.getElementById(modalId);
