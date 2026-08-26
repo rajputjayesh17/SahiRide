@@ -606,14 +606,14 @@ function verifyLoginOtp() {
   if (state.userSession.isNewUser && state.userSession.role === 'passenger') {
     alert(`🎉 Welcome to SahiRide, ${state.userSession.name}!\nYou have unlocked your FIRST 3 RIDES 100% FREE! Plus 5% OFF on every 5th ride!`);
   } else if (state.userSession.isNewUser && state.userSession.role === 'driver') {
-    alert(`🎉 Welcome Captain ${state.userSession.name}!\nDriver KYC Verification Approved ✓. You can now accept homebound & pooled rides!`);
+    alert(`🎉 Welcome Captain ${state.userSession.name}!\nDriver KYC Verification Approved ✓. Please select your ride preference to start duty.`);
   } else {
     alert(`Welcome back to SahiRide, ${state.userSession.name}!`);
   }
 
   if (state.userSession.role === 'driver') {
     switchView('driver');
-    setTimeout(() => { triggerDriverRidePopup(); }, 3500);
+    setTimeout(() => { openDriverDutyRideTypeModal(); }, 400);
   } else {
     switchView('passenger');
   }
@@ -755,10 +755,16 @@ function updateAuthUI() {
   const label = document.getElementById('userProfileLabel');
   const dot = document.getElementById('userStatusDot');
   const headerBadge = document.getElementById('headerNewUserBadge');
+  const header = document.querySelector('.site-header');
+  const bottomBar = document.querySelector('.mobile-bottom-bar');
+
+  const isPreLogin = !state.userSession.isLoggedIn || state.currentView === 'onboarding' || state.currentView === 'login';
+  if (header) header.style.display = isPreLogin ? 'none' : 'block';
+  if (bottomBar) bottomBar.style.display = isPreLogin ? 'none' : 'flex';
 
   if (state.userSession.isLoggedIn) {
     const isDriver = state.userSession.role === 'driver';
-    const shortName = state.userSession.name.split(' ')[0];
+    const shortName = (state.userSession.name || 'User').split(' ')[0];
     if (label) label.textContent = `${shortName} (${isDriver ? 'Driver' : 'Passenger'})`;
     if (dot) dot.style.background = 'var(--brand-secondary)';
     if (headerBadge) {
@@ -857,17 +863,28 @@ function updateRoleAccessUI() {
 // -------------------------------------------------------------
 function switchView(viewName) {
   // Strict Role-Based View Guard:
-  if (state.userSession.role === 'passenger') {
-    if (viewName === 'driver' || viewName === 'admin' || viewName === 'matching') {
-      viewName = 'passenger';
-    }
-  } else if (state.userSession.role === 'driver') {
-    if (viewName === 'passenger' || viewName === 'admin' || viewName === 'matching') {
-      viewName = 'driver';
+  if (state.userSession.isLoggedIn) {
+    if (state.userSession.role === 'passenger') {
+      if (viewName === 'driver' || viewName === 'admin' || viewName === 'matching') {
+        viewName = 'passenger';
+      }
+    } else if (state.userSession.role === 'driver') {
+      if (viewName === 'passenger' || viewName === 'admin' || viewName === 'matching') {
+        viewName = 'driver';
+      }
     }
   }
 
   state.currentView = viewName;
+
+  // Header & Bottom Bar Visibility Enforcer:
+  // (Hidden before login or during onboarding / login screens)
+  const header = document.querySelector('.site-header');
+  const bottomBar = document.querySelector('.mobile-bottom-bar');
+  const isPreLogin = !state.userSession.isLoggedIn || viewName === 'onboarding' || viewName === 'login';
+
+  if (header) header.style.display = isPreLogin ? 'none' : 'block';
+  if (bottomBar) bottomBar.style.display = isPreLogin ? 'none' : 'flex';
 
   document.querySelectorAll('.app-view').forEach(view => {
     view.classList.remove('active');
@@ -1996,18 +2013,55 @@ function initDriverMap() {
   renderDriverCockpitRoute();
 }
 
-function toggleDriverOnline() {
-  state.driver.online = !state.driver.online;
+let tempDriverDutyMode = 'pool';
+
+function openDriverDutyRideTypeModal() {
+  tempDriverDutyMode = state.driver.mode || 'pool';
+  selectDutyRideType(tempDriverDutyMode);
+  openModal('driverDutyRideTypeModal');
+}
+
+function selectDutyRideType(mode) {
+  tempDriverDutyMode = mode;
+  const cards = ['pool', 'normal', 'route'];
+  cards.forEach(c => {
+    const el = document.getElementById(`dutyChoiceCard-${c}`);
+    if (el) el.classList.toggle('selected', c === mode);
+  });
+}
+
+function confirmDriverDutyOnline() {
+  state.driver.mode = tempDriverDutyMode;
+  state.driver.online = true;
+  setDriverMode(tempDriverDutyMode);
+  closeModal('driverDutyRideTypeModal');
+
   const btn = document.getElementById('driverOnlineToggleBtn');
   const text = document.getElementById('driverOnlineStatusText');
+  if (btn) btn.className = 'online-pill online';
+  
+  let modeLabel = 'Sharing';
+  if (tempDriverDutyMode === 'normal') modeLabel = 'Solo / Normal';
+  else if (tempDriverDutyMode === 'route') modeLabel = 'Smart Hybrid';
 
-  if (state.driver.online) {
-    btn.className = 'online-pill online';
-    text.textContent = 'Online (Ready)';
-    setTimeout(() => { triggerDriverRidePopup(); }, 3500);
+  if (text) text.textContent = `Online (${modeLabel})`;
+
+  alert(`🟢 Captain Duty Active!\nYou are now Online accepting [${modeLabel}] rides. Scanning nearby corridor requests...`);
+  setTimeout(() => { triggerDriverRidePopup(); }, 3000);
+}
+
+function toggleDriverOnline() {
+  if (!state.driver.online) {
+    // Going online: Prompt driver every time to choose ride type!
+    openDriverDutyRideTypeModal();
   } else {
-    btn.className = 'online-pill offline';
-    text.textContent = 'Offline (Paused)';
+    // Going offline
+    state.driver.online = false;
+    const btn = document.getElementById('driverOnlineToggleBtn');
+    const text = document.getElementById('driverOnlineStatusText');
+    if (btn) btn.className = 'online-pill offline';
+    if (text) text.textContent = 'Offline (Paused)';
+    alert('⏸️ Duty Paused: You are now Offline.');
   }
 }
 
@@ -2923,3 +2977,19 @@ function switchUserRoleMode(targetRole) {
     switchView('driver');
   }
 }
+
+// -------------------------------------------------------------
+// APP INITIALIZATION & ICON MOUNT
+// -------------------------------------------------------------
+document.addEventListener('DOMContentLoaded', () => {
+  initIcons();
+  updateAuthUI();
+  updateRoleAccessUI();
+
+  if (!state.userSession.isLoggedIn) {
+    switchView('onboarding');
+  } else {
+    switchView(state.userSession.role === 'driver' ? 'driver' : 'passenger');
+  }
+});
+

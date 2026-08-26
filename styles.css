@@ -3477,3 +3477,151 @@ input:checked + .slider:before {
   font-size: 0.8rem;
   color: var(--text-muted);
 }
+
+/* -------------------------------------------------------------
+   DRIVER & PASSENGER PRE-RIDE SELECTION MODAL (NORMAL vs SHARING)
+   ------------------------------------------------------------- */
+.duty-choice-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  margin: 1.25rem 0;
+}
+
+.duty-choice-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1rem;
+  background: var(--bg-surface-raised);
+  border: 2px solid var(--border-medium);
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  text-align: left;
+  transition: all var(--transition-fast);
+  width: 100%;
+}
+
+.duty-choice-card:hover {
+  border-color: var(--brand-primary);
+  transform: translateY(-2px);
+}
+
+.duty-choice-card.selected {
+  border-color: var(--brand-primary);
+  background: rgba(99, 102, 241, 0.08);
+  box-shadow: 0 0 0 1px var(--brand-primary);
+}
+
+.duty-choice-icon {
+  width: 3rem;
+  height: 3rem;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 1.4rem;
+}
+
+.duty-choice-info {
+  flex: 1;
+}
+
+.duty-choice-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.3rem;
+}
+
+.duty-choice-title {
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--text-main);
+}
+
+.duty-choice-badge {
+  font-size: 0.7rem;
+  font-weight: 800;
+  padding: 0.2rem 0.55rem;
+  border-radius: var(--radius-full);
+  text-transform: uppercase;
+}
+
+.duty-choice-desc {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  line-height: 1.35;
+  margin-bottom: 0.4rem;
+}
+
+.duty-choice-tags {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.duty-tag-chip {
+  font-size: 0.68rem;
+  padding: 0.15rem 0.45rem;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+}
+
+/* -------------------------------------------------------------
+   PRE-LOGIN CLEAN BRAND HEADER & QUOTE
+   ------------------------------------------------------------- */
+.prelogin-brand-header {
+  text-align: center;
+  margin: 0 auto 1.5rem;
+  max-width: 540px;
+  animation: fadeIn 0.4s ease-out;
+}
+
+.prelogin-logo-badge {
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: var(--radius-lg);
+  background: linear-gradient(135deg, var(--brand-primary), #D97706);
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 24px rgba(245, 158, 11, 0.35);
+  margin-bottom: 0.75rem;
+}
+
+.prelogin-brand-title {
+  font-family: var(--font-heading);
+  font-size: 2rem;
+  font-weight: 900;
+  color: var(--text-main);
+  margin-bottom: 0.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.prelogin-pool-tag {
+  font-size: 0.72rem;
+  background: var(--brand-secondary-light);
+  color: var(--brand-secondary);
+  padding: 0.15rem 0.55rem;
+  border-radius: var(--radius-full);
+  font-weight: 800;
+  letter-spacing: 0.05em;
+}
+
+.prelogin-brand-quote {
+  font-size: 0.95rem;
+  font-style: italic;
+  color: var(--text-muted);
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+

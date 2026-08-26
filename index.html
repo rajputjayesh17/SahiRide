@@ -131,6 +131,15 @@
          ======================================================================= -->
     <section id="view-onboarding" class="app-view active">
       <div class="onboarding-screen">
+        <!-- Pre-login Brand Header & Quote -->
+        <div class="prelogin-brand-header">
+          <div class="prelogin-logo-badge">
+            <i data-lucide="navigation"></i>
+          </div>
+          <h1 class="prelogin-brand-title">Sahi<span class="accent">Ride</span> <span class="prelogin-pool-tag">AUTO &amp; CAB POOL</span></h1>
+          <p class="prelogin-brand-quote">“Sahi Ride, Sahi Price • Har Safar Sahi Dam Par &amp; Zero Deadhead”</p>
+        </div>
+
         <div class="onboarding-card">
           <div class="onboarding-top-bar">
             <span class="onboarding-badge" id="slideBadgeText">Feature 1 of 4</span>
@@ -257,11 +266,17 @@
          ======================================================================= -->
     <section id="view-login" class="app-view">
       <div class="login-screen">
+        <!-- Pre-login Brand Header & Quote -->
+        <div class="prelogin-brand-header">
+          <div class="prelogin-logo-badge">
+            <i data-lucide="navigation"></i>
+          </div>
+          <h1 class="prelogin-brand-title">Sahi<span class="accent">Ride</span> <span class="prelogin-pool-tag">AUTO &amp; CAB POOL</span></h1>
+          <p class="prelogin-brand-quote">“Sahi Ride, Sahi Price • Har Safar Sahi Dam Par &amp; Zero Deadhead”</p>
+        </div>
+
         <div class="login-card">
           <div style="text-align:center; margin-bottom:1.25rem;">
-            <div class="logo-badge" style="margin:0 auto 0.75rem;">
-              <i data-lucide="navigation"></i>
-            </div>
             <h2 style="font-size:1.45rem;" id="authHeaderTitle">Welcome to SahiRide</h2>
             <p style="font-size:0.85rem; color:var(--text-muted);" id="authHeaderSubtitle">Sign in or create a new account with mandatory KYC</p>
           </div>
@@ -2273,6 +2288,89 @@
       <button class="btn-primary" style="width:100%;" onclick="closeModal('ratingModal')">
         <span>Got It</span>
       </button>
+    </div>
+  </div>
+
+  <!-- DRIVER PRE-DUTY RIDE TYPE SELECTION MODAL (ASKED EVERY TIME BEFORE LOOKING FOR RIDES) -->
+  <div class="modal-backdrop" id="driverDutyRideTypeModal">
+    <div class="modal-dialog" style="max-width:540px;">
+      <div style="text-align:center; margin-bottom:1.25rem;">
+        <div style="width:3.5rem; height:3.5rem; border-radius:50%; background:linear-gradient(135deg, var(--brand-primary), var(--brand-secondary)); color:#fff; display:inline-flex; align-items:center; justify-content:center; margin-bottom:0.6rem; box-shadow:0 4px 16px rgba(245,158,11,0.3);">
+          <i data-lucide="car" style="width:2rem; height:2rem;"></i>
+        </div>
+        <h3 style="font-size:1.35rem; font-weight:800;">Captain Duty: Choose Ride Preference</h3>
+        <p style="font-size:0.85rem; color:var(--text-muted);">What type of rides do you want to accept for this shift before scanning?</p>
+      </div>
+
+      <!-- 3 Choice Cards -->
+      <div class="duty-choice-grid">
+        <!-- 1. Sharing Mode -->
+        <div class="duty-choice-card selected" id="dutyChoiceCard-pool" onclick="selectDutyRideType('pool')">
+          <div class="duty-choice-icon" style="background:rgba(16,185,129,0.15); color:var(--brand-secondary);">
+            🛺
+          </div>
+          <div class="duty-choice-info">
+            <div class="duty-choice-title-row">
+              <span class="duty-choice-title">Shared Auto Pooling</span>
+              <span class="duty-choice-badge" style="background:rgba(16,185,129,0.15); color:var(--brand-secondary);">+45% Daily Payout</span>
+            </div>
+            <p class="duty-choice-desc">Fill all 3 passenger seats along your corridor. Dynamic multi-hop pickup matching with minimal detours.</p>
+            <div class="duty-choice-tags">
+              <span class="duty-tag-chip">3 Passenger Capacity</span>
+              <span class="duty-tag-chip">Corridor Detour Match</span>
+              <span class="duty-tag-chip">Zero Deadhead</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. Normal Solo Mode -->
+        <div class="duty-choice-card" id="dutyChoiceCard-normal" onclick="selectDutyRideType('normal')">
+          <div class="duty-choice-icon" style="background:rgba(99,102,241,0.15); color:var(--brand-primary);">
+            🚗
+          </div>
+          <div class="duty-choice-info">
+            <div class="duty-choice-title-row">
+              <span class="duty-choice-title">Normal / Solo Rides</span>
+              <span class="duty-choice-badge" style="background:rgba(99,102,241,0.15); color:var(--brand-primary);">Zero Detours</span>
+            </div>
+            <p class="duty-choice-desc">Direct point-to-point rides for single passengers with no intermediate stops or route deviations.</p>
+            <div class="duty-choice-tags">
+              <span class="duty-tag-chip">1 Passenger Only</span>
+              <span class="duty-tag-chip">Direct Route</span>
+              <span class="duty-tag-chip">Standard Meter Rate</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. Smart Hybrid (Both) -->
+        <div class="duty-choice-card" id="dutyChoiceCard-route" onclick="selectDutyRideType('route')">
+          <div class="duty-choice-icon" style="background:rgba(245,158,11,0.15); color:var(--brand-accent);">
+            ⚡
+          </div>
+          <div class="duty-choice-info">
+            <div class="duty-choice-title-row">
+              <span class="duty-choice-title">Smart Hybrid (Homebound Corridor)</span>
+              <span class="duty-choice-badge" style="background:rgba(245,158,11,0.15); color:var(--brand-accent);">★ Recommended</span>
+            </div>
+            <p class="duty-choice-desc">Accept both Shared pools and Normal rides heading along your home return destination corridor.</p>
+            <div class="duty-choice-tags">
+              <span class="duty-tag-chip">Highest Match Rate</span>
+              <span class="duty-tag-chip">Smart Auto-Switch</span>
+              <span class="duty-tag-chip">Minimum Idle Time</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div style="display:flex; gap:0.75rem; margin-top:1rem;">
+        <button class="btn-primary" style="flex:1;" onclick="confirmDriverDutyOnline()">
+          <i data-lucide="radio"></i> <span>Go Online &amp; Start Looking for Rides</span>
+        </button>
+        <button class="btn-secondary" onclick="closeModal('driverDutyRideTypeModal')">
+          <span>Stay Offline</span>
+        </button>
+      </div>
     </div>
   </div>
 
